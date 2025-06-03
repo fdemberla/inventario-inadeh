@@ -1,0 +1,121 @@
+import { ConnectionPool } from "mssql";
+
+const config = {
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER!,
+  database: process.env.DB_DATABASE,
+  options: {
+    encrypt: true,
+    trustServerCertificate: true, // for local dev
+  },
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000,
+  },
+};
+
+let pool: ConnectionPool | null = null;
+
+async function getPool() {
+  if (!pool) {
+    const mssql = await import("mssql");
+    pool = await mssql.connect(config);
+  }
+  return pool;
+}
+
+// SQL helper function
+export async function sql(query: string, params = []) {
+  const pool = await getPool();
+  const request = pool.request();
+
+  params.forEach((param, index) => {
+    request.input(`param${index}`, param);
+  });
+
+  return request.query(query);
+}
+
+// lib/db.ts
+export async function rawSql(query: string, params: unknown[]) {
+  try {
+    const pool = await getPool();
+    const request = pool.request();
+
+    // Add parameters to the request
+    params.forEach((param, index) => {
+      request.input(`param${index}`, param);
+    });
+
+    // Debug logging in development
+    if (process.env.NODE_ENV === "development") {
+      console.log("Executing query:", query);
+      console.log("With parameters:", params);
+      console.log(
+        "Parameter types:",
+        params.map((p) => typeof p),
+      );
+    }
+
+    const result = await request.query(query);
+
+    // Optional: Log result in development
+    if (process.env.NODE_ENV === "development") {
+      console.log("Query result:", {
+        rowsAffected: result.rowsAffected,
+        recordset: result.recordset ? result.recordset.slice(0, 3) : null, // Show first 3 rows
+      });
+    }
+
+    return result.recordset;
+  } catch (err) {
+    console.error("Error executing raw SQL:", err);
+    throw new Error(`Database query failed: ${err.message} - Query: ${query}`);
+  }
+}
+
+export async function withTransaction(
+  callback: (transaction) => Promise<unknown>,
+) {
+  const pool = await poolPromise;
+  const transaction = new (await import("mssql")).Transaction(pool);
+  try {
+    await transaction.begin();
+    const result = await callback(transaction);
+    await transaction.commit();
+    return result;
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}
+
+export async function executeInTransaction(
+  queries: { query: string; params: [] }[],
+) {
+  const pool = await getPool();
+  const transaction = new Transaction(pool);
+
+  try {
+    await transaction.begin();
+
+    for (const { query, params } of queries) {
+      const request = new SqlRequest(transaction);
+      params.forEach((param, index) => {
+        request.input(`param${index}`, param);
+      });
+      await request.query(query);
+    }
+
+    await transaction.commit();
+    return true;
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}
+
+// Adding poolPromise function to return a pool as a Promise
+export const poolPromise = getPool();

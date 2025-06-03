@@ -1,0 +1,32 @@
+{
+  "id": "Inventario INADEH",
+  "name": "Inventario INADEH",
+  "short_name": "Inv INADEH",
+  "theme_color": "#004A98",
+  "background_color": "#D1D3D4",
+  "display": "standalone",
+  "orientation": "natural",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    { "src": "/icons/icons-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icons/icons-256.png", "type": "image/png", "sizes": "256x256" },
+    { "src": "/icons/icons-512.png", "type": "image/png", "sizes": "512x512" }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1044x901",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "home"
+    },
+    {
+      "src": "/screenshots/login.png",
+      "sizes": "448x396",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "login"
+    }
+  ]
+}

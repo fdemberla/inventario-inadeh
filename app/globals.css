@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@plugin "flowbite-react/plugin/tailwindcss";
+@source "../.flowbite-react/class-list.json";
+
+@theme {
+  --color-brand-naranja: #ed7625;
+  --color-brand-azul: #004a98;
+  --color-brand-verde: #44a147;
+  --color-brand-gris: #d1d3d4;
+}
