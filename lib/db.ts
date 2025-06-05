@@ -3,7 +3,7 @@ import { ConnectionPool } from "mssql";
 const config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER!,
+  server: process.env.DB_SERVER || "mssql",
   database: process.env.DB_DATABASE,
   options: {
     encrypt: true,
@@ -18,10 +18,47 @@ const config = {
 
 let pool: ConnectionPool | null = null;
 
-async function getPool() {
+/**
+ * Attempts to connect to SQL Server with retries.
+ * @param maxRetries Maximum number of retry attempts (default: 5)
+ * @param retryDelayMs Initial delay between retries in ms (default: 2000)
+ */
+async function connectWithRetry(
+  maxRetries = 5,
+  retryDelayMs = 2000,
+): Promise<ConnectionPool> {
+  let attempt = 0;
+  let lastError: Error | null = null;
+
+  while (attempt < maxRetries) {
+    try {
+      const mssql = await import("mssql");
+      const newPool = new mssql.ConnectionPool(config);
+      await newPool.connect();
+      console.log("✅ Successfully connected to SQL Server!");
+      return newPool;
+    } catch (err) {
+      lastError = err;
+      attempt++;
+      console.error(
+        `❌ Connection attempt ${attempt} failed. Retrying in ${retryDelayMs / 1000}s...`,
+      );
+      console.error("Error details:", err.message);
+
+      if (attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+        retryDelayMs *= 2; // Exponential backoff (2s, 4s, 8s, ...)
+      }
+    }
+  }
+
+  console.error("🔥 All connection attempts failed. Last error:", lastError);
+  throw lastError; // Re-throw the last error
+}
+
+export async function getPool() {
   if (!pool) {
-    const mssql = await import("mssql");
-    pool = await mssql.connect(config);
+    pool = await connectWithRetry(); // Uses default: 5 retries, starting at 2s delay
   }
   return pool;
 }

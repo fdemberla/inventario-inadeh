@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       ? parseInt(formData.get("unitID")!.toString())
       : null;
 
-    if (!productName || !sku || !categoryID) {
+    if (!productName || !barcode || !categoryID) {
       return NextResponse.json(
         {
           message:
@@ -65,17 +65,9 @@ export async function POST(req: Request) {
     // --- Check for duplicate SKU or Barcode ---
     const checkUniqueQuery = `
       SELECT 
-        (SELECT COUNT(*) FROM Products WHERE InternalSKU = @param0) AS SkuExists,
-        (SELECT COUNT(*) FROM Products WHERE Barcode = @param1) AS BarcodeExists;
+        (SELECT COUNT(*) FROM Products WHERE Barcode = @param0) AS BarcodeExists;
     `;
-    const [uniqueCheck] = await rawSql(checkUniqueQuery, [sku, barcode]);
-
-    if (uniqueCheck.SkuExists > 0) {
-      return NextResponse.json(
-        { message: `Ya existe un producto con el SKU "${sku}".` },
-        { status: 400 },
-      );
-    }
+    const [uniqueCheck] = await rawSql(checkUniqueQuery, [barcode]);
 
     if (barcode && uniqueCheck.BarcodeExists > 0) {
       return NextResponse.json(

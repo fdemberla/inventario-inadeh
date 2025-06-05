@@ -37,6 +37,33 @@ const withPWA = require("next-pwa")({
         },
       },
     },
+    {
+      // Cachea llamadas a la API
+      urlPattern: /^\/api\/.*$/i,
+      handler: "NetworkFirst",
+      method: "GET",
+      options: {
+        cacheName: "api-cache",
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 24 * 60 * 60, // 1 día
+        },
+        networkTimeoutSeconds: 5,
+      },
+    },
+    {
+      // Cachea páginas dentro de /dashboard
+      urlPattern: /^\/dashboard\/?.*/i,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "dashboard-pages",
+        expiration: {
+          maxEntries: 20,
+          maxAgeSeconds: 24 * 60 * 60, // 1 día
+        },
+        networkTimeoutSeconds: 5,
+      },
+    },
   ],
 });
 

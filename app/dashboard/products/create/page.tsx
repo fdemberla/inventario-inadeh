@@ -11,8 +11,9 @@ interface Category {
 
 interface Unit {
   UnitID: number;
-  SystemName: string;
+  System: string;
   UnitName: string;
+  Abbreviation: string; // <--- Agregado
 }
 
 interface Supplier {
@@ -49,6 +50,10 @@ export default function NewProductPage() {
   const [supplierList, setSupplierList] = useState<SupplierEntry[]>([]);
 
   const [selectedSystem, setSelectedSystem] = useState("");
+
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
 
   const systemOptions = [...new Set(units.map((u) => u.System))];
   const filteredUnits = units.filter((u) => u.System === selectedSystem);
@@ -100,6 +105,40 @@ export default function NewProductPage() {
     if (e.target.files?.[0]) {
       setImage(e.target.files[0]);
     }
+  };
+
+  const searchIstmoProducts = async (q: string) => {
+    try {
+      const res = await fetch(
+        `/api/products/search-istmo?q=${encodeURIComponent(q)}`,
+      );
+      const data = await res.json();
+      const empty = {
+        codigo: "0",
+        nombre: "No Aparece En Lista",
+        descripcion: "No Aparece En Lista",
+      };
+
+      const resultados = [...data.results, empty];
+
+      setResults(resultados || []);
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error searching:", error);
+      setResults([]);
+    }
+  };
+
+  const handleSearchClick = () => {
+    if (query.trim()) {
+      searchIstmoProducts(query);
+    }
+  };
+
+  const handleSelectResult = (value: string) => {
+    setForm((prev) => ({ ...prev, sku: value }));
+
+    setShowResults(false);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -205,17 +244,76 @@ export default function NewProductPage() {
             className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
           />
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            SKU (Codigo ISTMO)
-          </label>
+      </div>
+      {/* <div>
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Buscar Producto Istmo
+        </label>
+        <input
+          name="istmosearch"
+          onChange={handleChange}
+          required
+          className="mb-3 w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+        />
+        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          SKU (Codigo ISTMO)
+        </label>
+        <input
+          name="sku"
+          onChange={handleChange}
+          required
+          disabled
+          className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+        />
+      </div> */}
+
+      <div className="relative">
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Buscar Producto Istmo
+        </label>
+        <div className="mb-3 flex space-x-2">
           <input
-            name="sku"
-            onChange={handleChange}
+            type="text"
+            name="istmosearch"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             required
             className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
           />
+          <button
+            type="button"
+            onClick={handleSearchClick}
+            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            Buscar
+          </button>
         </div>
+
+        {showResults && results.length > 0 && (
+          <div>
+            <ul className="mb-2 max-h-60 w-full overflow-y-auto rounded-md border border-gray-300 bg-white shadow-md dark:border-gray-600 dark:bg-gray-800">
+              {results.map((product) => (
+                <li
+                  key={product.codigo}
+                  onClick={() => handleSelectResult(product.codigo)}
+                  className="cursor-pointer px-4 py-2 hover:bg-blue-100 dark:text-white dark:hover:bg-blue-900"
+                >
+                  {product.nombre} ({product.codigo})
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Código ISTMO
+        </label>
+        <input
+          name="sku"
+          value={form.sku}
+          readOnly
+          className="w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+        />
       </div>
 
       <div>
@@ -286,7 +384,7 @@ export default function NewProductPage() {
             value={selectedSystem}
             onChange={(e) => {
               setSelectedSystem(e.target.value);
-              setFormData((prev) => ({ ...prev, unitID: "" }));
+              setForm((prev) => ({ ...prev, unitID: "" }));
             }}
             required
             className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
