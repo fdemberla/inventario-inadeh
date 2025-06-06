@@ -227,7 +227,7 @@ export default function NewProductPage() {
           type="file"
           accept="image/*"
           onChange={handleImageChange}
-          className="w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
+          className="w-full rounded-2xl p-3 text-sm file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-blue-700 hover:file:bg-blue-100 dark:bg-gray-500 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
         />
       </div>
 

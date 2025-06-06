@@ -385,7 +385,7 @@ function ScannerPage() {
 
       {selectedWarehouse !== null && (
         <>
-          <div className="mt-4 mb-4 max-w-md">
+          {/* <div className="mt-4 mb-4 max-w-md">
             <span className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Tipo de operación:
             </span>
@@ -409,6 +409,36 @@ function ScannerPage() {
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Salida
               </span>
+            </div>
+          </div> */}
+
+          <div className="mt-4 mb-4 max-w-md">
+            <span className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Tipo de operación:
+            </span>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setOperationType("entrada")}
+                className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+                  operationType === "entrada"
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Recepcion
+              </button>
+              <button
+                type="button"
+                onClick={() => setOperationType("salida")}
+                className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+                  operationType === "salida"
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Despacho
+              </button>
             </div>
           </div>
 

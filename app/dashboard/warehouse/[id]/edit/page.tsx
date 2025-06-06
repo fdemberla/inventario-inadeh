@@ -45,10 +45,10 @@ export default function EditWarehousePage() {
         const locationsData = await locationsRes.json();
 
         setForm({
-          WarehouseName: warehouseData.warehouse.recordset?.[0].WarehouseName,
-          Location: warehouseData.warehouse.recordset?.[0].Location || "",
-          IsActive: warehouseData.warehouse.recordset?.[0].IsActive,
-          MainLocationID: warehouseData.warehouse.recordset?.[0].MainLocationID,
+          WarehouseName: warehouseData.warehouse?.WarehouseName,
+          Location: warehouseData.warehouse?.Location || "",
+          IsActive: warehouseData.warehouse?.IsActive,
+          MainLocationID: warehouseData.warehouse?.MainLocationID,
         });
 
         setLocations(locationsData.locations.recordset);

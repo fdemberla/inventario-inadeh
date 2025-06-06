@@ -38,7 +38,7 @@ export async function GET(
     // Removed p.ProductCode from the query since it doesn't exist
     const result = await rawSql<InventoryItem[]>(
       `
-      SELECT 
+        SELECT 
         i.InventoryID,
         i.ProductID,
         i.WarehouseID,
@@ -49,9 +49,11 @@ export async function GET(
         i.CreatedDate,
         i.ModifiedDate,
         p.ProductName,
-        p.Barcode
+        p.Barcode,
+        uom.UnitName
       FROM inventario.dbo.Inventory i
       JOIN inventario.dbo.Products p ON i.ProductID = p.ProductID
+      JOIN inventario.dbo.UnitsOfMeasurement uom  ON p.UnitID = uom.UnitID
       WHERE i.WarehouseID = @param0
       ORDER BY p.ProductName ASC
       `,

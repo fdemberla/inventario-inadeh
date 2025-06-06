@@ -118,11 +118,29 @@ export default function SidebarComponent({ user }: { user: User }) {
 
   const generalSections: SidebarSection[] = [
     {
-      key: "ver_inventario",
+      key: "inicio",
+      label: "Inicio",
+      icon: FaHome,
+      links: [{ label: "Ir al Inicio", path: "/dashboard" }],
+    },
+    {
+      key: "productos",
+      label: "Productos",
+      icon: HiOutlineCube,
+      links: [
+        { label: "Ver Todos", path: "/dashboard/products" },
+        { label: "Crear Producto", path: "/dashboard/products/create" },
+      ],
+    },
+
+    {
+      key: "inventario",
       label: "Inventario",
       icon: MdOutlineInventory,
       links: [
-        { label: "Ver Inventario", path: "/user-dashboard/view-inventory" },
+        { label: "Actualizar Inventario", path: "/dashboard/inventory/update" },
+
+        { label: "Scanner", path: "/dashboard/inventory/update/scanner" },
       ],
     },
   ];

@@ -281,7 +281,7 @@ export default function EditUserPage() {
                   onChange={() => handleWarehouseChange(w.WarehouseID)}
                 />
 
-                <span className="ml-2">
+                <span className="ml-2 dark:text-white">
                   {w.WarehouseCode} - {w.WarehouseName}
                 </span>
               </label>

@@ -76,13 +76,14 @@ export async function POST(req: NextRequest) {
 
         await rawSql(
           `INSERT INTO inventario.dbo.InventoryTransactions 
-            (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy) 
-            VALUES (@param0, 'RECEIPT', @param1, NULL, @param2, @param3)`,
+            (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy, ProductID) 
+            VALUES (@param0, 'RECEIPT', @param1, NULL, @param2, @param3, @param4)`,
           [
             inventoryResult[0].InventoryID,
             1,
             "Registro realizado con escáner",
             createdBy,
+            product.ProductID,
           ],
         );
       } else {
@@ -100,13 +101,14 @@ export async function POST(req: NextRequest) {
 
         await rawSql(
           `INSERT INTO inventario.dbo.InventoryTransactions 
-            (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy) 
-            VALUES (@param0, 'RECEIPT', @param1, NULL, @param2, @param3)`,
+            (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy, ProductID) 
+            VALUES (@param0, 'RECEIPT', @param1, NULL, @param2, @param3, @param4)`,
           [
             insertedInventory[0].InventoryID,
             1,
             "Registro realizado con escáner",
             createdBy,
+            product.ProductID,
           ],
         );
       }
@@ -156,13 +158,14 @@ export async function POST(req: NextRequest) {
 
       await rawSql(
         `INSERT INTO inventario.dbo.InventoryTransactions 
-          (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy) 
-          VALUES (@param0, 'SHIPMENT', @param1, NULL, @param2, @param3)`,
+          (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy, ProductID) 
+          VALUES (@param0, 'SHIPMENT', @param1, NULL, @param2, @param3, @param4)`,
         [
           inventoryResult[0].InventoryID,
           -1,
           "Registro realizado con escáner",
           createdBy,
+          product.ProductID,
         ],
       );
     }

@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Label, Select, TextInput, Button } from "flowbite-react";
 import { toast } from "react-hot-toast";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../../../components/DataTable"; // adjust path as needed
 import { useRouter } from "next/navigation";
+import InventoryUpdateModal, {
+  InventoryItem,
+} from "../../../components/InventoryUpdateModal";
 
 type Warehouse = {
   WarehouseID: number;
@@ -26,8 +29,9 @@ export default function InventoryPage() {
     null,
   );
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [updates, setUpdates] = useState<Record<number, number>>({});
+  const [updates, setUpdates] = useState<Record<number, string>>({});
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [modalItem, setModalItem] = useState<InventoryItem | null>(null);
 
   useEffect(() => {
     fetchWarehouses();
@@ -93,78 +97,82 @@ export default function InventoryPage() {
     setLastUpdated(new Date());
   };
 
-  const handleUpdate = async (item: InventoryItem) => {
-    const newQty = updates[item.InventoryID];
-    if (newQty === undefined || newQty === item.QuantityOnHand) {
-      toast("Sin cambios para este producto.");
-      return;
-    }
+  const handleUpdate = useCallback(
+    async (item: InventoryItem) => {
+      const newQtyStr = updates[item.InventoryID];
+      const newQty = Number(newQtyStr);
 
-    const response = await fetch("/api/inventory/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        productId: item.ProductID,
-        warehouseId: selectedWarehouseId,
-        newQuantity: newQty,
-        notes: "Ajuste manual",
-        referenceNumber: `WEB-${new Date().toISOString().slice(0, 10)}`,
-        updateType: "table",
-      }),
-    });
+      if (
+        newQtyStr === undefined || // No update entered
+        newQtyStr === "" || // Empty input
+        isNaN(newQty) || // Invalid number
+        newQty === item.QuantityOnHand // No actual change
+      ) {
+        toast("Sin cambios válidos para este producto.");
+        return;
+      }
 
-    const result = await response.json();
-    if (response.ok) {
-      toast.success(`Producto ${item.ProductName} actualizado.`);
-      fetchInventory(selectedWarehouseId!);
-    } else {
-      toast.error(result.message || "Error al actualizar.");
-    }
-  };
+      const response = await fetch("/api/inventory/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: item.ProductID,
+          warehouseId: selectedWarehouseId,
+          newQuantity: newQty,
+          notes: "Ajuste manual",
+          referenceNumber: `WEB-${new Date().toISOString().slice(0, 10)}`,
+          updateType: "table",
+        }),
+      });
 
-  const columns: ColumnDef<InventoryItem>[] = [
-    {
-      header: "Código de barras",
-      accessorKey: "Barcode",
+      const result = await response.json();
+      if (response.ok) {
+        toast.success(`Producto ${item.ProductName} actualizado.`);
+        fetchInventory(Number(selectedWarehouseId));
+      } else {
+        toast.error(result.message || "Error al actualizar.");
+      }
     },
-    {
-      header: "Producto",
-      accessorKey: "ProductName",
-    },
-    {
-      header: "Cantidad actual",
-      accessorKey: "QuantityOnHand",
-    },
-    {
-      header: "Nueva cantidad",
-      cell: ({ row }) => {
-        const item = row.original;
-        return (
-          <TextInput
-            type="number"
-            value={updates[item.InventoryID] ?? item.QuantityOnHand}
-            onChange={(e) =>
-              setUpdates((prev) => ({
-                ...prev,
-                [item.InventoryID]: Number(e.target.value),
-              }))
-            }
-          />
-        );
+    [selectedWarehouseId, updates],
+  );
+
+  const columns: ColumnDef<InventoryItem>[] = useMemo(
+    () => [
+      {
+        header: "Código de barras",
+        accessorKey: "Barcode",
       },
-    },
-    {
-      header: "Acciones",
-      cell: ({ row }) => {
-        const item = row.original;
-        return (
-          <Button size="xs" onClick={() => handleUpdate(item)}>
-            Actualizar
-          </Button>
-        );
+      {
+        header: "Producto",
+        accessorKey: "ProductName",
       },
-    },
-  ];
+      {
+        header: "Cantidad actual",
+        accessorKey: "QuantityOnHand",
+      },
+      {
+        header: "Unidad",
+        accessorKey: "UnitName",
+      },
+      {
+        header: "Acciones",
+        cell: ({ row }) => {
+          const item = row.original;
+          return (
+            <Button
+              size="xs"
+              onClick={() => {
+                setModalItem(item);
+              }}
+            >
+              Actualizar
+            </Button>
+          );
+        },
+      },
+    ],
+    [handleUpdate],
+  );
 
   const router = useRouter();
 
@@ -201,6 +209,13 @@ export default function InventoryPage() {
           </p>
         )}
       </div>
+
+      <InventoryUpdateModal
+        item={modalItem}
+        warehouseId={selectedWarehouseId}
+        onClose={() => setModalItem(null)}
+        onSuccess={() => fetchInventory(Number(selectedWarehouseId))}
+      />
 
       <DataTable data={inventory} columns={columns} />
     </div>
