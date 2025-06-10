@@ -3,6 +3,8 @@
 import { usePathname, useRouter } from "next/navigation";
 import { HiOutlineCube, HiOutlineHome } from "react-icons/hi";
 import { MdLogout, MdOutlineInventory } from "react-icons/md";
+import { CiBoxList } from "react-icons/ci";
+
 
 const BottomMenu = ({ user }: { user: { role: number } }) => {
   const pathname = usePathname();
@@ -26,6 +28,11 @@ const BottomMenu = ({ user }: { user: { role: number } }) => {
             icon: MdOutlineInventory,
             path: "/dashboard/inventory/update/scanner",
           },
+          {
+            label: "Unidades",
+            icon: CiBoxList,
+            path: "/dashboard/units"
+          }
         ]
       : [
           {

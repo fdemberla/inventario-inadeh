@@ -66,7 +66,7 @@ export default function UserListPage() {
   return (
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Usuarios</h1>
+        <h1 className="text-2xl font-bold dark:text-white">Usuarios</h1>
         <Button
           onClick={() => router.push("/dashboard/users/create")}
           className="bg-brand-verde"

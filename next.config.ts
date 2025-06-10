@@ -1,5 +1,4 @@
 //next.config.ts
-
 import type { NextConfig } from "next";
 import withFlowbiteReact from "flowbite-react/plugin/nextjs";
 const withPWA = require("next-pwa")({
@@ -77,7 +76,6 @@ const baseConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  swcMinify: true, // Enable SWC minification for improved performance
   compiler: {
     removeConsole: process.env.NODE_ENV !== "development", // Remove console.log in production
   },

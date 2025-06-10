@@ -134,7 +134,7 @@ export function DataTable<T extends object>({
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
-                    className="hover:bg-gray-700 dark:hover:bg-gray-100"
+                    className="hover:bg-gray-300 dark:hover:bg-gray-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell

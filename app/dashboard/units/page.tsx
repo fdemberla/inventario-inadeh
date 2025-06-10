@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Spinner } from "flowbite-react";
+import { Button, Spinner } from "flowbite-react";
 import { DataTable } from "@/app/components/DataTable";
+import { useRouter } from "next/navigation";
+
 
 type Unit = {
   UnitID: number;
@@ -14,6 +16,9 @@ type Unit = {
 export default function ViewAllUnits() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
+
+      const router = useRouter();
+
 
   useEffect(() => {
     const fetchUnits = async () => {
@@ -60,6 +65,12 @@ export default function ViewAllUnits() {
       <h1 className="mb-4 text-2xl font-bold dark:text-white">
         Unidades de Medida
       </h1>
+              <Button
+                onClick={() => router.push("/dashboard/units/create")}
+                className="bg-brand-verde"
+              >
+                Crear Unidad
+              </Button>
       <>
         <DataTable data={units} columns={columns} />
       </>

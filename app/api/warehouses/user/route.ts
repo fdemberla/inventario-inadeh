@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
     let getWarehouseQuery = `SELECT w.WarehouseID, w.WarehouseCode, rl.Name, rl.ShortName, w.WarehouseName, CONCAT(w.WarehouseCode, ' - ', rl.Name, ' - ', w.WarehouseName) AS NombreWarehouse
 FROM inventario.dbo.WarehouseUsers wu
 INNER JOIN inventario.dbo.Warehouses w ON wu.WarehouseID = w.WarehouseID
-INNER JOIN inventario.dbo.RegionalLocations rl ON w.MainLocationID = rl.MainLocationID;`;
+INNER JOIN inventario.dbo.RegionalLocations rl ON w.MainLocationID = rl.MainLocationID
+WHERE wu.UserID = @param0;`;
 
     if (!isUserAdmin) {
       getWarehouseQuery = `SELECT w.WarehouseID, w.WarehouseCode, rl.Name, rl.ShortName, w.WarehouseName, CONCAT(w.WarehouseCode, ' - ', rl.Name, ' - ', w.WarehouseName) AS NombreWarehouse

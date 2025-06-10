@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { Label, Select, TextInput, Button } from "flowbite-react";
+import { useEffect, useState, useMemo } from "react";
+import { Label, Select, Button } from "flowbite-react";
 import { toast } from "react-hot-toast";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../../../components/DataTable"; // adjust path as needed
 import { useRouter } from "next/navigation";
 import InventoryUpdateModal, {
-  InventoryItem,
 } from "../../../components/InventoryUpdateModal";
 
 type Warehouse = {
@@ -29,7 +28,6 @@ export default function InventoryPage() {
     null,
   );
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [updates, setUpdates] = useState<Record<number, string>>({});
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [modalItem, setModalItem] = useState<InventoryItem | null>(null);
 
@@ -97,44 +95,44 @@ export default function InventoryPage() {
     setLastUpdated(new Date());
   };
 
-  const handleUpdate = useCallback(
-    async (item: InventoryItem) => {
-      const newQtyStr = updates[item.InventoryID];
-      const newQty = Number(newQtyStr);
+  // const handleUpdate = useCallback(
+  //   async (item: InventoryItem) => {
+  //     const newQtyStr = item[item.InventoryID];
+  //     const newQty = Number(newQtyStr);
 
-      if (
-        newQtyStr === undefined || // No update entered
-        newQtyStr === "" || // Empty input
-        isNaN(newQty) || // Invalid number
-        newQty === item.QuantityOnHand // No actual change
-      ) {
-        toast("Sin cambios válidos para este producto.");
-        return;
-      }
+  //     if (
+  //       newQtyStr === undefined || // No update entered
+  //       newQtyStr === "" || // Empty input
+  //       isNaN(newQty) || // Invalid number
+  //       newQty === item.QuantityOnHand // No actual change
+  //     ) {
+  //       toast("Sin cambios válidos para este producto.");
+  //       return;
+  //     }
 
-      const response = await fetch("/api/inventory/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: item.ProductID,
-          warehouseId: selectedWarehouseId,
-          newQuantity: newQty,
-          notes: "Ajuste manual",
-          referenceNumber: `WEB-${new Date().toISOString().slice(0, 10)}`,
-          updateType: "table",
-        }),
-      });
+  //     const response = await fetch("/api/inventory/update", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         productId: item.ProductID,
+  //         warehouseId: selectedWarehouseId,
+  //         newQuantity: newQty,
+  //         notes: "Ajuste manual",
+  //         referenceNumber: `WEB-${new Date().toISOString().slice(0, 10)}`,
+  //         updateType: "table",
+  //       }),
+  //     });
 
-      const result = await response.json();
-      if (response.ok) {
-        toast.success(`Producto ${item.ProductName} actualizado.`);
-        fetchInventory(Number(selectedWarehouseId));
-      } else {
-        toast.error(result.message || "Error al actualizar.");
-      }
-    },
-    [selectedWarehouseId, updates],
-  );
+  //     const result = await response.json();
+  //     if (response.ok) {
+  //       toast.success(`Producto ${item.ProductName} actualizado.`);
+  //       fetchInventory(Number(selectedWarehouseId));
+  //     } else {
+  //       toast.error(result.message || "Error al actualizar.");
+  //     }
+  //   },
+  //   [selectedWarehouseId],
+  // );
 
   const columns: ColumnDef<InventoryItem>[] = useMemo(
     () => [
@@ -171,7 +169,7 @@ export default function InventoryPage() {
         },
       },
     ],
-    [handleUpdate],
+    [],
   );
 
   const router = useRouter();
