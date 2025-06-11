@@ -1,5 +1,5 @@
 -- Create and use database
-IF DB_ID('inventario') IS NULL
+IF DB_ID('inventario_prod') IS NULL
     CREATE DATABASE inventario;
 GO
 
@@ -15,9 +15,117 @@ ALTER SERVER ROLE sysadmin ADD MEMBER devuser;  -- Full admin (for dev only)
 -- OR, for restricted access:
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::dbo TO devuser;
 
-USE [inventario]
+USE [master]
 GO
-/****** Object:  Table [dbo].[Categories]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Database [inventario_prod]    Script Date: 11/06/2025 9:26:36 ******/
+CREATE DATABASE [inventario_prod]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'inventario', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\inventario.mdf' , SIZE = 73728KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'inventario_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\inventario_log.ldf' , SIZE = 73728KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
+GO
+ALTER DATABASE [inventario_prod] SET COMPATIBILITY_LEVEL = 160
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [inventario_prod].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [inventario_prod] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [inventario_prod] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [inventario_prod] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [inventario_prod] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [inventario_prod] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [inventario_prod] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [inventario_prod] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [inventario_prod] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [inventario_prod] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [inventario_prod] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [inventario_prod] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [inventario_prod] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [inventario_prod] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [inventario_prod] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [inventario_prod] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [inventario_prod] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [inventario_prod] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [inventario_prod] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [inventario_prod] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [inventario_prod] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [inventario_prod] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [inventario_prod] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [inventario_prod] SET RECOVERY FULL 
+GO
+ALTER DATABASE [inventario_prod] SET  MULTI_USER 
+GO
+ALTER DATABASE [inventario_prod] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [inventario_prod] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [inventario_prod] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [inventario_prod] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [inventario_prod] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [inventario_prod] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'inventario', N'ON'
+GO
+ALTER DATABASE [inventario_prod] SET QUERY_STORE = ON
+GO
+ALTER DATABASE [inventario_prod] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 1000, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200, WAIT_STATS_CAPTURE_MODE = ON)
+GO
+USE [inventario_prod]
+GO
+/****** Object:  User [testing_sa]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE USER [testing_sa] WITHOUT LOGIN WITH DEFAULT_SCHEMA=[dbo]
+GO
+/****** Object:  User [DevUser]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE USER [DevUser] FOR LOGIN [DevUser] WITH DEFAULT_SCHEMA=[dbo]
+GO
+ALTER ROLE [db_owner] ADD MEMBER [DevUser]
+GO
+ALTER ROLE [db_accessadmin] ADD MEMBER [DevUser]
+GO
+ALTER ROLE [db_securityadmin] ADD MEMBER [DevUser]
+GO
+ALTER ROLE [db_ddladmin] ADD MEMBER [DevUser]
+GO
+ALTER ROLE [db_backupoperator] ADD MEMBER [DevUser]
+GO
+ALTER ROLE [db_datareader] ADD MEMBER [DevUser]
+GO
+ALTER ROLE [db_datawriter] ADD MEMBER [DevUser]
+GO
+ALTER ROLE [db_denydatareader] ADD MEMBER [DevUser]
+GO
+ALTER ROLE [db_denydatawriter] ADD MEMBER [DevUser]
+GO
+/****** Object:  Table [dbo].[Categories]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -35,7 +143,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Inventory]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[Inventory]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -56,7 +164,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[InventoryTransactions]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[InventoryTransactions]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -77,7 +185,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Products]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[Products]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -101,7 +209,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[ProductsIstmo]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[ProductsIstmo]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -117,7 +225,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[ProductSuppliers]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[ProductSuppliers]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -138,7 +246,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[RegionalLocations]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[RegionalLocations]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -154,7 +262,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Roles]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[Roles]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -171,7 +279,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Suppliers]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[Suppliers]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -192,7 +300,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[UnitsOfMeasurement]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[UnitsOfMeasurement]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -209,7 +317,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Users]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[Users]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -232,7 +340,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Warehouses]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[Warehouses]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -252,7 +360,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[WarehouseUsers]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Table [dbo].[WarehouseUsers]    Script Date: 11/06/2025 9:26:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -309,7 +417,71 @@ INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOn
 INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (1005, 22, 9, 7, 0, NULL, NULL, CAST(N'2025-05-29T15:25:55.3221962' AS DateTime2), CAST(N'2025-06-05T11:44:32.9751203' AS DateTime2))
 INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2004, 19, 9, 15, 0, NULL, NULL, CAST(N'2025-06-02T15:17:15.0519793' AS DateTime2), CAST(N'2025-06-02T15:18:02.5565711' AS DateTime2))
 INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2005, 23, 9, 0, 0, NULL, NULL, CAST(N'2025-06-04T10:29:58.0404655' AS DateTime2), CAST(N'2025-06-04T10:30:41.6339137' AS DateTime2))
-INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2006, 21, 21, 120, 0, NULL, NULL, CAST(N'2025-06-05T14:47:42.0298243' AS DateTime2), CAST(N'2025-06-05T15:56:33.1333333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2006, 21, 21, 123, 0, NULL, NULL, CAST(N'2025-06-05T14:47:42.0298243' AS DateTime2), CAST(N'2025-06-06T08:41:28.5800000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2007, 32, 2008, 800, 0, NULL, CAST(N'2025-06-06T20:11:00.0000000' AS DateTime2), CAST(N'2025-06-06T15:12:01.5702677' AS DateTime2), CAST(N'2025-06-06T10:34:00.6700000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2008, 32, 2009, 1610, 0, NULL, CAST(N'2025-06-06T20:35:00.0000000' AS DateTime2), CAST(N'2025-06-06T15:35:16.2325355' AS DateTime2), CAST(N'2025-06-06T13:29:25.9933333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2009, 35, 2009, 468, 0, NULL, CAST(N'2025-06-06T20:43:00.0000000' AS DateTime2), CAST(N'2025-06-06T15:43:23.7286811' AS DateTime2), CAST(N'2025-06-06T10:43:23.7266667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2010, 36, 2009, 960, 0, NULL, CAST(N'2025-06-06T20:43:00.0000000' AS DateTime2), CAST(N'2025-06-06T15:45:17.5388476' AS DateTime2), CAST(N'2025-06-06T10:45:17.5366667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2011, 37, 2009, 178, 0, NULL, CAST(N'2025-06-06T20:52:00.0000000' AS DateTime2), CAST(N'2025-06-06T15:52:26.3510781' AS DateTime2), CAST(N'2025-06-06T10:52:26.3500000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2012, 38, 2009, 300, 0, NULL, CAST(N'2025-06-06T20:53:00.0000000' AS DateTime2), CAST(N'2025-06-06T15:53:31.2822988' AS DateTime2), CAST(N'2025-06-06T10:53:31.2800000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2013, 39, 2009, 3000, 0, NULL, CAST(N'2025-06-06T20:55:00.0000000' AS DateTime2), CAST(N'2025-06-06T15:55:19.7330333' AS DateTime2), CAST(N'2025-06-06T10:55:19.7300000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2014, 40, 2009, 1350, 0, NULL, CAST(N'2025-06-06T21:04:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:05:56.9710441' AS DateTime2), CAST(N'2025-06-06T11:06:32.1533333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2015, 41, 2009, 960, 0, NULL, CAST(N'2025-06-06T21:08:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:09:17.6063186' AS DateTime2), CAST(N'2025-06-06T11:09:17.6033333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2016, 42, 2009, 35, 0, NULL, CAST(N'2025-06-06T21:14:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:15:11.2442261' AS DateTime2), CAST(N'2025-06-06T11:15:11.2433333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2017, 43, 2009, 1739, 0, NULL, CAST(N'2025-06-06T21:16:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:16:23.9173311' AS DateTime2), CAST(N'2025-06-06T11:16:23.9133333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2018, 44, 2009, 107, 0, NULL, CAST(N'2025-06-06T21:22:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:22:28.7958854' AS DateTime2), CAST(N'2025-06-06T11:22:28.7933333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2019, 45, 2009, 1200, 0, NULL, CAST(N'2025-06-06T21:34:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:34:57.3283128' AS DateTime2), CAST(N'2025-06-06T11:34:57.3266667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2020, 46, 2009, 386, 0, NULL, CAST(N'2025-06-06T21:36:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:36:35.4945065' AS DateTime2), CAST(N'2025-06-06T11:36:35.4900000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2021, 47, 2009, 60, 0, NULL, CAST(N'2025-06-06T21:40:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:40:24.1241464' AS DateTime2), CAST(N'2025-06-06T11:40:24.1233333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2022, 48, 2009, 194, 0, NULL, CAST(N'2025-06-06T21:44:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:47:40.7917009' AS DateTime2), CAST(N'2025-06-06T11:47:40.7900000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2023, 49, 2009, 323, 0, NULL, CAST(N'2025-06-06T21:56:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:56:33.2388100' AS DateTime2), CAST(N'2025-06-06T11:56:33.2366667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2024, 50, 2009, 895, 0, NULL, CAST(N'2025-06-06T21:57:00.0000000' AS DateTime2), CAST(N'2025-06-06T16:57:48.1840788' AS DateTime2), CAST(N'2025-06-07T15:58:46.8566667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2025, 52, 2009, 6912, 0, NULL, CAST(N'2025-06-06T23:54:00.0000000' AS DateTime2), CAST(N'2025-06-06T18:55:06.2634698' AS DateTime2), CAST(N'2025-06-06T13:55:06.2633333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2026, 58, 2009, 3342, 0, NULL, CAST(N'2025-06-07T18:11:00.0000000' AS DateTime2), CAST(N'2025-06-07T13:12:33.5053123' AS DateTime2), CAST(N'2025-06-07T09:35:06.5566667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2027, 54, 2009, 2969, 0, NULL, CAST(N'2025-06-07T18:22:00.0000000' AS DateTime2), CAST(N'2025-06-07T13:23:18.7359771' AS DateTime2), CAST(N'2025-06-07T08:23:18.7333333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2028, 61, 2009, 1236, 0, NULL, CAST(N'2025-06-07T18:36:00.0000000' AS DateTime2), CAST(N'2025-06-07T13:36:34.4080103' AS DateTime2), CAST(N'2025-06-07T08:36:34.4066667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2029, 62, 2009, 8, 0, NULL, CAST(N'2025-06-07T18:46:00.0000000' AS DateTime2), CAST(N'2025-06-07T13:46:11.3301214' AS DateTime2), CAST(N'2025-06-07T08:46:11.3266667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2030, 66, 2009, 2926, 0, NULL, CAST(N'2025-06-07T18:59:00.0000000' AS DateTime2), CAST(N'2025-06-07T13:59:44.3688841' AS DateTime2), CAST(N'2025-06-07T08:59:44.3666667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2031, 65, 2009, 156, 0, NULL, CAST(N'2025-06-07T18:59:00.0000000' AS DateTime2), CAST(N'2025-06-07T14:01:02.2095028' AS DateTime2), CAST(N'2025-06-07T09:01:02.2066667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2032, 64, 2009, 3600, 0, NULL, CAST(N'2025-06-07T19:07:00.0000000' AS DateTime2), CAST(N'2025-06-07T14:07:56.4307589' AS DateTime2), CAST(N'2025-06-07T09:07:56.4300000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2033, 67, 2009, 2100, 0, NULL, CAST(N'2025-06-07T19:22:00.0000000' AS DateTime2), CAST(N'2025-06-07T14:23:05.1318276' AS DateTime2), CAST(N'2025-06-07T09:23:05.1300000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2034, 68, 2009, 961, 0, NULL, CAST(N'2025-06-07T19:24:00.0000000' AS DateTime2), CAST(N'2025-06-07T14:24:34.1472102' AS DateTime2), CAST(N'2025-06-07T09:24:34.1466667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2035, 51, 2009, 5260, 0, NULL, CAST(N'2025-06-07T19:30:00.0000000' AS DateTime2), CAST(N'2025-06-07T14:30:39.9518576' AS DateTime2), CAST(N'2025-06-07T09:30:39.9500000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2036, 69, 2009, 2112, 0, NULL, CAST(N'2025-06-07T19:38:00.0000000' AS DateTime2), CAST(N'2025-06-07T14:38:09.4120120' AS DateTime2), CAST(N'2025-06-07T09:38:09.4100000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2037, 71, 2009, 4516, 0, NULL, CAST(N'2025-06-07T19:41:00.0000000' AS DateTime2), CAST(N'2025-06-07T14:41:45.1980427' AS DateTime2), CAST(N'2025-06-07T09:41:45.1966667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2038, 72, 2009, 139, 0, NULL, CAST(N'2025-06-07T19:50:00.0000000' AS DateTime2), CAST(N'2025-06-07T14:50:29.4867901' AS DateTime2), CAST(N'2025-06-07T09:50:29.4866667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2039, 73, 2009, 72700, 0, NULL, CAST(N'2025-06-07T20:06:00.0000000' AS DateTime2), CAST(N'2025-06-07T15:06:43.4527576' AS DateTime2), CAST(N'2025-06-07T10:06:43.4500000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2040, 74, 2009, 666, 0, NULL, CAST(N'2025-06-07T20:16:00.0000000' AS DateTime2), CAST(N'2025-06-07T15:16:40.0805386' AS DateTime2), CAST(N'2025-06-07T10:16:40.0800000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2041, 75, 2009, 28, 0, NULL, CAST(N'2025-06-07T20:26:00.0000000' AS DateTime2), CAST(N'2025-06-07T15:26:55.4320358' AS DateTime2), CAST(N'2025-06-07T10:26:55.4300000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2042, 18, 2009, 3600, 0, NULL, CAST(N'2025-06-07T20:31:00.0000000' AS DateTime2), CAST(N'2025-06-07T15:31:43.3579054' AS DateTime2), CAST(N'2025-06-07T10:31:43.3566667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2043, 76, 2009, 2360, 0, NULL, CAST(N'2025-06-08T01:39:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:40:16.7389692' AS DateTime2), CAST(N'2025-06-07T15:40:16.7366667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2044, 77, 2009, 5760, 0, NULL, CAST(N'2025-06-08T01:40:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:40:31.3055099' AS DateTime2), CAST(N'2025-06-07T15:40:31.3033333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2045, 78, 2009, 5676, 0, NULL, CAST(N'2025-06-08T01:40:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:40:46.9948208' AS DateTime2), CAST(N'2025-06-07T15:40:46.9933333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2046, 79, 2009, 2088, 0, NULL, CAST(N'2025-06-08T01:41:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:41:07.3472037' AS DateTime2), CAST(N'2025-06-07T15:41:07.3466667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2047, 100, 2009, 603, 0, NULL, CAST(N'2025-06-08T01:45:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:45:31.3677501' AS DateTime2), CAST(N'2025-06-07T15:45:31.3666667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2048, 80, 2009, 156, 0, NULL, CAST(N'2025-06-08T01:45:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:45:56.3723617' AS DateTime2), CAST(N'2025-06-07T15:45:56.3700000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2049, 81, 2009, 982, 0, NULL, CAST(N'2025-06-08T01:46:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:46:16.7423240' AS DateTime2), CAST(N'2025-06-07T15:46:16.7400000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2050, 101, 2009, 314, 0, NULL, CAST(N'2025-06-08T01:49:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:49:16.8069713' AS DateTime2), CAST(N'2025-06-07T15:49:16.8033333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2051, 82, 2009, 620, 0, NULL, CAST(N'2025-06-08T01:49:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:49:32.3278843' AS DateTime2), CAST(N'2025-06-07T15:49:32.3266667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2052, 83, 2009, 1282, 0, NULL, CAST(N'2025-06-08T01:49:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:49:47.8563393' AS DateTime2), CAST(N'2025-06-07T15:49:47.8533333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2053, 19, 2009, 64100, 0, NULL, CAST(N'2025-06-08T01:51:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:51:50.5680250' AS DateTime2), CAST(N'2025-06-07T15:51:50.5666667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2054, 84, 2009, 115056, 0, NULL, CAST(N'2025-06-08T01:52:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:52:21.1475082' AS DateTime2), CAST(N'2025-06-07T15:52:59.1733333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2055, 85, 2009, 946, 0, NULL, CAST(N'2025-06-08T01:53:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:53:20.1035411' AS DateTime2), CAST(N'2025-06-07T15:53:20.1000000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2056, 86, 2009, 781, 0, NULL, CAST(N'2025-06-08T01:53:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:53:34.0390030' AS DateTime2), CAST(N'2025-06-07T15:53:34.0366667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2057, 87, 2009, 737, 0, NULL, CAST(N'2025-06-08T01:53:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:53:48.6114259' AS DateTime2), CAST(N'2025-06-07T15:53:48.6100000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2058, 88, 2009, 13033, 0, NULL, CAST(N'2025-06-08T01:53:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:54:12.3105005' AS DateTime2), CAST(N'2025-06-07T15:54:12.3100000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2059, 89, 2009, 292, 0, NULL, CAST(N'2025-06-08T01:54:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:54:29.4749878' AS DateTime2), CAST(N'2025-06-07T15:54:29.4700000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2060, 90, 2009, 9, 0, NULL, CAST(N'2025-06-08T01:54:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:54:53.5673824' AS DateTime2), CAST(N'2025-06-07T15:54:53.5666667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2061, 91, 2009, 12, 0, NULL, CAST(N'2025-06-08T01:55:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:55:12.3835449' AS DateTime2), CAST(N'2025-06-07T15:55:12.3800000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2062, 3, 2009, 118, 0, NULL, CAST(N'2025-06-08T01:55:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:55:24.9365123' AS DateTime2), CAST(N'2025-06-07T15:55:24.9333333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2063, 93, 2009, 11, 0, NULL, CAST(N'2025-06-08T01:55:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:55:41.4393431' AS DateTime2), CAST(N'2025-06-07T15:55:41.4400000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2064, 94, 2009, 396, 0, NULL, CAST(N'2025-06-08T01:55:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:56:01.4693762' AS DateTime2), CAST(N'2025-06-07T15:56:01.4666667' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2065, 21, 2009, 18, 0, NULL, CAST(N'2025-06-08T01:56:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:56:33.5640729' AS DateTime2), CAST(N'2025-06-07T15:56:33.5633333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2066, 95, 2009, 13, 0, NULL, CAST(N'2025-06-08T01:56:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:56:58.9243287' AS DateTime2), CAST(N'2025-06-07T15:56:58.9233333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2067, 96, 2009, 14, 0, NULL, CAST(N'2025-06-08T01:57:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:57:21.1103099' AS DateTime2), CAST(N'2025-06-07T15:57:21.1100000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2068, 97, 2009, 45, 0, NULL, CAST(N'2025-06-08T01:57:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:57:36.5821300' AS DateTime2), CAST(N'2025-06-07T15:57:36.5800000' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2069, 98, 2009, 44, 0, NULL, CAST(N'2025-06-08T01:57:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:57:51.5559224' AS DateTime2), CAST(N'2025-06-07T15:57:51.5533333' AS DateTime2))
+INSERT [dbo].[Inventory] ([InventoryID], [ProductID], [WarehouseID], [QuantityOnHand], [QuantityReserved], [ReorderLevel], [LastStockedDate], [CreatedDate], [ModifiedDate]) VALUES (2070, 99, 2009, 1015, 0, NULL, CAST(N'2025-06-08T01:58:00.0000000' AS DateTime2), CAST(N'2025-06-07T20:58:20.4307879' AS DateTime2), CAST(N'2025-06-07T15:58:20.4300000' AS DateTime2))
 SET IDENTITY_INSERT [dbo].[Inventory] OFF
 GO
 SET IDENTITY_INSERT [dbo].[InventoryTransactions] ON 
@@ -607,6 +779,78 @@ INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [Transacti
 INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3142, 2006, N'RECEIPT', 1, NULL, N'Registro realizado con escáner', N'admin', CAST(N'2025-06-05T20:55:39.8040326' AS DateTime2), 21)
 INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3143, 2006, N'RECEIPT', 1, NULL, N'Registro realizado con escáner', N'admin', CAST(N'2025-06-05T20:56:01.5312521' AS DateTime2), 21)
 INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3144, 2006, N'ADJUSTMENT', 110, N'WEB-2025-06-05', N'Ajuste manual', N'WEB_USER', CAST(N'2025-06-05T20:56:33.1363444' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3145, 2006, N'ADJUSTMENT', 3, N'WEB-2025-06-06', N'Ajuste manual', N'WEB_USER', CAST(N'2025-06-06T13:41:28.5839160' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3146, 2007, N'RECEIPT', 5, N'WEB-INIT-1749222721517', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T15:12:01.5712682' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3147, 2007, N'ADJUSTMENT', 795, N'WEB-2025-06-06', N'Ajuste manual', N'WEB_USER', CAST(N'2025-06-06T15:34:00.6724355' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3148, 2008, N'RECEIPT', 1450, N'WEB-INIT-1749224116221', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T15:35:16.2325355' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3149, 2009, N'RECEIPT', 468, N'WEB-INIT-1749224603672', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T15:43:23.7286811' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3150, 2010, N'RECEIPT', 960, N'WEB-INIT-1749224717514', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T15:45:17.5388476' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3151, 2011, N'RECEIPT', 178, N'WEB-INIT-1749225146293', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T15:52:26.3510781' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3152, 2012, N'RECEIPT', 300, N'WEB-INIT-1749225211273', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T15:53:31.2832992' AS DateTime2), NULL)
+GO
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3153, 2013, N'RECEIPT', 3000, N'WEB-INIT-1749225319723', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T15:55:19.7340339' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3154, 2014, N'RECEIPT', 1344, N'WEB-INIT-1749225956912', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:05:56.9710441' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3155, 2014, N'ADJUSTMENT', 6, N'WEB-2025-06-06', N'Ajuste manual', N'WEB_USER', CAST(N'2025-06-06T16:06:32.1566259' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3156, 2015, N'RECEIPT', 960, N'WEB-INIT-1749226157550', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:09:17.6063186' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3157, 2016, N'RECEIPT', 35, N'WEB-INIT-1749226511196', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:15:11.2442261' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3158, 2017, N'RECEIPT', 1739, N'WEB-INIT-1749226583908', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:16:23.9173311' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3159, 2018, N'RECEIPT', 107, N'WEB-INIT-1749226948733', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:22:28.7958854' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3160, 2019, N'RECEIPT', 1200, N'WEB-INIT-1749227697272', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:34:57.3283128' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3161, 2020, N'RECEIPT', 386, N'WEB-INIT-1749227795487', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:36:35.4945065' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3162, 2021, N'RECEIPT', 60, N'WEB-INIT-1749228024065', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:40:24.1251470' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3163, 2022, N'RECEIPT', 194, N'WEB-INIT-1749228460738', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:47:40.7917009' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3164, 2023, N'RECEIPT', 323, N'WEB-INIT-1749228993183', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:56:33.2388100' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3165, 2024, N'RECEIPT', 297, N'WEB-INIT-1749229068179', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T16:57:48.1850804' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3166, 2008, N'ADJUSTMENT', 160, N'WEB-2025-06-06', N'Ajuste manual', N'WEB_USER', CAST(N'2025-06-06T18:29:25.9953395' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3167, 2025, N'RECEIPT', 6912, N'WEB-INIT-1749236106189', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-06T18:55:06.2684736' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3168, 2026, N'RECEIPT', 702, N'WEB-INIT-1749301953452', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T13:12:33.5063124' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3169, 2027, N'RECEIPT', 2969, N'WEB-INIT-1749302598679', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T13:23:18.7379746' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3170, 2028, N'RECEIPT', 1236, N'WEB-INIT-1749303394303', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T13:36:34.4090102' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3171, 2029, N'RECEIPT', 8, N'WEB-INIT-1749303971295', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T13:46:11.3321216' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3172, 2030, N'RECEIPT', 2926, N'WEB-INIT-1749304784329', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T13:59:44.3698834' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3173, 2031, N'RECEIPT', 156, N'WEB-INIT-1749304862153', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T14:01:02.2195035' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3174, 2032, N'RECEIPT', 3600, N'WEB-INIT-1749305276424', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T14:07:56.4337612' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3175, 2033, N'RECEIPT', 2100, N'WEB-INIT-1749306185061', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T14:23:05.1368270' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3176, 2034, N'RECEIPT', 961, N'WEB-INIT-1749306274071', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T14:24:34.1492092' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3177, 2035, N'RECEIPT', 5260, N'WEB-INIT-1749306639922', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T14:30:39.9548572' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3178, 2026, N'ADJUSTMENT', 2640, N'WEB-2025-06-07', N'Ajuste manual', N'WEB_USER', CAST(N'2025-06-07T14:35:06.5604915' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3179, 2036, N'RECEIPT', 2112, N'WEB-INIT-1749307089351', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T14:38:09.4210095' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3180, 2037, N'RECEIPT', 4516, N'WEB-INIT-1749307305129', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T14:41:45.2050413' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3181, 2038, N'RECEIPT', 139, N'WEB-INIT-1749307829431', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T14:50:29.4937906' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3182, 2039, N'RECEIPT', 72700, N'WEB-INIT-1749308803385', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T15:06:43.4567573' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3183, 2040, N'RECEIPT', 666, N'WEB-INIT-1749309400022', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T15:16:40.0885360' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3184, 2041, N'RECEIPT', 28, N'WEB-INIT-1749310015354', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T15:26:55.4423259' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3185, 2042, N'RECEIPT', 3600, N'WEB-INIT-1749310303313', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T15:31:43.3598983' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3186, 2043, N'RECEIPT', 2360, N'WEB-INIT-1749328816661', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:40:16.7399688' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3187, 2044, N'RECEIPT', 5760, N'WEB-INIT-1749328831295', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:40:31.3055099' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3188, 2045, N'RECEIPT', 5676, N'WEB-INIT-1749328846987', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:40:46.9948208' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3189, 2046, N'RECEIPT', 2088, N'WEB-INIT-1749328867343', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:41:07.3472037' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3190, 2047, N'RECEIPT', 603, N'WEB-INIT-1749329131308', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:45:31.3677501' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3191, 2048, N'RECEIPT', 156, N'WEB-INIT-1749329156356', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:45:56.3723617' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3192, 2049, N'RECEIPT', 982, N'WEB-INIT-1749329176738', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:46:16.7423240' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3193, 2050, N'RECEIPT', 314, N'WEB-INIT-1749329356750', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:49:16.8069713' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3194, 2051, N'RECEIPT', 620, N'WEB-INIT-1749329372322', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:49:32.3278843' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3195, 2052, N'RECEIPT', 1282, N'WEB-INIT-1749329387849', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:49:47.8563393' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3196, 2053, N'RECEIPT', 64100, N'WEB-INIT-1749329510510', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:51:50.5690255' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3197, 2054, N'RECEIPT', 9588, N'WEB-INIT-1749329541142', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:52:21.1475082' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3198, 2054, N'ADJUSTMENT', 105468, N'WEB-2025-06-07', N'Ajuste manual', N'WEB_USER', CAST(N'2025-06-07T20:52:59.1745700' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3199, 2055, N'RECEIPT', 946, N'WEB-INIT-1749329600091', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:53:20.1035411' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3200, 2056, N'RECEIPT', 781, N'WEB-INIT-1749329614023', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:53:34.0390030' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3201, 2057, N'RECEIPT', 737, N'WEB-INIT-1749329628605', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:53:48.6124256' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3202, 2058, N'RECEIPT', 13033, N'WEB-INIT-1749329652305', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:54:12.3114931' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3203, 2059, N'RECEIPT', 292, N'WEB-INIT-1749329669468', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:54:29.4749878' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3204, 2060, N'RECEIPT', 9, N'WEB-INIT-1749329693552', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:54:53.5673824' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3205, 2061, N'RECEIPT', 12, N'WEB-INIT-1749329712370', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:55:12.3835449' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3206, 2062, N'RECEIPT', 118, N'WEB-INIT-1749329724932', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:55:24.9365123' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3207, 2063, N'RECEIPT', 11, N'WEB-INIT-1749329741425', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:55:41.4403432' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3208, 2064, N'RECEIPT', 396, N'WEB-INIT-1749329761452', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:56:01.4693762' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3209, 2065, N'RECEIPT', 18, N'WEB-INIT-1749329793550', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:56:33.5640729' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3210, 2066, N'RECEIPT', 13, N'WEB-INIT-1749329818909', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:56:58.9253310' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3211, 2067, N'RECEIPT', 14, N'WEB-INIT-1749329841098', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:57:21.1103099' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3212, 2068, N'RECEIPT', 45, N'WEB-INIT-1749329856568', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:57:36.5821300' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3213, 2069, N'RECEIPT', 44, N'WEB-INIT-1749329871542', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:57:51.5569216' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3214, 2070, N'RECEIPT', 1015, N'WEB-INIT-1749329900426', N'Initial inventory creation', N'WEB_USER', CAST(N'2025-06-07T20:58:20.4307879' AS DateTime2), NULL)
+INSERT [dbo].[InventoryTransactions] ([TransactionID], [InventoryID], [TransactionType], [QuantityChange], [ReferenceNumber], [Notes], [CreatedBy], [CreatedDate], [ProductID]) VALUES (3215, 2024, N'ADJUSTMENT', 598, N'WEB-2025-06-07', N'Ajuste manual', N'WEB_USER', CAST(N'2025-06-07T20:58:46.8584481' AS DateTime2), NULL)
 SET IDENTITY_INSERT [dbo].[InventoryTransactions] OFF
 GO
 SET IDENTITY_INSERT [dbo].[Products] ON 
@@ -621,13 +865,537 @@ INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description
 INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (16, N'7896557', N'Papel', N'8/11', N'678909', 5, NULL, 1, CAST(N'2025-05-02T15:22:29.9558014' AS DateTime2), NULL, CAST(5.0000 AS Decimal(18, 4)), 14)
 INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (17, N'04091996', N'Pala', N'pala', N'19960904', 1, NULL, 1, CAST(N'2025-05-02T15:30:07.7087858' AS DateTime2), NULL, CAST(120.0000 AS Decimal(18, 4)), 4)
 INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (18, N'516794', N'ESPONJA CON BRILLO DE FREGAR', NULL, N'516794', 2, NULL, 1, CAST(N'2025-05-27T16:44:54.2001743' AS DateTime2), NULL, CAST(3.7300 AS Decimal(18, 4)), 4)
-INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (19, N'7453000908341', N'clip', NULL, N'7453000908341', 6, NULL, 1, CAST(N'2025-05-28T13:34:43.3180936' AS DateTime2), CAST(N'2025-06-02T20:16:57.5508275' AS DateTime2), CAST(3.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (19, N'7453000908341', N'Clips Jumbo', NULL, N'7453000908341', 6, NULL, 1, CAST(N'2025-05-28T13:34:43.3180936' AS DateTime2), CAST(N'2025-06-07T20:51:17.1369125' AS DateTime2), CAST(3.0000 AS Decimal(18, 4)), 4)
 INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (20, N'7453000908389', N'Ganchos Plasticos', NULL, N'7453000908389', 6, N'/uploads/8f07fd3a-d193-42e0-b65c-96cb1e3f5d99.webp', 1, CAST(N'2025-05-28T13:41:06.2438867' AS DateTime2), NULL, CAST(5.9900 AS Decimal(18, 4)), 5)
-INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (21, N'7453015114331', N'Pines', NULL, N'7453015114331', 6, N'/uploads/201d0aed-a626-49d0-aed0-c5d5682c97dd.webp', 1, CAST(N'2025-05-28T14:26:38.1730977' AS DateTime2), NULL, CAST(6.9900 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (21, N'7453015114331', N'Pines', NULL, N'7453015114331', 6, NULL, 1, CAST(N'2025-05-28T14:26:38.1730977' AS DateTime2), CAST(N'2025-06-07T20:26:00.9912706' AS DateTime2), CAST(1.0000 AS Decimal(18, 4)), 4)
 INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (22, N'7453000940396', N'Stickers', NULL, N'7453000940396', 6, N'/uploads/f789d9fa-1c91-4cb1-bff6-ed19f283ca89.webp', 1, CAST(N'2025-05-29T15:31:11.1772863' AS DateTime2), NULL, CAST(0.5000 AS Decimal(18, 4)), 11)
 INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (23, N'0', N'Botella de agua', NULL, N'7453013153462', 13, N'/uploads/b8b45aa2-0500-4775-baf7-833e6fb05a7b.webp', 1, CAST(N'2025-06-04T15:29:21.2048468' AS DateTime2), NULL, CAST(0.9900 AS Decimal(18, 4)), 3)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (31, N'0', N'prubeba', N'prueba', N'866798', 22, NULL, 1, CAST(N'2025-06-06T13:43:22.3709029' AS DateTime2), NULL, CAST(3.0000 AS Decimal(18, 4)), 39)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (32, N'0', N'Cloro', N'Pallet cloro', N'4200557399', 2, NULL, 1, CAST(N'2025-06-06T15:10:26.9533004' AS DateTime2), CAST(N'2025-06-06T15:29:38.7957208' AS DateTime2), CAST(1.0000 AS Decimal(18, 4)), 36)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (34, N'0', N'Pallet Cloro (42x4)', N'pallet cloro 42x4', N'420055739942', 2, NULL, 1, CAST(N'2025-06-06T15:14:32.6689378' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 42)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (35, N'0', N'Detergente en Polvo Verde', NULL, N'6904542109372', 2, NULL, 1, CAST(N'2025-06-06T15:41:14.9917670' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 43)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (36, N'0', N'Detergente en Polvo Azul', NULL, N'019372907268', 2, NULL, 1, CAST(N'2025-06-06T15:42:46.8503343' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 43)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (37, N'0', N'Paño Absorbente', N'Paño Absorbente', N'4200608000', 2, NULL, 1, CAST(N'2025-06-06T15:51:52.6555261' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 7)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (38, N'0', N'Paño de Limpieza', NULL, N'4200607999', 2, NULL, 1, CAST(N'2025-06-06T15:53:17.2227032' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 7)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (39, N'0', N'Escoba tipo cepillo', NULL, N'4200589030', 2, NULL, 1, CAST(N'2025-06-06T15:55:07.6049277' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (40, N'0', N'Toallitas Desinfectante Desechables', NULL, N'019372905486', 2, NULL, 1, CAST(N'2025-06-06T16:03:51.5829059' AS DateTime2), NULL, CAST(0.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (41, N'0', N'Detergente Liquido Dixie', NULL, N'019372905042', 2, NULL, 1, CAST(N'2025-06-06T16:08:31.7533002' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (42, N'0', N'Desodorante Ambiental en Aerosol', NULL, N'27702532370978', 2, NULL, 1, CAST(N'2025-06-06T16:14:40.5036883' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 7)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (43, N'0', N'Desodorante en Pastilla', NULL, N'7451103700022', 2, NULL, 1, CAST(N'2025-06-06T16:16:05.3956745' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (44, N'0', N'Papel Toalla Industrial', NULL, N'088689003079', 2, NULL, 1, CAST(N'2025-06-06T16:22:09.3572683' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 44)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (45, N'0', N'Grapadora Metalica', NULL, N'7453038433846', 6, NULL, 1, CAST(N'2025-06-06T16:34:35.0432240' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (46, N'0', N'Cremora', NULL, N'035406036223', 21, NULL, 1, CAST(N'2025-06-06T16:36:18.1054249' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (47, N'0', N'Azucar Morena', NULL, N'7451022509089', 21, NULL, 1, CAST(N'2025-06-06T16:39:11.6164156' AS DateTime2), CAST(N'2025-06-06T16:39:50.6972789' AS DateTime2), CAST(1.0000 AS Decimal(18, 4)), 45)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (48, N'269521515050000205', N'Revolvedores', NULL, N'4200609319', 21, NULL, 1, CAST(N'2025-06-06T16:43:53.6253595' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (49, N'0', N'Alcohol 16oz', NULL, N'018718700099', 2, NULL, 1, CAST(N'2025-06-06T16:56:08.4531299' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (50, N'0', N'Base para tape', NULL, N'7453015103069', 6, NULL, 1, CAST(N'2025-06-06T16:57:32.3252396' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (51, N'0', N'Papel Blanco 8 1/2x11 500', NULL, N'7501249809902', 4, NULL, 1, CAST(N'2025-06-06T18:42:40.6111783' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 14)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (52, N'0', N'Papel Higienico Industrial Blanco', NULL, N'4200621913', 2, NULL, 1, CAST(N'2025-06-06T18:54:40.7957090' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (53, N'0', N'Jabon Liquido para manos', NULL, N'273471317040300005', 2, NULL, 1, CAST(N'2025-06-06T18:58:57.2774720' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 44)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (54, N'0', N'Limpiador desinfectante desodorante', NULL, N'019372904984', 2, NULL, 1, CAST(N'2025-06-06T20:29:36.3111997' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 36)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (55, N'0', N'Tape Transparente', NULL, N'7453015163537', 6, NULL, 1, CAST(N'2025-06-07T12:55:12.8378556' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (56, N'0', N'Liquido Corrector', NULL, N'7453015107005', 6, NULL, 1, CAST(N'2025-06-07T12:57:11.9865885' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (57, N'0', N'Kit de Marcadores para tablero con borrador', NULL, N'7591213032122', 6, NULL, 1, CAST(N'2025-06-07T12:59:34.4135814' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (58, N'0', N'Te de Canela', NULL, N'7451000701627', 21, NULL, 1, CAST(N'2025-06-07T13:11:05.8467579' AS DateTime2), CAST(N'2025-06-07T13:13:50.2352845' AS DateTime2), CAST(1.0000 AS Decimal(18, 4)), 46)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (59, N'0', N'Tabla Portapapeles', NULL, N'7453015112382', 6, NULL, 1, CAST(N'2025-06-07T13:25:00.6585805' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (60, N'0', N'Abrehuecos Doble', NULL, N'5902687811601', 6, NULL, 1, CAST(N'2025-06-07T13:28:59.6540497' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (61, N'0', N'Tijeras', NULL, N'1000000000000', 6, NULL, 1, CAST(N'2025-06-07T13:30:24.1433912' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (62, N'0', N'Vasos Conicos', NULL, N'2000000', 21, NULL, 1, CAST(N'2025-06-07T13:44:54.8158443' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 44)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (63, N'0', N'Vasos Conicos', NULL, N'20000001', 21, NULL, 1, CAST(N'2025-06-07T13:45:53.1413638' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 44)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (64, N'0', N'Cuchara Chica Plastica Blanca', NULL, N'7451304222897', 21, NULL, 1, CAST(N'2025-06-07T13:51:52.2411562' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 11)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (65, N'0', N'Chuchara Sopera', NULL, N'7451304223153', 21, NULL, 1, CAST(N'2025-06-07T13:52:53.0191600' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 11)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (66, N'0', N'Kit de Cubiertos', NULL, N'7451304223214', 21, NULL, 1, CAST(N'2025-06-07T13:53:46.0750448' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 11)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (67, N'0', N'Papel Toalla', NULL, N'30000000003', 2, NULL, 1, CAST(N'2025-06-07T14:22:31.0145459' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 15)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (68, N'0', N'Papel Bond 8 1/2x11', NULL, N'7453000912607', 4, NULL, 1, CAST(N'2025-06-07T14:24:14.3447059' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 14)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (69, N'0', N'Te de Sabores Variados', NULL, N'7451000700453', 21, NULL, 1, CAST(N'2025-06-07T14:37:49.6876117' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 46)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (71, N'0', N'Cafe Molido Negro', NULL, N'7451000702013', 21, NULL, 1, CAST(N'2025-06-07T14:40:53.5416687' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (72, N'0', N'Jabon Tocador', NULL, N'4000000004', 2, NULL, 1, CAST(N'2025-06-07T14:49:55.0807562' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 7)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (73, N'0', N'Folder Manila 8 1/2 x 11', NULL, N'7453000904732', 8, NULL, 1, CAST(N'2025-06-07T15:05:26.3545880' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (74, N'269141215040000032', N'Papel de Embalar', NULL, N'7453000959008', 25, NULL, 1, CAST(N'2025-06-07T15:10:17.7113219' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (75, N'0', N'Papel Toalla Absorbente', NULL, N'088689002621', 2, NULL, 1, CAST(N'2025-06-07T15:25:21.7838433' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 45)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (76, N'0', N'Platos Plasticos', NULL, N'70000007', 21, NULL, 1, CAST(N'2025-06-07T20:05:01.1603062' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 11)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (77, N'0', N'Resaltadores Verdes', NULL, N'7453038413497', 6, NULL, 1, CAST(N'2025-06-07T20:06:00.6108172' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (78, N'0', N'Resaltadores Naranjas', NULL, N'7453010008628', 6, NULL, 1, CAST(N'2025-06-07T20:06:37.1595211' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (79, N'0', N'Resaltador Verde Delgado', NULL, N'0638126959621', 6, NULL, 1, CAST(N'2025-06-07T20:07:03.9857923' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (80, N'0', N'Bolígrafo Rojo', NULL, N'600000006', 6, NULL, 1, CAST(N'2025-06-07T20:07:40.5141984' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (81, N'0', N'Boligrafo Azul Punta Bola', NULL, N'7453000935521', 6, NULL, 1, CAST(N'2025-06-07T20:08:24.7599573' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 7)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (82, N'0', N'Clip Sujeta Papel 33mm', NULL, N'7453015103441', 6, NULL, 1, CAST(N'2025-06-07T20:09:09.2493885' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 5)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (83, N'0', N'Notas Adhesivas de Colores 3x3', NULL, N'0040962166796', 6, NULL, 1, CAST(N'2025-06-07T20:09:39.7932068' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (84, N'0', N'Binder Clip 3/4', NULL, N'7591213014302', 6, NULL, 1, CAST(N'2025-06-07T20:12:42.9954089' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (85, N'0', N'Binder Clip 15mm', NULL, N'6935003520931', 6, NULL, 1, CAST(N'2025-06-07T20:18:49.0731381' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 46)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (86, N'0', N'Binder Clip Metal 25mm', NULL, N'7453010000356', 6, NULL, 1, CAST(N'2025-06-07T20:19:29.3003761' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 46)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (87, N'0', N'Binder Clip Metal 51mm', NULL, N'7453010035082', 6, NULL, 1, CAST(N'2025-06-07T20:20:06.7407930' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 46)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (88, N'0', N'Sobre Manila 9x12', NULL, N'80000008', 6, NULL, 1, CAST(N'2025-06-07T20:21:12.1603379' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (89, N'0', N'Goma Liquida', NULL, N'692734973023', 6, NULL, 1, CAST(N'2025-06-07T20:22:06.9043040' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (90, N'0', N'Reglas Plásticas Transparentes', NULL, N'900009', 6, NULL, 1, CAST(N'2025-06-07T20:22:41.6818778' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 11)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (91, N'0', N'Porta Lapices', NULL, N'7453015120523', 6, NULL, 1, CAST(N'2025-06-07T20:23:33.8441733' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (92, N'0', N'Calculadoras', NULL, N'6945647978371', 6, NULL, 1, CAST(N'2025-06-07T20:23:53.9133863' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (93, N'0', N'Perforadora 3 huecos', NULL, N'10100000101', 6, NULL, 1, CAST(N'2025-06-07T20:24:19.6014289' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (94, N'0', N'Saca puntas de metal', NULL, N'7591213019499', 6, NULL, 1, CAST(N'2025-06-07T20:24:42.2597058' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (95, N'0', N'Tabla de Inventario 8 1/2 x 11', NULL, N'6921734992260', 6, NULL, 1, CAST(N'2025-06-07T20:26:34.9699148' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (96, N'0', N'Tinta para sello color rojo', NULL, N'7501015201671', 6, NULL, 1, CAST(N'2025-06-07T20:27:01.3631914' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (97, N'0', N'Dispensador de Clip', NULL, N'7453015100631', 6, NULL, 1, CAST(N'2025-06-07T20:27:33.9509303' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (98, N'0', N'Limpiador de vidrio liquido', NULL, N'7451100250711', 2, NULL, 1, CAST(N'2025-06-07T20:28:22.9349941' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 7)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (99, N'0', N'Detergente para Lavar Vajilla', NULL, N'0019372905042', 2, NULL, 1, CAST(N'2025-06-07T20:39:05.7235293' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 4)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (100, N'0', N'Resaltador Amarillo Punta Biselada', NULL, N'500000005', 6, NULL, 1, CAST(N'2025-06-07T20:44:02.5277186' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 44)
+INSERT [dbo].[Products] ([ProductID], [InternalSKU], [ProductName], [Description], [Barcode], [CategoryID], [ImageURL], [IsActive], [CreatedDate], [ModifiedDate], [Cost], [UnitID]) VALUES (101, N'0', N'Boligrafo Negro', NULL, N'7453015142990', 6, NULL, 1, CAST(N'2025-06-07T20:48:54.5408668' AS DateTime2), NULL, CAST(1.0000 AS Decimal(18, 4)), 7)
 SET IDENTITY_INSERT [dbo].[Products] OFF
 GO
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501015380003832', N'AJO MOLIDO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501015380005315', N'VERDURAS FRESCAS LECHUGA ROMANA NACIONAL', NULL, N'KG')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501016340001515', N'FRUTA FRESCA PASITAS', NULL, N'KG')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501016340010717', N'PIÑA EN REBANADAS', NULL, N'LTA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501317010020017', N'LECHE CONDENSADA', NULL, N'LTA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501317010050032', N'LECHE CREMORA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501317010060032', N'LECHE CREMORA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501317010140717', N'LECHE EN POLVO INSTANTANEA 360GR', NULL, N'LTA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501317012000632', N'LECHE EVAPORADA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501317030010014', N'HELADO', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501317030031205', N'MANTEQUILLA SIN SAL DE 227 GRS.', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501317030050032', N'MARGARINA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501318020110015', N'QUESO FETA', NULL, N'KG')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501318020190015', N'QUESO PARMESANO', NULL, N'KG')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501318020280115', N'QUESO GRUYERE', NULL, N'KG')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501515134000219', N'ACEITE VEGETAL 2.5', NULL, N'L')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501615090000002', N'AZUCAR MORENA 1 LIBRA', NULL, N'BTO')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501615090001523', N'AZUCAR', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501715510000023', N'SAL', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501715520040023', N'OREGANO', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501715520040032', N'OREGANO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501715520132723', N'LEVADURA INSTANTANEA', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501715520133323', N'PASTA SECA LASAÑA', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501715520133732', N'QUESO MOZARELA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501715520133923', N'SAZONADOR DE ARROZ', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501717070000004', N'VINAGRES', NULL, N'LC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501717070010104', N'VINAGRE BLANCO', NULL, N'LC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501718300000214', N'MOSTAZA', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501718300000232', N'MOSTAZA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501718300010032', N'SALSA DE TOMATE - KETCHUP', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501718300030411', N'MAYONESA', NULL, N'FRC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501718310000117', N'PASTA DE TOMATE', NULL, N'LTA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501719010000523', N'GUISANTES CONGELADOS 500 GRS.', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501719020000432', N'SALSA DE SPAGUETI', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501719020010504', N'SALSA INGLESA 24 OZ', NULL, N'LC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501719020090423', N'SALSA DE TOMATE CON HONGOS 227GR.', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501719030001319', N'ACEITE', NULL, N'L')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501719030001332', N'ACEITE VEGETAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501719030002032', N'ACEITUNAS VERDES ENTERAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000103732', N'HARINA SUAVE 25 LB', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000110115', N'MARGARINA SIN SAL', NULL, N'KG')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000118423', N'AJONJOLI 14 GRAMOS', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000119123', N'ARROZ EN GRANO LARGO 5 LIBRAS', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000119323', N'AZUCAR MICROPULVERIZADA DE 454 G', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000123217', N'LECHE EVAPORADA', NULL, N'LTA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000123519', N'LECHE TETRA PACK', NULL, N'L')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000123623', N'LEVADURA INSTANTANEA 125 GRAMOS', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000124623', N'PAN MOLIDO', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000125217', N'PASTA DE TOMATE 178 GRAMOS', NULL, N'LTA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000125623', N'PIMIENTA NEGRA MOLIDA', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000126623', N'TOMILLO 13 GRANOS', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000127317', N'ACEITUNAS NEGRAS', NULL, N'LTA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000132132', N'HARINA SUAVE 25LBS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501900000138732', N'HARINA DE TRIGO TODO USO 25 LIBRAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501921110086015', N'JAMON AHUMADO', NULL, N'KG')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501921110086115', N'TOCINO AHUMADO', NULL, N'KG')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201501924010040123', N'MERMELADA DE PIÑA 400 GR', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502017060000523', N'CAFE', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502017060000732', N'CAFE MOLIDO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502017060000932', N'CAFE REGULAR 425 GR.MEZCLA ARABICA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502017100000005', N'TE SURTIDOS', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502017110000205', N'TE DE CANELA', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502017110040032', N'TE SABORES VARIADOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502017130000105', N'TE VARIADO', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502017130000305', N'TE NEGRO', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502017140000002', N'CREMA PARA CAFE', NULL, N'BTO')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502023110020523', N'PEPITA DE MARAÃ‘ON', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502210010010032', N'POROTOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502210010020032', N'LENTEJAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502210010040023', N'ARVEJAS', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502211020000832', N'POLVO DE HORNEAR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502211020020032', N'HARINA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201502212010010032', N'HOJUELA DE MAIZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'201771115070000023', N'FINAS HIERVAS DE 10 GR', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'202101218020003832', N'CASCARILLA DE ARROZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'202501924030000033', N'MELAZA', NULL, N'BID')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'203502023010020032', N'AGUA 16 ONZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'203502023010020132', N'AGUA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'203502023010100032', N'BOTELLAS DE AGUA PURIFICADA 16 OZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'203502023010100132', N'BOTELLA DE AGUA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'203502023010110032', N'AGUA EN BOTELLA L DE 24/ UNIDAD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'203502023010270032', N'GARRAFON DE AGUA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'203502023060000005', N'SODA', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'203502023060080332', N'SODA DE LATA SABOR A NARANJA DE 354 ML.', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'211301617010002232', N'TOALLITAS PARA LIMPIEZA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'211311515060020027', N'SOGA COLOR CREMA', NULL, N'ROL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'211521215000100032', N'JUEGOS DE SABANAS 3/4 100% DE ALGODON', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'211521215050000032', N'ALMOHADA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'211521215090000832', N'JUEGO DE SABANA 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'211521217010000032', N'TOALLAS DE BAÑO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'211999937501030001', N'LIJAS DE TELA PARA PLOMERIA #100', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111500000001605', N'HILO DE BORDAR NEGRO', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111500000004005', N'HILO DE BORDAR COLOR MATIZADO', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517020400032', N'CONOS DE HILOS DE COSER', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517030105837', N'TELA DE SATIN DE SEDA AMARILLO', NULL, N'YD')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517030105937', N'TELA DE SATIN DE SEDA AZUL', NULL, N'YD')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517030106037', N'TELA DE SATIN DE SEDA NARANJA', NULL, N'YD')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517030106137', N'TELA DE SATIN DE SEDA ROJA', NULL, N'YD')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517030106237', N'TELA DE SATIN DE SEDA ROSADA', NULL, N'YD')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517030106337', N'TELA DE SATIN DE SEDA VERDE', NULL, N'YD')
+GO
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517030106937', N'TELA POPLIN DE 60 BLANCA', NULL, N'YD')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517030107137', N'TELA WALL BLANCA', NULL, N'YD')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213111517150120027', N'TELA CRINOLINA', NULL, N'ROL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'213601219000102037', N'TELA DE POPLIN COLOR BLANCO', NULL, N'YD')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'222151115070000232', N'RELLENO DE GAS DE 100 LBS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'222422717010200232', N'RELLENO CILINDRO GAS OXIG 200 P3', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'222422717010200432', N'RELLENO CILINDRO GAS ARGON 240 P3', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'222422717010200732', N'RELLENO CILINDRO GAS OXIG. 220- P3', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'222491215090100932', N'TANQUE CAMPINGAS DE 1 LB', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'231141115310100032', N'LIBRO RECORD 150 PAG', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'231141115310300132', N'LIBRO RECORD 500 PAG TAMAÑO 7X10 7/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115000002132', N'PAPEL DE BARBERO PARA PROTEGER CUELLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115000003127', N'ETIQUETAS C/LOGO DE INADEH', NULL, N'ROL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115000003205', N'PAPEL CONTINUO 14 7/8 X 11BLANCO 1 PARTE', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115000003332', N'PAPEL CONTINUO 14 7/8X11 BLANCO 3 PARTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115000003432', N'PAPEL CONTINUO 14 7/8X11 BLANCO 4 PARTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115070000326', N'PAPEL BOND ROSADO 8.5 X 14 20 LBS', NULL, N'RES')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115150100027', N'PAPEL P/SUMADORAS', NULL, N'ROL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115250000626', N'PAPEL BOND 20 LB 8 1/2 X 11', NULL, N'RES')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115250010126', N'PAPEL BOND CELESTE 8 1/2 X 11', NULL, N'RES')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115250311626', N'PAPEL BOND 8 1/2 X 11', NULL, N'RES')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115252200126', N'PAPEL MULTIPROPOSITO 8 1/2X 14 20 LBS', NULL, N'RES')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115253000026', N'PAPEL BOND 8 1/2 X 14', NULL, N'RES')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141115253001926', N'PAPEL MULTIUSO BLN 8 1/2X13', NULL, N'RES')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232141218120000223', N'PAPEL FOTOGRAFICO 8.5*11', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232312015150000132', N'CARTAPACIO DE 8 1/2x11 CADA CJA DE 100', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232412150600000232', N'SOBRE MANILA 15X18', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232412150600000432', N'SOBRES DE MANILA 10 X 13', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232412150600000632', N'SOBRES DE MANILA 7 1/2 X 10 1/2 DE 24 LB', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441035020010932', N'CUBIERTA P/ENCUADERNAR TRANSPARENTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441215060000132', N'SOBRE MANILA 9X12', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441215060001205', N'SOBRES MANILA 11 1/22 X 14 1/2 DE 24 LB', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441215060002632', N'SOBRE DE MANILA 10 X 13', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441215060100032', N'SOBRES MANILA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441215060315032', N'SOBRES DE MANILA 10X13 24 LIB', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441215060912832', N'SOBRES BLANCO NO.10', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441215171701032', N'SOBRE MANILA 6X9', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441220110000332', N'CARTAPACIO FOLDER 8 1/2X11', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441220114900105', N'CARTAP/FOL/ MAN/ TAMAÑO CARTA 8 ½ X 14', NULL, N'CA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441220114901305', N'CARTAP/FOL/MAN/TAMAÑO CARTA 8 ½ X 11', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441220115200032', N'CARTAPACIO O FOLDER MANILA TAMAÑO CARTA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441220200001132', N'FOLDER', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441220200206005', N'FOLDER TAMAÑO CARTA MANILA', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232441220200306032', N'FOLDER TAMAÑO LEGAL MANILA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232551015090000032', N'LIBRO RECORD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232551015090000132', N'LIBRO RECORD 150 PAGINAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232551015090000332', N'LIBRO RECORD DE 500 PAGINAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232551216140101332', N'QUITA Y PON COLOR NEON 2 7/8 X2 7/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232601211050010005', N'PAPEL CARBON 8 1/2 X 11', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232601211050020105', N'PAPEL CARBON 8 1/2 X 13', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'232821215070006832', N'SOBRE DE MANILA 15X18', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239141117030040332', N'PAPEL TOALLA FINO, ULTRA ABSORBENTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239391213100000132', N'CAJA DE ARCHIVO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239422818099000732', N'SERVILLETAS CHICAS DECORADAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239441035020183005', N'CUBIERTAS D/ENCUAD AZUL', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239441035022170205', N'CUBIERTA P/ENCUADERNAR 8 1/2 X11 COL/NE', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239441220110001005', N'FOLDER 8 1/2 X 11', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239441220110001305', N'FOLDER 81/2 X 14', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239441220110010132', N'CARPETA PORTAFOLIO DE CARTONVYNIL AZUL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239521216020010023', N'SERVILLETAS TIPO COCKTAIL', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239531217040000032', N'BINDING CASE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239601211340070002', N'PAPEL TOALLA', NULL, N'BTO')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239999937501040040', N'PAP HIG 1000 HOJAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239999937501040041', N'SERVILLETAS TIPO DISPEN/BLAN. 6.5""X12.5""', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239999937501040044', N'DIVS P/ PORTF AMA C/ PSTÑ', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239999937501040045', N'CARPETA COLGANTE TAM CARTA AMPO', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239999937501040047', N'BINDING CASE N° 51', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'239999937501040052', N'LIMA RECTA', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242101717010004632', N'CYBOR 10EA ENVASE DE 250ML', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242101915090000232', N'INSECTICIDAS EN AEROSOL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242101915090003332', N'INSECTICIDA NEEMCIDE DE UN LITRO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242121619020000232', N'JABON EN POLVO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242121619020000532', N'DETERGENTE EN POLVO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242273521210000632', N'CLEAN DE AMONIO DESINFECTANTE AL 0.3%', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242422816040000732', N'DESINFECTANTE EN AEROSOL DE 12 OZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242422817050000132', N'DETERGENTE EN POLVO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242422817050001032', N'DETERGENTE LIQUIDO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242471318050000135', N'DESODORANTE AMBIENTAL EN AEROSOL', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242471318050000232', N'LIMPIADOR DESINFECTANTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'242471318050110132', N'LIMPIADOR MULTIPROPOSITO/ORIGINA/ELIMIN', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244101113050100032', N'PECUTRIN VIT', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244101915000000032', N'AMIBAÑO 12.5% USO VETERINARIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244421216000000105', N'DERMOLAN EN PASTA 90GR', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244421216000021132', N'INVERMECTINA AL 3.15% INYECT. DE 50CC', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244421216000021432', N'BETAMETASONA INYECTABLE FRC. DE 20ML', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244421216000022632', N'VACUNA CONTRA VIRUELA FC. DE 100 DOSIS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244421216000022732', N'VACUNA NEWCASTLE FCO. DE 100 DOSIS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244421216000023332', N'ANTICOCCIDIAL DE 15 GR.', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244421216000024111', N'FORFLOX MISCELA', NULL, N'FRC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244421216000024211', N'ENROFLOXACINA 10% EN 250ML', NULL, N'FRC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244511027220100032', N'YODO PLUS GLN', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'244511919050200032', N'PIPERAZINA PARA CONTROL DE GUSANOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249121419040000932', N'OXIGENO INDUSTRIAL 200 PIES CUBICOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249123521040000532', N'ALCOHOL 16OZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249123521040001632', N'GEL TRANSPARENTE 1 OZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249251740040001932', N'REFRIGERANTE R290A-25LB', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249251740040003532', N'REFRIGERANTE R-134A 30 LIBRAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249251740040100332', N'REFRIGERANTE R 22 DE 30 LBS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249251740043000432', N'REFRIGERANTE R-404A 24 LBS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249252015000000035', N'JABON DE TOCADOR', NULL, N'DOC')
+GO
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249312117040000014', N'SELLADOR', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249422816040400014', N'KANGARU', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249422816040500132', N'DESINFECTANTE LIQUIDO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249422817050020032', N'JABON EN LIQUIDO ANTISEPTICO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249422817050020132', N'DETERGENTE JABON LAVA PLATOS LIQUIDO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249471015050103114', N'CLORO HIPOCLORITO DE 5.25%', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249471015050103132', N'CLORO HIPOCLORITO DE 5.25%', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249471318030100514', N'CLORO HIPOCLORITO DE SODIO AL 5.25%', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249471318050000214', N'LIMPIADOR DESINFECTANTE DESODORANTE', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249471318050080105', N'DESODORANTE AMBIENTAL EN AEROSOL C/12 UN', NULL, N'CA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249471318050080732', N'DESODORANTE AMBIENTAL EN SPRAY', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249471318050100032', N'DESODORANTE EN PASTILLA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249471318160000014', N'DESINF. DESODOR. GERMIS/AMONIO/CUAT/LIQ', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249512412250000023', N'ALCANFOR', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249512412250000123', N'ALCANFOR', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040021', N'PEGAMENTO PVC', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040055', N'LIMPIADOR DE BAÑOS PARA INODORO Y URINAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040056', N'TINTA PARA SELLO COLOR AZUL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040058', N'CERA CUENTA FÁCIL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040059', N'GOMA SEMI-LÍQUIDA TRANSPARENTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040060', N'GOMA BLANCA SEMI LIQUIDA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040062', N'TINTA SELLO ROLL ON ROJA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040063', N'CINTA P/IMPRE CANON AP11', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040064', N'TINTA (REFIL) DE AGUA PARA MARCADOR/NEGR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040065', N'TINTA (REFIL) DE AGUA PARA MARCADOR/AZUL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040066', N'TINTA (REFIL) DE AGUA PARA MARCADOR/ROJO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040067', N'TINTA (REFIL) DE AGUA PARA MARCADOR/VERD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040068', N'CORRECTOR LIQUIDO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040069', N'RELLENO D/TINTATIPO GOTERO COL/ROJ AUT', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040070', N'RELLENO D/TINTATIP GOTERO COL AZU AUTO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040071', N'RELLENO D/TINTATIP GOTER COL NEG AUTO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'249999937501040072', N'COLA BLANCA', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'253111216040602432', N'PELDAÑO PARA ACCESO A CAMILLA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'253111216090011532', N'PLYWOOD 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254201424021103932', N'FERRETERIA DE FREGADOR DOBLE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254231715090030027', N'SOLDADURA ESTAÑO 50/50 ( ROLLO)', NULL, N'ROL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254241118120040032', N'FREGADOR DOBLE INOXIDABLE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254301517000001132', N'PARRILLA BAÑO PVC 2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254301815010010032', N'TINA DE CEMENTO DOBLE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254301815040000032', N'LAVAMANOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254301815040000432', N'FERRETERIA DE INODORO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254301815040040032', N'LAVAMANOS CON PEDESTAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254312313130006832', N'TUBERIA 1/2X20 GALV. C/R', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254312313130011232', N'TUBERIA DE PVC 3/4 X 20', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254312313130011932', N'TUBERIA DE PVC 2 1/2X20', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254312313130110932', N'TUBERIA PVC ACUEDUCTO CAL.40 2X20', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401416060000432', N'KORKY', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401417020211232', N'LLAVE DE LAVAMANO SENCILLA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401419010000132', N'MANGUERA DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401421000102032', N'MANGUERA DE ABASTO PARA INODORO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401421150009032', N'TEE DE COBRE 1 1/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401423000502132', N'RED TEE 4X1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401423050013332', N'TUBERIA GALVANIZADA C/ROSCA 1/2X30', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401423050013432', N'TUBERIA GALVANIZADA DE 1 C/R', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401423200001132', N'GLANDULA GALVANIZDA DE 2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401423200131132', N'TEE DE COBRE DE 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040000432', N'CODO 2 X 45', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040008332', N'ADAPTADOR DE 1/2 PVC - CAL-40', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040008432', N'ADAPTADOR DE 3/4 PVC - CAL-40', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040008532', N'CODO DE 90º GALVANIZADO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040008632', N'CODO DE COBRE DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040008732', N'CONEXION DE 1/2 DE COBRE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040008832', N'FERRETERIA PARA TINA DE LAVAR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040008932', N'LLAVE DE MANGUERA DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040009032', N'TEE DE 1/2 GALVANIZADA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040009132', N'TUBERIA GALVANIZADA DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040009232', N'TUBIN 3/4 C/R', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040009332', N'YEE DE PVC DE 2 DE 1 A 1', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040009432', N'YEE DE PVC DE 2 DE 1 A 2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040043432', N'CODO DE COBRE DE 1', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426040416532', N'CODO DE COBRE 1/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426042203532', N'UNION DE COBRE DE 2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426042203632', N'UNION DE COBRE DE 1 1/ 2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254401426050007532', N'TUBO 1 1/2X1.05 ML', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254461715050050932', N'LLAVE DE ANGULO 3/8 X 1/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254721023000006232', N'DUCTOS PLASTICOS DE 40 X 40 DE 6 PIES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'254721023000010332', N'DUCTOS PLASTICOS 50X50 DE 6 PIES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255241124060000332', N'CAJA OCTAGONAL DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261000000000932', N'DECODIFICADOR MOD.74LS47', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261000000002932', N'CAPACITOR 50V. 0.1 MICRO FARADIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261000000005232', N'CONECTORES MACHO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261000000007532', N'INTEGRADO 555', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261000000017632', N'DIMMER 120V 15 AMP', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261000000020932', N'CAPACITADOR MOD 50V 4.7 MICRO FARADIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261000000021032', N'CAPACITADOR DE CERAMICA MOD. 1 NANO MF', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261000000021332', N'DIODO MOD.4002/N4002/1N4002', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000101132', N'CABLES ELECTRICOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000102232', N'AISLANTE PLASTICO ESPIRAL DE 10M', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000102332', N'BOTONERAS DE DOS FUNCIONES 250V 5A', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000102432', N'CONTACTORES MAGNETICOS DE 2 POLOS 125V', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000102832', N'DIVISIONES ELECT MOLDURAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000102932', N'ELECTRODO PARA BOQUILLA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000103027', N'ELECTRODO PLASMA O CORTADORA P/PLASMA', NULL, N'ROL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000103132', N'MOLDURA IVORY V211', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000103432', N'SPAGUETI Nº. 4-200', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000103532', N'SPAGUETI Nº. 8-200', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215000103632', N'UNION ELEC. EMT DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215050000218', N'ALAMBRE DULCE Nº 16', NULL, N'LB')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215220000527', N'ALAMBRE #14 ROJO SOLIDO', NULL, N'ROL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261215240012532', N'TRANSISTOR BD135', NULL, N'C/U')
+GO
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261216130001934', N'SPAGUETTIS O AISLAMIENTO ELECTRICO', NULL, N'TF')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255261216160000032', N'CABLE DE DATA CATEGORIA 5-6 PARA LED', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255301024010021332', N'BARRA DE GROUND 3/8 X 5', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255312312100100332', N'TUBING ELECTRICO 3/4 X 10 GALVANIZADO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255312615020101332', N'INTERRUPTOR 4 VIAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255312615021160032', N'CAJILLA REDONDA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255312615023390032', N'TAPA INTERRUPTOR SENCILLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255321115030003532', N'LAMPARA CON SENSOR DE MOVIMIENTOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255321216090000632', N'FOTOCELDA DE 120 V', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255321410160003432', N'PVC ELECTRICO 1 1/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391016120000732', N'FOCO DE 60 WATTS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391117040300132', N'LAMPARA FLUORECENTE DOBLE DE 32W', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391118000001832', N'INTERRUPTORES DE 3 VIAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391118000003732', N'INTERRUPTOR DE 60 AMP 2 POLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391118000006432', N'INTERRUPTOR DE 30 AMP 3 POLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391118000405032', N'INTERRUPTOR SENCILLO 120V/15AMP', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391118001309032', N'INTERRUPTOR SENCILLO SILEN 15A 120V', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391210090200032', N'REGULADOR DE VOLTAJE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391214020002632', N'TOMACORRIENTES 220VOLTIOS SENCILLO P/CAJ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391214020240432', N'CONECTOR IVORY V5785', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391214021060032', N'TOMACORR SENC 110V-125V15AMP', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391214090000332', N'CONECTORES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391214090070532', N'CONECTOR ELECTRICO DE 4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391214090170132', N'CONECTORES PARA CABLE DE METAL 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391214090200532', N'CONECTORES DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391214340101832', N'TIPO DE ENTRADA DE 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391214340109532', N'RESISTENCIA DE 10 0HM', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391215020011432', N'SWITCH INTERRUPTOR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391215020011532', N'SENSOR DE ALTA PRESION', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391215020011632', N'SENSOR DE BAJA PRESION', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391215110000132', N'INTERRUPTOR BLANCO 15 AMP 125 VOLTIOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391215110000932', N'INTERRUPTOR BIPOLAR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391215120300132', N'BOTONERA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391215140003032', N'RELEVADOR TERMICO 17 A 25 AMPERIOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391216011000832', N'BRAKE DE SEGURIDAD PRINCIPAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391217030000932', N'TAPON PARA EMPALME ROJO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391217030001032', N'TAPON PARA EMPALMEAMARILLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255391217050100632', N'GRAPA PARA TUBERIA 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255401416060100032', N'CONECTORES PVC 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255432014100020932', N'MICRO SWITCH', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255601049000000232', N'COUPLING EMT 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255601049000029932', N'ESQUINERA IVORY V517', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255601049120000627', N'CABLE #16 NEGRO DE 500 PIES', NULL, N'ROL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255601049120040032', N'CABLE ELECTRICO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'255601049120041234', N'CABLE NEGRO # 14', NULL, N'TF')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256111017040000732', N'ABRAZADERAS DE METAL 04 ACERO CARBON B', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256111017040501632', N'ANGULO DE ALUMINIO DE 2 X 1/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256111017040501732', N'TORNILLOS # 8 DE 1/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256111017040501832', N'TORNILLO GALVANIZADO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256111017040501932', N'TUBO DE 1/2 GALVANIZADO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256111017040502032', N'TUBO DE 1 1/2 GALVANIZADO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256111017040502132', N'TUBO DE 3/4 C/ROSCA GALVANIZADO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256261215001002334', N'ALAMB CUADR PARA COLAR ARENA 1/12 “ X 36', NULL, N'TF')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256271121030100832', N'ABRAZADERA DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256271121200000023', N'GRAPAS C', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256301023040103032', N'RIEL PARA PUERTA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256301024040003032', N'VARILLAS DE ACERO 3/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311600000000832', N'BISAGRA DE 3 X 3', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311600000000932', N'BISAGRAS DE 2 1/2 X 2 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311615000300032', N'TORNILLOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311615000400105', N'CAJA DE TORNILLOS', NULL, N'CA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311615002000032', N'TORNILLO TRASERO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311615040005932', N'TORNILLO DE 3/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311615090000823', N'TORNILLO GYPSUM DE 3', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311616180030032', N'BARRA ROSCADA 3/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311617000100132', N'TUERCA DE BRONCE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311624030000032', N'BISAGRA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311624040101232', N'GRAPAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311626000000023', N'GANCHO ACERO INOX. EN FORMA DE S', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311628020000332', N'GRILLETE DE SEGURIDAD AZUL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311628020000432', N'TUBO EXTENSOR PARA TRUSS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256311632110205032', N'GRAPA P/BARRA DE GROUND 3/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256312313080101132', N'TUBERIA RIG. GALVAN. 1/2X20', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256312313101000432', N'TUBO REDONDO GALVANIZADO D/ 1', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256312313110007232', N'TUBO 3/4X20 PVC CAL.40 (TRAMO)', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256313311010000832', N'ESTRUCTURA METALICA TRUSS DE 3MTS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256313311010000932', N'ESTRUCTURA METALICA TRUSS DE 2MTS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256313311010001032', N'CONEXION PREMONTADA ESTRUCTURA METALICA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256313311010001132', N'BASE DE ACERO 30-40 800X10MM', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256401419010400232', N'TUBING DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256401423050000632', N'REDUCION BUSHING', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256401423060000132', N'ASIENTO DE LLAVE DE BAÑO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256401423200000832', N'ANGULO DE 2 1/2 X 2 1/2 X 3/8 X 20''', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'256721026020000132', N'OPERADOR DE VENTANA ALUMINIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259111621070100132', N'TAPE ELECTRICO GUTAPERCHA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259231315000000532', N'BARRA DE GOMA CALIENTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259231715020102532', N'PASTA TERRACOTA P/ MOLDEAR DE 500 GRAMOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259231715090200532', N'SOLDADURA CON NUCLEO DE RESINA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259311615030000632', N'TACO PLASTICO 5/16 X 2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259311615030300032', N'TACOS ESPANCION 1/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259311615080000632', N'RABO DE CARGA DE 1/4 DE COBRE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259312016034400303', N'PEGAMENTO GRIS PARA PISO', NULL, N'BOL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259401426060100732', N'UNION DE 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259601049120030532', N'ELECTRODO DE TUGSTENO 3/32X7 TRORIATED', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259601049120030632', N'ELECTRODO DE TUGSTENO 3/32X8 PURE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259999937501040050', N'TRANSFORMADOR DE AUDIO 120C 60HZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'259999937501040052', N'UNION 5/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262201214000001232', N'MANGOS PARA LIMAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262201214000001332', N'PIEDRA PARA CHISPERO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262201214000020732', N'PISTOLA CHICA DE GOMA CALIENTE', NULL, N'C/U')
+GO
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262201214000022032', N'TIJERAS PEQUEÑAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262201214000023732', N'BROCAS DE 1/4X4 CONCRETO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262201214000036132', N'ALICATE PROFESIONAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262201214000040932', N'PISTOLAS DE GOMA DELGADAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262201214000041632', N'TIJERA TAMAÑO NORMAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262201215050100132', N'SACA BOCADO DE 1/2 A 1 1/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262231315072140032', N'LIJA DE MADERA N°80', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262231315072150032', N'LIJA PARA MADERA N°40', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262231516070000032', N'PRENSA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262231516070200932', N'TERRAJA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262231518200000232', N'MANOMETRO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262231715150001132', N'BROCAS DE 1/32', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262231716000000732', N'BROCA DE CONCRETO DE 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262231716030000032', N'CORTADOR DE TUBO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262231716110000032', N'BERBIQUI', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271115040000032', N'NAVAJA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271115060100232', N'CIZALLA PARA CORTAR CABLE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271116026030532', N'MARTILLO 16 OZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271117161000832', N'JUEGOS DE MACHOS DE 1/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271117161000932', N'JUEGOS DE MACHOS DE 5/32', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271117260500432', N'LLAVE L HEX LARGA 5/16', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271118020010332', N'NIVEL D/ALUMINIO 24', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271119020000332', N'LIMA TRIANGULAR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271120030050032', N'RASTRILLOS DE PLASTICO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271120040100132', N'PALA MAD CORTO CUADRADA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271121120000732', N'PINZA OVALADA O PICO DE LORO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271121120020032', N'PINZA PICO DE LORO DE 12', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271121120100032', N'PINZA DE CORTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271122010100032', N'PALAUSTRE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271122020010132', N'FLOTA MADERA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271122020110132', N'LLANA METAL LISA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271126020000032', N'CINCEL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271126020080332', N'CENTRO PUNTO DE 1/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262271128010000132', N'JUEGO DE BROCAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262312119040000032', N'BROCHAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262312119040030032', N'BROCHAS 2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262401417420000532', N'ATOMIZADOR PLASTICO 16 OZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262401424090000132', N'BOQUILLA DOBLE PARA SOLDAR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262401515190002332', N'DESTAPADOR DE INODORO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262441216180000132', N'TIJERA DE JARDIN', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262441216180200232', N'TIJERA DE 8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'262601315090000032', N'BOQUILLAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'263391217190000832', N'CASCO DE SEGURIDAD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'263461815020000832', N'CHALECO DE SEGURIDAD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'263461815070000005', N'CHALECO REFLECTIVO', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'263461817010000032', N'CASCO DE SEGURIDAD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'263461819011000024', N'PROTC OIDTAPON AUD', NULL, N'PAA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'263531025040110124', N'GUANTES DE CAUCHO', NULL, N'PAA')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'265432014020704532', N'MEMORIA DE 64 GB', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'265432117080001232', N'CABLE USB 2.0 A-B M/M 6FT INF', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'265432117080011032', N'MOUSE OPTICO USB', NULL, N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101015060000232', N'INDUMENTARIAS PARA CABALLOS', N'INDUMENTARIAS PARA CABALLOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101113010000132', N'KONG BOLAS CON PITO', N'KONG BOLAS CON PITO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101113060000132', N'AHORCADOR DE PERROS', N'AHORCADOR DE PERROS', N'C/U')
@@ -677,6 +1445,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101316030004532', N'LIMA MEDIA LUNA 150/150 PARA U­AS', N'LIMA MEDIA LUNA 150/150 PARA U­AS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101316030004632', N'GUILLOTINA DE COLORES PARA U­AS', N'GUILLOTINA DE COLORES PARA U­AS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101316030004732', N'SET DE PINCEL PARA DIBUJOS DE U­AS', N'SET DE PINCEL PARA DIBUJOS DE U­AS', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101316030004832', N'U­AS NATURALES X 500', N'U­AS NATURALES X 500', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101316030004932', N'U­AS SONRISA TRANSPARENTE X 500', N'U­AS SONRISA TRANSPARENTE X 500', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101316030005005', N'U­AS NATURAL CAJA DE 100 UND', N'U­AS NATURAL CAJA DE 100 UND', N'CJ')
@@ -728,7 +1497,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070001423', N'HUECITO DE BOLSA DE 2 ONZA', N'HUECITO DE BOLSA DE 2 ONZA', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070001523', N'ESCARCHA VERDE', N'ESCARCHA VERDE', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070001532', N'HOJA DE AFEITAR DOBLE FILO', N'HOJA DE AFEITAR DOBLE FILO', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070001535', N'COLLAR DE ARROZ BLANCO 6X14', N'COLLAR DE ARROZ BLANCO 6X14', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070001623', N'CHAQUIRA COLOR NEGRO', N'CHAQUIRA COLOR NEGRO', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070001635', N'HORQUILLAS CHICAS NEGRO', N'HORQUILLAS CHICAS NEGRO', N'DOC')
@@ -778,6 +1546,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070005135', N'BINCHAS BLANCAS', N'BINCHAS BLANCAS', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070005235', N'BINCHAS BLANCAS GRANDES DE 1', N'BINCHAS BLANCAS GRANDES DE 1', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070005335', N'BINCHAS CREMAS', N'BINCHAS CREMAS', N'DOC')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070005423', N'CANUTILLO AZUL # 3', N'CANUTILLO AZUL # 3', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070005523', N'CAUNITILLO AMARILLO #3 EN BOLSA', N'CAUNITILLO AMARILLO #3 EN BOLSA', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070005623', N'CAUNITILLO NARANJA # 3', N'CAUNITILLO NARANJA # 3', N'PAQ')
@@ -829,7 +1598,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070009723', N'TRIMI BOLSA DE 2 ONZA', N'TRIMI BOLSA DE 2 ONZA', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070009727', N'TRIMI BOLSA DE 2 ONZA', N'TRIMI BOLSA DE 2 ONZA', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070009832', N'BROCHA APLICADORA PARA TINTE', N'BROCHA APLICADORA PARA TINTE', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070009932', N'ESCARCHA', N'ESCARCHA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070010032', N'ESPONJAS DE PINTAR REDONDAS', N'ESPONJAS DE PINTAR REDONDAS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070010132', N'GUILLOTINA PARA CORTE DE U­A', N'GUILLOTINA PARA CORTE DE U­A', N'C/U')
@@ -879,6 +1647,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070014035', N'PERLAS ARROZ EN COLLAR #3 COL/AZUL #3X6', N'PERLAS DE ARROZ EN COLLAR #3 COLOR AZUL #3X6', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070014132', N'PERLAS ARROZ EN COLLAR #3 COL/VERDE 3X6', N'PERLAS DE ARROZ EN COLLAR #3 COLOR VERDE 3X6', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070014135', N'PERLAS ARROZ EN COLLAR #3 COL/VERDE 3X6', N'PERLAS DE ARROZ EN COLLAR #3 COLOR VERDE 3X6', N'DOC')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070014232', N'PEINETAS GRANDES TRANSPARENTE LISAS', N'PEINETAS GRANDES TRANSPARENTE LISAS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070014235', N'PEINETAS GRANDES TRANSPARENTE LISAS', N'PEINETAS GRANDES TRANSPARENTE LISAS', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070014327', N'ALAMBRE DULCE #3 5 LIBRAS', N'ALAMBRE DULCE #3 5 LIBRAS', N'ROL')
@@ -930,7 +1699,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070018832', N'BANDEJA DE GERMINIZACION DE 325 HUECOS', N'BANDEJA DE GERMINIZACION DE 325 HUECOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070018932', N'BANDEJA DE GERMINIZACION DE 72 HUECOS', N'BANDEJA DE GERMINIZACION DE 72 HUECOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070019032', N'BATERIA ALCALINA DE 9 VOLTIO', N'BATERIA ALACALINA DE 9 VOLTIO', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070019135', N'BINCHAS GRANDES LISAS', N'BINCHAS GRANDES LISAS', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070019235', N'PERLAS BLANCA PARA TEMBLEQUE # 3.5', N'PERLAS BLANCA PARA TEMBLEQUE # 3.5', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070019335', N'PERLAS BLANCAS PARA TEMBLEQUE 2.5', N'PERLAS BLANCAS PARA TEMBLEQUE 2.5', N'DOC')
@@ -980,6 +1748,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070023732', N'MANGUERA DE 3/4', N'MANGUERA DE 3/4', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070023823', N'MARIPOSAS PLASTICAS', N'MARIPOSAS PLASTICAS', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070023923', N'MARIPOSAS PLASTICAS TORNASOL', N'MARIPOSAS PLASTICAS TORNASOL', N'PAQ')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070024032', N'MICROASPERSOR', N'MICROASPERSOR', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070024132', N'NAVAJAS PARA USO DE BARBERO', N'NAVAJAS PARA USO DE BARBERO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070024232', N'CERA PARA HIDRATAR MANOS Y PIES', N'CERA PARA HIDRATAR MANOS Y PIES', N'C/U')
@@ -1031,7 +1800,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070028732', N'BLOWER PROFESIONAL', N'BLOWER PROFESIONAL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070028832', N'BOLSAS ALTA DENSIDAD PARA EMPACAR 10 X15', N'BOLSAS ALTA DENSIDAD PARA EMPACAR 10 X 15', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070028932', N'BOLSAS ALTA DENSIDAD PARA EMPACAR 6 X 10', N'BOLSAS ALTA DENSIDAD PARA EMPACAR 6 X 10', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070029023', N'BOLSA DE CELOFAN N­7 EN PAQUETE D/500', N'BOLSA DE CELOFAN N­7 EN PAQUETE DE 500', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070029032', N'BOLSAS ALTA DENSIDAD PARA EMPACAR 8 X 10', N'BOLSAS ALTA DENSIDAD PARA EMPACAR 8 X 10', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070029041', N'BOLSAS DE ALTA DENSIDAD P/EMPAQUE 8X10', N'BOLSAS DE ALTA DENSIDAD PARA ENPAQUE AL VACIO 8 X 10 PULGADAS', N'MLR')
@@ -1081,6 +1849,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070033335', N'BINCHAS BLANCA CON DIENTE', N'BINCHAS BLANCA CON DIENTE', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070033423', N'BOLSITA ROJAS CHICA PAQ/ 25 UNIDADES', N'BOLSITA ROJAS CHICA PAQUETES DE 25 UNIDADES', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070033623', N'CASCABELES DORADO # 18', N'CASCABELES DORADO # 18', N'PAQ')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070033723', N'CASCABELES DORADOS', N'CASCABELES DORADOS', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070033823', N'CHAQUIRA AMARILLA', N'CHAQUIRA AMARILLA', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070033923', N'CHAQUIRA CELESTE', N'CHAQUIRA CELESTE', N'PAQ')
@@ -1132,7 +1901,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070038532', N'PERLAS TORNASOL #3', N'PERLAS TORNASOL #3', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070038535', N'PERLAS TORNASOL #3', N'PERLAS TORNASOL #3', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070038632', N'PLASTICO DE CALIBRACION', N'PLASTICO DE CALIBRACION', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070038723', N'POMPON SURTIDO', N'POMPON SURTIDO', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070038832', N'REGULADORES DE ACETILENO', N'REGULADORES DE ACETILENO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070038932', N'REPUJADORA DE CUTICULA DE METAL', N'REPUJADORA DE CUTICULA DE METAL', N'C/U')
@@ -1182,6 +1950,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070102932', N'PEGAMENTO EN BROCHA PARA U­A', N'PEGAMENTO EN BROCHA PARA U­A', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070103032', N'POLVO PARA U­A TONO NUDE', N'POLVO PARA U­A TONO NUDE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070103132', N'U­A SONRISA O LUNA NATURAL 500 PZA', N'U­A SONRISA O LUNA NATURAL 500 PZA', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070103232', N'U­A SONRISA O LUNA PUNTA BLANCA 500 PZA', N'U­A SONRISA O LUNA PUNTA BLANCA 500 PZA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101416070103323', N'CRISTALERIA PARA U­A SET X 12 UND', N'CRISTALERIA PARA U­A SET X 12 UND', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101500000000123', N'PAQUETES DE ROSAS', N'PAQUETES DE ROSAS', N'PAQ')
@@ -1233,7 +2002,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001001732', N'PLANT ESPAVE/NCANACARDIUM EXCELSUM', N'PLANT ESPAVE/NCANACARDIUM EXCELSUM', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001001832', N'PLANT ALMENDRO/NC:DYPTERYX PANAMENSIS', N'PLANT ALMENDRO/NC:DYPTERYX PANAMENSIS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001001932', N'PLANT AMARILLO/NC:TERMINALIA AMAZONIA', N'PLANT AMARILLO/NC:TERMINALIA AMAZONIA', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001002032', N'PLANT BALO/NC:GLIRICIDIA SEPIUM', N'PLANT BALO/NC:GLIRICIDIA SEPIUM', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001002132', N'PLANT BALSAMO NC MYROXYLON BALSAMUM', N'PLANT BALSAMO NC:MYROXYLON BALSAMUM', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001002232', N'PLANT BAMBUGUADUA/NCGUADUA ANGUSTIFOLIA', N'PLANT BAMBUGUADUA/NCGUADUA ANGUSTIFOLIA', N'C/U')
@@ -1283,6 +2051,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001006623', N'ESCARCHA ROJA', N'ESCARCHA ROJA', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001007035', N'GANCHO DE CABELLO GRANDE', N'GANCHO DE CABELLO GRANDE', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001007135', N'GANCHOS CHICOS PARA EL CABELLO', N'GANCHOS CHICOS PARA EL CABELLO', N'DOC')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001007232', N'PEINILLA GRANDE', N'PEINILLA GRANDE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001007332', N'CEPILLO PLANO', N'CEPILLO PLANO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101520001007423', N'JUEGO DE PEINILLA', N'JUEGO DE PEINILLA', N'PAQ')
@@ -1334,7 +2103,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101615110200032', N'ARBOL DE OREGON DE 12'' SIN LUCES', N'ARBOL DE OREGON DE 12'' SIN LUCES', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101615110200132', N'ARBOLES DE 7'' SIN LUCES', N'ARBOLES DE 7'' SIN LUCES', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101615110300132', N'ADORNOS CON FORMAS DE NAVIDAD', N'ADORNOS CON FORMAS DE NAVIDAD', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101615110400132', N'ADORNOS EN FORMA DE INSTRUMENTO MUSICAL', N'ADORNOS EN FORMA DE INSTRUMENTO MUSICAL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101615110500132', N'PICK LARGOS NAVIDE­OS', N'PICK LARGOS NAVIDE­OS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269101615110500232', N'PICK LARGOS NAVIDE­OS AZUL', N'PICK LARGOS NAVIDE­OS AZUL', N'C/U')
@@ -1384,6 +2152,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111316020001032', N'PAJUELAS DE SEMEN RAZA BRAHMAN', N'RAZA : BRAHMAN', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111316020001132', N'SEMEN RAZA HOLSTEIN (DOMINOS 29JE3759)', N'SEMEN DE LA RAZA HOLSTEIN (DOMINOS 29JE3759)', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111316020001232', N'PAJUELA D/SEMEN HOLSTEIN /N/C/0200HO3753', N'PAJUELA DE SEMEN HOLSTEIN NEGRO CODIGO 0200HO3753', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111316020001332', N'PAJUELA /SEMEN HOLSTEIN /N/C/0200HO05592', N'PAJUELA DE SEMEN HOLSTEIN NEGRO CODIGO 0200HO05592', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111316020001432', N'PAJUELAS DE SEMEN HOLSTEIN ROJO', N'PAJUELAS DE SEMEN HOLSTEIN ROJO CODIGO 120.0939.5960.2', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111316020001532', N'PAJUELAS DE SEMEN JERSEY', N'PAJUELAS DE SEMEN JERSEY CODIGO 0200JE00230', N'C/U')
@@ -1435,7 +2204,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111621080101027', N'MALLA DE SARAN DE POLIETILENO DE ALTA DE', N'MALLA DE SARAN DE POLIETILENO DE ALTA DENSIDAD', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111621080101127', N'ROLLO DE MALLA TUTORA', N'ROLLO DE MALLA TUTORA', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111621080101232', N'MALLA GEOTEXTIL', N'MALLA GEOTEXTIL', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111621080201021', N'MALLA DE POLYESTER 280', N'MALLA DE POLYESTER 280', N'M')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111621090000121', N'GALONES METALICOS-ENCAJES', N'GALONES METALICOS-ENCAJES', N'M')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269111621090000132', N'COOLER 102 QT', N'COOLER 102 QT', N'C/U')
@@ -1485,6 +2253,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269131110160000123', N'BOLSAS PLASTIC D/POLIETILENO P/VIVER 6X8', N'BOLSAS PLASTICAS DE POLIETILENO PARA VIVEROS EN TAMA­OS 5X7 CALIBRE 2.0', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269131110160000223', N'BOLSAS PLAST DE POLIETILENO P/VIVER 8X10', N'BOLSAS PLASTICAS DE POLIETILENO PARA VIVEROS EN TAMA­OS 8X10 CALIBRE 2.0', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269131110160000935', N'BOLSAS NON WOVEN EXP CON CORDON', N'BOLSAS NON WOVEN EXP CON CORDON', N'DOC')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269131110160002532', N'BOLSA DE ALGODO 37CM X 41CM', N'BOLSA DE ALGODO 37CM X 41CM', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269131112030000127', N'PELICULA 33.8CM X 61MTS LASER FUJI', N'PELICULA 33.8CM X 61MTS LASER FUJII', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269131112140000123', N'FILMINA DE PRUEBA DE POLIESTIRENO', N'FILMINA DE PRUEBA DE POLIESTIRENO', N'PAQ')
@@ -1536,7 +2305,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269141218080100232', N'PAPEL FILM DE COCINA', N'PAPEL FILM DE COCINA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269141218080100827', N'PAPEL FILM DE 100 PIES', N'PAPEL FILM DE 100 PIES', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269141218080101027', N'PAPEL ENCERADO', N'PAPEL ENCERADO', N'ROL')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269141218080101227', N'PAPEL FILM DE 200 PIES', N'PAPEL FILM DE 200 PIES', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269151215110000005', N'PASTA DE MEDIR COMBUSTIBLE', N'PASTA DE MEDIR COMBUSTIBLE', N'CJ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269201211150000032', N'MAQUINA PARA RASURAR', N'MAQUINA PARA RASURAR', N'C/U')
@@ -1586,6 +2354,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269231531350010032', N'CUBIERTA PARA RODILLO DE 9', N'CUBIERTA PARA RODILLO DE 9', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269231531350010132', N'CUBIERTA PARA ROLO 9 X 3/4 PIEL BORREGO', N'CUBIERTA PARA ROLO 9 X 3/4 PIEL BORREGO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269231533130100032', N'PAD DE CORTE', N'PAD DE CORTE', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269231533130200032', N'PAD NEGRO 17', N'PAD NEGRO 17', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269231533130300032', N'PAD VERDE 17', N'PAD VERDE 17', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269231535010000032', N'PORTAROLO', N'PORTAROLO', N'C/U')
@@ -1637,7 +2406,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269240000000200032', N'PLASTICOS TRANSPARENTE', N'PLASTICOS TRANSPARENTE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269240000000200037', N'PLASTICOS TRANSPARENTE', N'PLASTICOS TRANSPARENTE', N'YD')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269240000000200132', N'PLASTICO PARA PLASTIFICAR CARNET', N'PLASTICO PARA PLASTIFICAR CARNET', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269240000000200221', N'PLASTICO PARA SECADORES SOLARES', N'PLASTICO PARA SECADORES SOLARES', N'M')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269240000000200332', N'PLASTICO TRANSPARENTE P/EMBOLTUR 17X1200', N'PLASTICO TRANSPARENTE PARA EMBOLTURA TAMA­O 17­ DE ALTO X 1200­DE LARGO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269240000000200418', N'PLASTICOS TRANSPARENTE DE TUBO FLAT', N'PLASTICOS TRANSPARENTE DE TUBO FLAT', N'LB')
@@ -1687,6 +2455,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269241118100010132', N'TANQUE D/ALM D/AGUA D/PLA 55 GAL C/TAPA', N'TANQUE D/ALM D/AGUA DE PLASTICO DE 55 GALONES CON TAPA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269241122050100014', N'RECIPIENTES PARA GAS', N'RECIPIENTES PARA GAS', N'GLN')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269241124040000132', N'BAUL CHICO', N'BAUL CHICO NEGRO', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269241124040000232', N'BAUL PARA MOTO', N'BAUL PARA MOTO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269241125050000032', N'PALLET PLASTICO INDUSTRIAL 48X40X5.', N'PALLET PLASTICO INDUSTRIAL 48X40X5.5', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269241215020000032', N'BOLSA DE MANTA SUCIA CON LOGO', N'BOLSA DE MANTA SUCIA CON LOGO', N'C/U')
@@ -1738,7 +2507,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269251724080010032', N'TAPON DE ACEITE', N'TAPON DE ACEITE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269251725050100032', N'TUBO FINO BICLETA', N'TUBO FINO BICLETA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269251726000100132', N'GUTTER FOOT F TRANSIT', N'GUTTER FOOT F TRANSIT MEDIUM', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269251726050100032', N'CANASTA DE TECHO', N'CANASTA DE TECHO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269251726050200032', N'BARRA DE TECHO', N'BARRA DE TECHO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269251726050200132', N'WINGBAR 1.35 MTS', N'WINGBAR 1.35 MTS', N'C/U')
@@ -1788,6 +2556,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117000040023', N'BATERIA 6V RECARGABLE', N'BATERIA 6V RECARGABLE', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117000050032', N'BATERIA 3 VOLTIO', N'BATERIA 3 VOLTIO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117000060032', N'BATERIA P/LECTOR D/HUELLA DACTILAR', N'BATERIA PARA LECTOR DE HUELLA DACTILAR DATALOGIC MARCA: DATALOGIC', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117000070032', N'BATERIA ALCALINAS MAXELL AA', N'BATERIA ALCALINAS MAXELL AA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117000080032', N'BATERIA MODELO CR1220', N'BATERIA MODELO CR1220', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117000090024', N'BATERIA TIPO D', N'BATERIA TIPO D', N'PAA')
@@ -1839,7 +2608,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117020000432', N'PILA LITHIUM PARA CAMARA 3 VOLTIOS', N'PILA LITHIUM PARA CAMARA 3 VOLTIOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117020000532', N'FLASH PARA CAMARA FOTOGRAFICA PROFESIONA', N'FLASH PARA CAMARA FOTOGRAFICA PROFESIONAL. CON RADIO TRANSMISOR TIPO 1', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117020000632', N'SPEEDLITE 600 EX II RT FLASH', N'SPEEDLITE 600 EX II RT FLASH', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117020000732', N'BATERIAS TRIPLE AA/ PAQUETE DE 2', N'BATERIAS TRIPLE AA/ PAQUETE DE 2', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117020000832', N'BATERIAS TIPO C MEDIANA/PAQUETE DE 2', N'BATERIAS TIPO C MEDIANA / PAQUETE DE 2', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117020000932', N'BATERIAS TIPO D PAQUETE DE 2', N'BATERIAS TIPO D PAQUETE DE 2', N'C/U')
@@ -1889,6 +2657,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117050000532', N'BATERIAS ALCALINAS TIPO D', N'BATERIAS ALCALINAS TIPO D', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117050000632', N'BATERIA ALK DURACELL 9V', N'BATERIA ALK DURACELL 9V', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117050000732', N'BATERIA TRIPLE A/PAQUETE DE 2', N'BATERIA TRIPLE A/PAQUETE DE 2', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117050000832', N'BATERIA TIPO C MEDIANA/ PAQUETE DE 2', N'BATERIA TIPO C MEDIANA/ PAQUETE DE 2', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117050000923', N'BATERIA RECARGABLES AA', N'BATERIA RECARGABLES AA', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269261117050000932', N'BATERIA TIPO D PAQUETE DE 2', N'BATERIA TIPO D PAQUETE DE 2', N'C/U')
@@ -1940,7 +2709,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301036040500132', N'LAMINA GYPSUM 1/2X4X8', N'LAMINA GYPSUM 1/2X4X8', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301036040500232', N'LAMINAS CARTA 125 STUDMARK', N'LAMINAS CARTA 125 STUDMARK', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301036040600032', N'LAMINA DE FOAM LISA 2X4X5/8', N'LAMINA DE FOAM LISA 2X4X5/8', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301036040600132', N'LAMINA NUVE 2X4X5/8', N'LAMINA NUVE 2X4X5/8', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301116010000032', N'CALCE NO 1', N'CALCE NO 1', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301519010000032', N'TOLDA', N'TOLDA', N'C/U')
@@ -1990,6 +2758,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301617070002137', N'VINIL COLOR VINO', N'VINIL COLOR VINO', N'YD')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301617070002237', N'VINIL COLOR AZUL', N'VINIL COLOR AZUL', N'YD')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301617070003127', N'VINIL ADHESIVO 24 PULG X 50MTS NARANJA', N'VINIL ADHESIVO 24 PULG X 50MTS NARANJA', N'ROL')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301617070003227', N'VINIL ADHESIVO 24 PULG X 50MTS AZUL', N'VINIL ADHESIVO 24 PULG X 50MTS AZUL', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301617070003327', N'VINIL ADHESIVO 24 PULG X 50MTS VERDE', N'VINIL ADHESIVO 24 PULG X 50MTS VERDE', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301617070003427', N'VINIL ADHESIVO 24 PULG X 50MTS PLATA', N'VINIL ADHESIVO 24 PULG X 50MTS PLATA', N'ROL')
@@ -2041,7 +2810,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301717050000332', N'ESMERILADO DECORATIVO 0.83X1.30MTS', N'ESMERILADO DECORATIVO 0.83X1.30MTS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301717050000432', N'ESMERILADO DECORATIVO 1.73X1.30MTS', N'ESMERILADO DECORATIVO 1.73X1.30MTS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301717050000532', N'ESMERILADO DECORATIVO 0.82X0.32MTS', N'ESMERILADO DECORATIVO 0.82X0.32MTS', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301717050000632', N'ESMERILADO DECORATIVO 1.20X1.30MTS', N'ESMERILADO DECORATIVO 1.20X1.30MTS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301717050000732', N'ESMERILADO DECORATIVO 0.60X1.30MTS', N'ESMERILADO DECORATIVO 0.60X1.30MTS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269301815010000032', N'TINA DE PEDICURE SPA PEDICURE', N'TINA DE PEDICURE(SPA PEDICURE)', N'C/U')
@@ -2091,6 +2859,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269311625060080032', N'SOPORTE MOVIL DE PROYECTOR', N'SOPORTE MOVIL DE PROYECTOR', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269311625060100032', N'SOPORTE DE TV PLASMA LCD DE 24 A 42', N'SOPORTE DE TV PLASMA LCD DE 24 A 42', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269311625060100132', N'ESTRUCTURA COMPLETA TIPO BOOTH', N'ESTRUCTURA COMPLETA TIPO BOOTH', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269311625060100232', N'ESTRUCTURA COMPLETA PARA PORTA POSTALES', N'ESTRUCTURA COMPLETA PARA PORTA POSTALES', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269311625060100332', N'ESTRUCTURA DE PROLIPROPENO AZUL PARA 4 A', N'ESTRUCTURA DE PROLIPROPENO AZUL PARA 4 ASIENTOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269311625060100432', N'PALO TELESCOPICO DE 62', N'PALO TELESCOPICO DE 62', N'C/U')
@@ -2142,7 +2911,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312015160000732', N'ROLLO/CARP REFLEC GRADO INGENI 24X50 AZU', N'ROLLO DE CARPETA REFLECTIVA GRADO INGENIER­A AZUL 24X50 YDS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312015160000832', N'ROLLO/CARP REFLEC ALTA INTEN 36X50 AMARI', N'ROLLO DE CARPETA REFLECTIVA ALTA INTENSIDAD AMARILLA 36X50 YDS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312015160000932', N'ROLLO/CARP REFLEC ALTA INTEN 48X50 AMARI', N'ROLLO DE CARPETA REFLECTIVA ALTA INTENSIDAD AMARILLA 48X50 YDS', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312015160001032', N'ROLLO/CARP REFLEC ALTA INTEN 24X50 BLANC', N'ROLLO DE CARPETA REFLECTIVA ALTA INTENSIDAD BLANCA 24X50 YDS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312015160001132', N'ROLLO/CARP REFLEC ALTA INTEN 36X50 BLANC', N'ROLLO DE CARPETA REFLECTIVA ALTA INTENSIDAD BLANCA 36X50 YDS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312015160001232', N'ROLLO DE CARPETA REFLECTIVA AZUL 36X50', N'ROLLO DE CARPETA REFLECTIVA AZUL 36X50 YDS.', N'C/U')
@@ -2192,6 +2960,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312417010000532', N'ESPEJO', N'ESPEJO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312417010000632', N'ESPEJO ENMARCADO 76.2 X 101.6', N'ESPEJO ENMARCADO 76.2 X 101.6', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312417010000732', N'ESPEJO CLARO PULIDO/1/4 DE ESPESOR22X', N'PULIDO DE 1/4 DE ESPESOR DE 22 X 65', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312417010000832', N'ESPEJO CLARO PULIDO/1/4ESPESOR 74X96', N'PULIDO DE 1/4 DE ESPESOR DE 74X96', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312417010000932', N'ESPEJO CLARO PULIDO1/4 ESPESOR 55 X84', N'PULIDO DE 1/4 DE ESPESOR DE 55 X 84', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269312417010001032', N'ESPEJO CIRCULAR', N'ESPEJO CIRCULAR', N'C/U')
@@ -2243,7 +3012,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391016050300432', N'FOCO DE 120 WATTS', N'FOCO DE 120 WATTS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391016050300532', N'FOCO DE 150 WATTS', N'FOCO DE 150 WATTS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391016050300632', N'FOCO DE 17 WATTS', N'FOCO DE 17 WATTS', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391016050300732', N'FOCO DE 20 WATTS', N'FOCO DE 20 WATTS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391016050300832', N'FOCO DE 22 WATTS REDONDO', N'FOCO DE 22 WATTS REDONDO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391016050300932', N'FOCO DE 23 WATT', N'FOCO DE 23 WATT', N'C/U')
@@ -2293,6 +3061,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391115180000435', N'MANITA CON LUZ', N'MANITA CON LUZ', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391115180000532', N'LUCES P/ CHALECOS SALVAVIDAS AUTOMATICAS', N'LUCES P/ CHALECOS SALVAVIDAS AUTOMATICAS ACTIVADAS AL AGUA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391115180000632', N'VINCHA DE CORONA ROSADA Y CELESTE (PZAS)', N'VINCHA DE CORONA ROSADA Y CELESTE (PZAS)', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391115180000732', N'ESPADA CON LUCES LEDS', N'ESPADA CON LUCES LEDS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391115180000932', N'VINCHAS BLANCAS GRANDES DE 1', N'VINCHAS BLANCAS GRANDES DE 1', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391115180000935', N'VINCHAS BLANCAS GRANDES DE 1', N'VINCHAS BLANCAS GRANDES DE 1', N'DOC')
@@ -2344,7 +3113,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391217190000032', N'PROTECTOR', N'PROTECTOR', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391217190000532', N'MOVIL DE CUNA', N'MOVIL DE CUNA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391217190100032', N'PROTECTOR DE ALUMINIO', N'PROTECTOR DE ALUMINIO', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391217190100132', N'PROTECTORES DE SEGURIDAD PARA ESTANTERIA', N'PROTECTORES DE SEGURIDAD PARA ESTANTERIA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391217190100232', N'PROTECTOR GUARDA TERMOSTATO/DE PLASTCIO', N'PROTECTOR GUARDA TERMOSTATO DE PLASTCIO-GRANDE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269391217190100332', N'PROTECTORES P/PATAS DE L/CANES', N'PROTECTORES P/PATAS DE L/CANES', N'C/U')
@@ -2394,6 +3162,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269401510001000132', N'BOMBA P/FUMIGAR 2.0GAL/8LIT.#865G-13', N'JGO DE 42 ACC PARA MOTOTOOL BDA3037-LA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269401510001100132', N'BOMBA FUMIGAR TIPO MOCHILA', N'BOMBA FUMIGAR TIPO MOCHILA 16LT', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269401510001100232', N'BOMBA DE FUMIGAR H/COMERCIAL 2G', N'BOMBA DE FUMIGAR H/COMERCIAL 2G', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269401510001200032', N'BOMBA DE FUMIGAR A LITROS', N'BOMBA DE FUMIGAR A LITROS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269401515010100032', N'BOMBA RAVX DE AIRE DE PIE', N'BOMBA RAVX DE AIRE DE PIE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269401515010100132', N'BOMBA PARA INFLAR BALONES', N'BOMBA PARA INFLAR BALONES', N'C/U')
@@ -2445,7 +3214,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269411226010001232', N'KIT D/CINTA PORTA GAFET POLYST 19X1', N'KIT DE CINTA PORTA GAFETE DE POLYSTER RESISTENT, FUL COLOR CAMUFLAJE DE 19X 1', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269411226010001332', N'CINTA PORTA YOYO CON LOGO DE METAL', N'CINTA PORTA YOYO CON LOGO DE METAL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269411226010001432', N'PORTA BROCHURE', N'PORTA BROCHURE', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269411226010001532', N'PORTAGAFETES PLASTICOS 8X12CM VERT', N'PORTAGAFETES PLASTICOS DE 8 X 12CM VERTICAL CON CORDON DE NYLON GRUESO EN COLOR: AZ­L, VERDE Y ROJO DE TAMA­­ 3/4 DE GROSOR', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269411226010001632', N'CINTA PARA IMPRESION YMCFK', N'CINTA PARA IMPRESION YMCFK', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269411226010001732', N'PORTA DIPLOMA C/CINTAS EN C/ESQUINA', N'PORTA DIPLOMA C/CINTAS EN C/ESQUINA', N'C/U')
@@ -2495,6 +3263,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269421316060000705', N'MASCARILLAS', N'MASCARILLAS', N'CA')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269421316060000732', N'MASCARILLAS', N'MASCARILLA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269421316060000805', N'MASCARILLAS QUIRURGICAS DESECHABLES', N'MASCARILLAS QUIRURGICAS DESECHABLES', N'CJ')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269421316060000905', N'MASCARILLA', N'MASCARILLA', N'CJ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269421316060200032', N'MASCARILLA CON FILTRO MSA', N'MASCARILLA CON FILTRO MSA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269421316060200132', N'KIT DE MASCARILLA R6211', N'KIT DE MASCARILLA R6211', N'C/U')
@@ -2546,7 +3315,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269422954240000232', N'NAVAJA PARA BARBERO', N'NAVAJA PARA BARBERO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269431025050000032', N'PARAGUA TIPO GOLF D/UN TONO, LOGO', N'PARAGUA TIPO GOLF D/UN TONO LOGO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269431025050100135', N'PARAGUAS TIPO GOLF DE 8 VARILLAS DE 1 TO', N'PARAGUAS TIPO GOLF DE 8 VARILLAS DE 1 TONO', N'DOC')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269431025050100232', N'PARAGUAS DOBLE PA­O', N'PARAGUAS DOBLE PA­O', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269431025050100332', N'PARAGUA TIPO GOLF COLOR NEGRO', N'PARAGUA TIPO GOLF COLOR NEGRO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269431025050100432', N'PARAGUAS ELGIN 8 PANEL', N'PARAGUAS ELGIN, 8 PANEL', N'C/U')
@@ -2596,6 +3364,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441035040001623', N'CANUTILLOS VERDE # 3', N'CANUTILLOS VERDE # 3', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441035040001723', N'CANUTILLOS AZUL #3', N'CANUTILLOS AZUL #3', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441035040001823', N'CANUTILLOS ROSADO FUERTE #3', N'CANUTILLOS ROSADO FUERTE #3', N'PAQ')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441035040001923', N'CANUTILLOS NARANJA #3', N'CANUTILLOS NARANJA #3', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441035040002023', N'CANUTILLO LARGO', N'CANUTILLO LARGO', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441035040002123', N'CANUTILLOS TORNASOL # 3 ENTORCHADOS', N'CANUTILLOS TORNASOL # 3 ENTORCHADOS', N'PAQ')
@@ -2647,7 +3416,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441216130000232', N'U­AS ESTILETO NATURAL', N'U­AS ESTILETO NATURAL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441216130000332', N'U­AS ESTILETO TRANSPARENTE', N'U­AS ESTILETO TRANSPARENTE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441216140000132', N'CASCABEL GRANDE', N'CASCABEL GRANDE', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441216260000005', N'DEDAL', N'DEDAL', N'CJ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441216260100005', N'DEDAL PLASTICOS NEGRO DE 1X1 1/2 X 3', N'DEDAL PLASTICOS NEGRO DE 1X1 1/2 X 3', N'CJ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269441216260100032', N'DEDAL CROMADO DE 1/2 X 1DE DIAME', N'DEDAL CROMADO DE 1/2 X 1DE DIAMETRO', N'C/U')
@@ -2697,6 +3465,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269451315010000332', N'PELICULA A COLOR DE 135/36 EXP. 400', N'PELICULA DE COLOR DE 135/36 EXP. 400', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269451315010000432', N'ROLLO DE MICROFILM 16MMX100 PIES FUJI', N'ROLLO DE MICROFILM 16MMX100 PIES FUJI', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461018010000132', N'FUNDA TACTICA PARA PISTOLA CARTUCHERA', N'FUNDA TACTICA PARA PISTOLA CARTUCHERA', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461018010000432', N'COBERTOR PLASTICO DE BANDEJA MOD N­1', N'COBERTOR PLASTICO DE BANDEJA MOD N­1', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461018010100132', N'COBERT D/CHAROL P/FUSIL D/PARADA C.BLANC', N'OBERTOR D/CHAROL P/FUSIL D/PARADA COLOR BLANCO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461018010100223', N'FUNDA ESPIRAL SIN CORTE', N'FUNDA ESPIRAL SIN CORTE DE PLASTICO COLOR AZUL', N'PAQ')
@@ -2748,7 +3517,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461715030170032', N'CERRADURAS P/ GAVETA MUEBLE AEREO', N'JUEGOS DE CERRADURAS PARA GAVETA DE MUEBLE AEREO CON LLAVE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461715030180032', N'CERRADURAS P/ MODULARES', N'JUEGOS DE CERRADURAS PARA MODULARES', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461715030190032', N'CERRADURAS DE VITRINA', N'JUEGOS DE CERRADURAS DE VITRINA', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461715030200032', N'CERRADURAS DE CAJON', N'CERRADURAS DE CAJON', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461715030200132', N'CERRADURA ELECTRICA PARA PUERTA', N'CERRADURA ELECTRICA PARA PUERTA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461715030210032', N'CERRADURAS CILINDRO-MARIPOSA PLTDO', N'JUEGOS DE CERRADURAS DE CILINDRO Y MARIPOSA PLATEADA', N'C/U')
@@ -2798,6 +3566,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461815040000324', N'GUANTES DE PUNTO PARA TRABAJO', N'GUANTES DE PUNTO PARA TRABAJO', N'PAA')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461815040000332', N'GUANTES DE TRABAJO CON PALMA DE CUERO', N'GUANTES DE TRABAJO CON PALMA DE CUERO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461815040000832', N'FUNDA PARA GANADO BOVINO', N'FUNDA PARA GANADO BOVINO PAQ DE 50 UND', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461815040100024', N'GUANTES PARA USO DE JARDINER­A', N'GUANTES PARA USO DE JARDINER­A', N'PAA')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461815040200005', N'GUANTES PARA INSEMINACION ARTIFICIAL', N'GUANTES PARA INSEMINACION ARTIFICIAL', N'CJ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269461815040200032', N'GUANTES SINTETICOS GRANDE', N'GUANTES SINTETICOS GRANDE', N'C/U')
@@ -2849,7 +3618,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269470000000010132', N'FILTRO DE CARTUCHO PARA ASPIRADORA', N'FILTRO DE CARTUCHO PARA ASPIRADORA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269471015000000032', N'HANGING BAR DOBLE DE 1 METRO', N'HANGING BAR DOBLE DE 1 METRO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269471015050100132', N'CLORINADOR FLOTANTE', N'CLORINADOR FLOTANTE', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269471216040100132', N'ASPIRADORA PARA COMPUTADORA', N'ASPIRADORA PARA COMPUTADORA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269471217012400032', N'BOLSAS ECOLOGICAS', N'BOLSAS ECOLOGICAS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269471316030000132', N'ESPONJA COMPRENSIBLE', N'ESPONJA COMPRENSIBLE', N'C/U')
@@ -2899,6 +3667,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020100132', N'OBSEQUIO ESTUCHE DE CREMAS PERFUMA', N'OBSEQUIO ESTUCHE DE CREMAS PERFUMA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020100232', N'OBSEQUIO ESTUCHE DE MAD/LOGO INST', N'OBSEQUIO ESTUCHE DE MAD/LOGO INST', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020100332', N'OBSEQUIO ARREGLOS DE MANO 1 ROSA', N'OBSEQUIO ARREGLOS DE MANO 1 ROSA', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020100432', N'OBSEQUIO GOLD LABEL MINI', N'OBSEQUIO GOLD LABEL MINI', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020100632', N'PERFUME P.E 18', N'PERFUME P.E 18', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020100732', N'PERFUME BULGARI LEAU EXQU', N'PERFUME BULGARI LEAU EXQU', N'C/U')
@@ -2950,7 +3719,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020600832', N'SET DE BOLAS', N'SET DE BOLAS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020600932', N'PIPAS /131291', N'PIPAS /131291', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020601032', N'ESTUCHE DE MAD/LOGO INST', N'ESTUCHE DE MAD/LOGO INST', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020601132', N'PIPAS', N'PIPAS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020601332', N'PIPAS /131291', N'PIPAS /131291', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016020601432', N'PIPAS', N'PIPAS', N'C/U')
@@ -3000,6 +3768,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090100432', N'FLORES DECORATIVAS AZUL', N'FLORES DECORATIVAS AZUL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090100505', N'FLORES DECORATIVAS PLATEADA', N'FLORES DECORATIVAS PLATEADA', N'CJ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090100532', N'FLORES DECORATIVAS PLATEADA', N'FLORES DECORATIVAS PLATEADA', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090100605', N'FLORES DECORATIVAS ROJA', N'FLORES DECORATIVAS ROJA', N'CJ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090100632', N'FLORES DECORATIVAS ROJA', N'FLORES DECORATIVAS ROJA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090100705', N'FLORES DECORATIVAS FUCSIA GRANDES', N'FLORES DECORATIVAS FUCSIA GRANDES', N'CJ')
@@ -3051,7 +3820,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090502132', N'GUIRNALDAS 6', N'GUIRNALDAS 6', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090502232', N'GUIRNALDAS', N'GUIRNALDAS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090502332', N'SET DE BOLAS ROJO, DORADO Y VERDE', N'SET DE BOLAS ROJO, DORADO Y VERDE', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090502432', N'MALLAS ROJO, DORADO Y VERDE', N'MALLAS ROJO, DORADO Y VERDE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090502532', N'MALLAS ROJO,DORADO Y VERDE', N'MALLAS ROJO,DORADO Y VERDE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090602205', N'ADORNOS C/ FORMAS TROMPETA DE 10', N'ADORNOS CON FORMAS TROMPETA DE 10 DORADO', N'CJ')
@@ -3101,6 +3869,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090604405', N'ADORNOS C/ FORMAS DE CADENA', N'ADORNOS CON FORMAS DE CADENA', N'CJ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090604432', N'ADORNOS C/ FORMAS DE CADENA', N'ADORNOS CON FORMAS DE CADENA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090700023', N'GLOBO', N'GLOBO', N'PAQ')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090700032', N'GLOBO', N'GLOBO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090704123', N'GLOBO 12 VERDE', N'GLOBO 12 VERDE', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491016090704223', N'GLOBO 12 ROSADO', N'GLOBO 12 ROSADO', N'PAQ')
@@ -3152,7 +3921,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491017040000032', N'PLACA DE RECONOCIMIENTO', N'PLACA DE RECONOCIMIENTO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491017040000132', N'PLACA DE RECONOCIMIENTO', N'PLACA DE RECONOCIMIENTO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491017040000232', N'PLACA CONMEMORATIVA GRANITO 1.00X0.75 -', N'PLACA CONMEMORATIVA, EN GRANITO TAMA­O 1.00X0.75 - CON LOGO Y NOMBRES GRABADOS, PINTADO EN COLOR DORADO. (P/ EL MONUMENTO A LOS CAIDOS)', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491017040000332', N'PLACA PERSONALIZADA', N'PLACA PERSONALIZADA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491017040000432', N'PLACAS DE RECONOCIMIENTO 6X8', N'PLACAS DE RECONOCIMIENTO 6X8', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491215030000132', N'TIENDA D/ CAMPA­A TROPICAL', N'TIENDA D/ CAMPA­A TROPICAL', N'C/U')
@@ -3202,6 +3970,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491215100010132', N'REFRI P/BEBIDAS TANQUE D/10 GAL IGOO', N'REFRI P/BEBIDAS TANQUE DE 10 GALONES IGOO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491215100100132', N'COOLERS CON RUEDAS 100QT', N'COOLERS CON RUEDAS 100QT', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491215100200132', N'HIELERA QUICK COLD 150', N'HIELERA QUICK COLD 150', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491215100200232', N'HIELERA PLASTICA C/AGARRD Y TAP 25 GLN', N'HIELERA PLASTICA C/AGARRADERA Y TAPADERA 25 GLN', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491215100300132', N'NEVERA TRIPLE COMBO 48QT CEL', N'NEVERA TRIPLE COMBO 48QT CEL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269491215101200132', N'COOLER GRANDE C/RUEDAS 2 COMPARTIMIENTOS', N'COOLER GRANDE C/RUEDAS 2 COMPARTIMIENTOS', N'C/U')
@@ -3253,7 +4022,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269521520100200035', N'LONCHERA DE NYLON', N'LONCHERA DE NYLON', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269521521010000032', N'POCILLOS PERSONALIZADOS', N'POCILLOS PERSONALIZADOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269521521030100032', N'JARRONES DE VIDRIO REDONDOS', N'JARRONES DE VIDRIO REDONDOS', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269521521030100132', N'JARRON GIGANTE DECOR MATIZ', N'JARRON GIGANTE DECOR MATIZ', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269521521030100232', N'JARRONES DECORATIVOS', N'JARRONES DECORATIVOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269521615020000032', N'MINI DV 60 MNTS', N'MINI DV 60 MNTS', N'C/U')
@@ -3303,6 +4071,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531025200200232', N'RP METAL DORADO', N'RP METAL DORADO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531025200210132', N'RP CON LAUREL', N'RP CON LAUREL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531025201000032', N'RANGO D/METAL D/GALA CAPITAN', N'RANGO D/METAL D/GALA CAPITAN', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531025202000032', N'RANGO D/METAL D/GALA COMISIONADO', N'RANGO D/METAL D/GALA COMISIONADO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531025203000032', N'RANGO D/METAL D/GALA MAYOR', N'RANGO D/METAL D/GALA MAYOR', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531025204000032', N'RANGO D/METAL D/GALA SUB-COMISIONADO', N'RANGO D/METAL D/GALA SUB-COMISIONADO', N'C/U')
@@ -3354,7 +4123,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531300000003632', N'RUBOR COMPACTO C/VIOLET', N'RUBOR COMPACTO C/VIOLET', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531300000003732', N'RUBOR COMPACTO C/SALMON', N'RUBOR COMPACTO C/SALMON', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531300000003832', N'RUBOR COMPACTO C/CORALINO', N'RUBOR COMPACTO C/CORALINO', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531300000003932', N'CORRECTOR OJOS LIQUIDO C/MANCHADO', N'CORRECTOR OJOS LIQUIDO C/MANCHADO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531300000004032', N'CORRECTOR OJOS LIQUIDO C/CREMEBRU', N'CORRECTOR OJOS LIQUIDO C/CREMEBRU', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531300000004132', N'CORRECTOR OJOS LIQUIDO C/CAFE CON LECHE', N'CORRECTOR OJOS LIQUIDO C/CAFE CON LECHE', N'C/U')
@@ -3404,6 +4172,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316020000432', N'MAQUINA DE AFEITAR DESECHABLE DE PLASTIC', N'MAQUINA DE AFEITAR DESECHABLE DE PLASTICO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316020000523', N'MAQUINA AFEITAR DESECHAB PLASTIC PAQ24UN', N'MAQUINA DE AFEITAR DESECHABLE DE PLASTICO -PAQUETE DE 24 UNIDADES', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316020000532', N'MAQUINA AFEITAR DESECHAB PLASTIC PAQ24UN', N'MAQUINA DE AFEITAR DESECHABLE DE PLASTICO -PAQUETE DE 24 UNIDADES', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316020000632', N'CUCHILLAS DE 8 PARA MAQUINA DE CORTAR V', N'CUCHILLAS DE 8 PARA MAQUINA DE CORTAR VERTICAL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316020000732', N'CUCHILLAS DE 10 P/MAQUIN D/CORTAR VERTI', N'CUCHILLAS DE 10 PARA MAQUINA DE CORTAR VERTICAL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316020000932', N'MAQUINA DE CORTAR CABELLO', N'MAQUINA DE CORTAR CABELLO', N'C/U')
@@ -3455,7 +4224,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316130000032', N'SET DE CREMA PARA MUJER', N'SET DE CREMA PARA MUJER', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316130000132', N'SER DE CREMA PARA HOMBRE GEL B/DEO', N'SER DE CREMA PARA HOMBRE GEL B/DEO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316130000232', N'ESTUCHE COMPLETO D/CUIDADO PERSONAL', N'ESTUCHE COMPLETO D/CUIDADO PERSONAL', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316130000332', N'ESTUCHE COMPLETO D/CUIDADO PERSONAL', N'ESTUCHE COMPLETO D/CUIDADO PERSONAL', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316160000132', N'SPRAY PARA CABELLO EXTRA HOLD FIJADOR', N'SPRAY PARA CABELLO EXTRA HOLD FIJADOR', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269531316160000232', N'SPRAY PARA CABELLO MEDIANO FIJADOR', N'SPRAY PARA CABELLO MEDIANO FIJADOR', N'C/U')
@@ -3505,6 +4273,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541015010300032', N'CADENA BRUJA CON BROCHE', N'CADENA BRUJA CON BROCHE', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541015020000132', N'ADORNO DE PESCADITOS', N'ADORNO DE PESCADITOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541016010100132', N'PULSO PARA LA MANO CON FLOR Y PERLAS', N'PULSO PARA LA MANO CON FLOR Y PERLAS', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541116010000132', N'RELOJ DE PARED', N'RELOJ DE PARED', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541116010000232', N'RELOJ 208-277V 40AMPS T 104 INTERMATIC', N'RELOJ DE TIEMPO 208-277V - 40AMPS, - T -104. MARCA Y CASA PRODUCTORA: INTERMATIC, PAIS DE ORIGEN: USA.', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541116010000332', N'RELOJ 120 V 40 AMP T 101 INTERMATIC', N'RELOJ DE TIEMPO 120 V - 40 AMP, - T -101. MARCA Y CASA PRODUCTORA: INTERMATIC, PAIS DE ORIGEN: USA.', N'C/U')
@@ -3556,7 +4325,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217000003735', N'PERLA EN COLLAR AMARILLO', N'PERLA EN COLLAR AMARILLO', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217000003835', N'PERLA EN COLLARES ROJO', N'PERLA EN COLLARES ROJO', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217000003935', N'PERLA ARROZ EN COLLAR COLOR FUERTE 3X6', N'PERLA DE ARROZ EN COLLARES COLOR FUERTE 3X6', N'DOC')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217000004035', N'PERLA ARROZ EN COLLARES COLOR VERDE #3X6', N'PERLA ARROZ EN COLLARES COLOR VERDE #3X6', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217000004135', N'COLLAR DE LAGRIMAS BLANCAS 6X10', N'COLLAR DE LAGRIMAS BLANCAS 6X10', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217000004235', N'COLLAR DE LAGRIMA 3X6', N'COLLAR DE LAGRIMA 3X6', N'DOC')
@@ -3606,6 +4374,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217010100532', N'ENJARETADO EN CINTA AMARILLA', N'ENJARETADO EN CINTA AMARILLA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217010100632', N'PRENDAS DE POLLERA', N'PRENDAS DE POLLERA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217010100732', N'TEMBLEQUE COLOR BLANCO', N'TEMBLEQUE COLOR BLANCO', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217010101623', N'FLORECITAS BLANCA', N'FLORECITAS BLANCA', N'PAQ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217010101635', N'FLORECITAS BLANCAS # 4', N'FLORECITAS BLANCAS # 4', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269541217010200032', N'PAQUETE DE FLORECITAS PARA TEMBLEQUES', N'PAQUETE DE FLORECITAS PARA TEMBLEQUES', N'C/U')
@@ -3657,7 +4426,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217020000232', N'PLACAS DE METAL, PARA CIRCULACION MOTOS', N'PLACAS DE METAL, PARA CIRCULACION MOTOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217020000332', N'PLACA D/MARMOLIA/NEGRA/BAJO RELIE/20X25', N'PLACA DE MARMOLIA, COLOR NEGRO CON TEXTO GRABADO A LASER BAJO RELIEVE PINTADO EN COLOR DORADO, TAMA­O 20X25', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217020000432', N'PLACA DE MARMOLINA', N'PLACA DE MARMOLINA', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217020000532', N'PLACAS 7X9 CON GUACAS', N'PLACAS 7X9 CON GUACAS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217020000632', N'PLACA DE METAL DE FLECHA PARA PULSADOR', N'REPUESTOS Y ACCESORIOS PARA ELEVADORES', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217020001332', N'PLAQUITA METALIZADA DE SEGURIDAD', N'PLAQUITA METALIZADA DE SEGURIDAD', N'C/U')
@@ -3707,6 +4475,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217270002232', N'ESTACION MANUAL D/ALARMA D/INCENDIO DB', N'ESTACION MANUAL DE ALARMA DE INCENDIO DOBLE ACCION', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217270002332', N'LETRERO DE DIRECTOR 14X4', N'LETRERO DE DIRECTOR CON 14 DE LARGO X 4 DE ANCHO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217270002432', N'LETRERO DE SUB-DIRECTOR 14X4', N'LETRERO DE SUB-DIRECTOR CON 14 DE LARGO X 4 DE ANCHO', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217270002532', N'LETRERO DE COORDINACION ADMI. 14X4', N'LETRERO DE COORDINACION ADMI. CON 14 DE LARGO X 4DE ANCHO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217270002632', N'LETRERO DE RECURSOS HUMANOS 14X4', N'LETRERO DE RECURSOS HUMANOS CON 14 DE LARGO X 4 DE ANCHO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551217270002732', N'LETRERO DE DESARROLLO SOCIAL 14X4', N'LETRERO DE DESARROLLO SOCIAL CON 14 DE LARGO X 4 DE ANCHO', N'C/U')
@@ -3758,7 +4527,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551218020200132', N'GAFETE PLASTIFICADO A COLOR', N'GAFETE PLASTIFICADO A COLOR', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551218020200205', N'LAMINAS P/PLASTIFICAR 70X100MM 200MICRAS', N'LAMINAS PARA PLASTIFICAR 70X100 MM 200 MICRAS', N'CJ')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551222000100032', N'ASTA DE MADERA', N'ASTA DE MADERA', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551222000100132', N'ASTA PARA OFICINA', N'ASTA PARA OFICINA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269551272700000132', N'LETRERO CON VINIL ADHESIVO 2.60X2X065', N'LETRERO CON VINIL ADHESIVO 2.60X2X065', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269561015010000032', N'SOPORTE', N'SOPORTE', N'C/U')
@@ -3808,6 +4576,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269561015280203132', N'CANASTA DE MIMBRE CON MANGO', N'CANASTA DE MIMBRE CON MANGO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269561017120000132', N'PEDESTAL PARA BOCINA EQUIPO DE SONIDO', N'PEDESTAL PARA BOCINA EQUIPO DE SONIDO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269561017120000232', N'PEDESTAL PARA MICROFONO EQUIPO SONIDO', N'PEDESTAL PARA MICROFONO EQUIPO SONIDO', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269561017120010032', N'PEDESTAL PARA TABLERO', N'PEDESTALES PARA TABLERO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269561017120010132', N'PEDESTALES CON FLORES', N'PEDESTALES CON FLORES', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269561019040010132', N'BASE DE MADERA PARA ASTA', N'BASES, PATAS O EXTENSIONES DE PATAS DE MUEBLES DE MADERA PARA ASTA', N'C/U')
@@ -3859,7 +4628,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020000632', N'ESMALTE DE U­A MORADO', N'ESMALTE DE U­A MORADO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020000732', N'ESMALTE DE U­A NEGRO', N'ESMALTE DE U­A NEGRO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020000832', N'ESMALTE DE U­A ROSADO PASTEL', N'ESMALTE DE U­A ROSADO PASTEL', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020000932', N'PINES CON RP DORADOS', N'PINES CON RP DORADOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020001032', N'PINES CON FUSILES DORADOS', N'PINES CON FUSILES DORADOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020001132', N'PINES DE BOINA TRICOLOR', N'PINES DE BOINA TRICOLOR', N'C/U')
@@ -3909,6 +4677,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020102532', N'GAFETE HONOR AL MERITO AEREO', N'GAFETE HONOR AL MERITO AEREO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020102632', N'GAFETE ALAS C/ESTR. P/SUPERV. PLAT.', N'GAFETE ALAS C/ESTR. P/SUPERV. PLAT.', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020102732', N'GAFETE ALAS C/ESTR.Y L. DORADO INSP.', N'GAFETE ALAS C/ESTR.Y L. DORADO INSP.', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020102832', N'GAFETE CORAZON PURPURA', N'GAFETE CORAZON PURPURA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020102932', N'GAFETE CONDECORACIONES LOG SENAN', N'GAFETE CONDECORACIONES LOG SENAN', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020103032', N'PIN RP CON LAURELES DORADA', N'PIN RP CON LAURELES DORADA', N'C/U')
@@ -3960,7 +4729,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020300932', N'PINES 1 BARRA METAL NEGRO', N'PINES 1 BARRA METAL NEGRO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020301032', N'PINES 1 ESTRELLA DORADO', N'PINES 1 ESTRELLA DORADO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020301132', N'PINES 1 ESTRELLA METAL NEGRO', N'PINES 1 ESTRELLA METAL NEGRO', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020301232', N'PINES 2 BARRAS DORADO', N'PINES 2 BARRAS DORADO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020301332', N'PINES 2 BARRAS METAL NEGRO', N'PINES 2 BARRAS METAL NEGRO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020301432', N'PINES 2 ESTRELLAS DORADA', N'PINES 2 ESTRELLAS DORADA', N'C/U')
@@ -4010,6 +4778,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020306032', N'PINES EN BRONCE CON TERMINADO DORADO', N'PINES EN BRONCE CON TERMINADO DORADO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020306132', N'PINES PLASTICO', N'PINES PLASTICOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020306232', N'DECORACIONES PARA U­AS', N'DECORACIONES PARA U­AS', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014020306235', N'DECORACIONES PARA U­AS', N'DECORACIONES PARA U­AS', N'DOC')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014030000102', N'CORONA O TIARA PARA FIESTA O EVENTOS', N'CORONAS DE CELEBRACI­N O TIARA PARA FIESTA O EVENTOS', N'BTO')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601014030000105', N'CORONA O TIARA PARA FIESTA O EVENTOS', N'CORONAS DE CELEBRACI­N O TIARA PARA FIESTA O EVENTOS', N'CJ')
@@ -4061,7 +4830,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601210010000032', N'CUADRO DECORATIVO', N'CUADRO DECORATIVO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601210010000132', N'CUADRO ACRILICO 10MM 21X23', N'CUADRO ACRILICO 10MM 21X23', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601210010000232', N'CUADRO ACRILICO 10MM 26X38', N'CUADRO ACRILICO 10MM 26X38', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601210010003332', N'CUADRO ACRILICO TRANSPARENTE DE 3 MM', N'CUADRO ACRILICO TRANSPARENTE DE 3 MM DE ESPESOR, TAMA­O 10 X 13 + PERNOS EN LAS ESQUINAS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601210010004032', N'CARETAS FACIALES', N'CARETAS FACIALES', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601210010100132', N'CUADRO 48 1/2 X 45 1/4', N'CUADRO 48 1/2 X 45 1/4', N'C/U')
@@ -4111,6 +4879,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601211360000127', N'PAPEL AHUMADO CARBON OSCURO', N'PAPEL AHUMADO CARBON OSCURO', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601211360000132', N'PAPEL AHUMADO 3M MODELO NIGHT VISION 15', N'PAPEL AHUMADO 3M MODELO NIGHT VISION 15', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601211360000227', N'PAPEL AHUMADO CARBON MEDIANO', N'PAPEL AHUMADO CARBON MEDIANO', N'ROL')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601211360000327', N'PAPEL AHUMADO CARBON REFLECTIVO', N'PAPEL AHUMADO CARBON REFLECTIVO', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601211360000427', N'PAPEL ALUMINIO 18X500', N'PAPEL ALUMINIO 18X500', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601211360100032', N'PAPEL ALUMINIO', N'PAPEL ALUMINIO', N'C/U')
@@ -4162,7 +4931,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601219020000032', N'FIELTRO', N'FIELTRO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601219020000137', N'FIELTRO BLANCO DE 60 DE ANCHO', N'FIELTRO BLANCO DE 60 PULGADAS DE ANCHO', N'YD')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601219020000237', N'FIELTRO CELESTE DE 60 DE ANCHO', N'FIELTRO CELESTE DE 60 PULGADAS DE ANCHO', N'YD')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601219020000337', N'FIELTRO CHOCOLATE DE 60 DE ANCHO', N'FIELTRO CHOCOLATE DE 60 PULGADAS DE ANCHO', N'YD')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601219020000437', N'FIELTRO NARANJA DE 60 DE ANCHO', N'FIELTRO NARANJA DE 60 DE ANCHO', N'YD')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601219020000537', N'FIELTRO NEGRO DE 60 DE ANCHO', N'FIELTRO NEGRO DE 60 DE ANCHO', N'YD')
@@ -4212,6 +4980,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601232040040027', N'CINTAS DECORATIVAS BLANCA', N'CINTAS DECORATIVAS BLANCA', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601232040050027', N'CINTAS DECORATIVAS DORADA', N'CINTAS DECORATIVAS DORADA', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601232040060027', N'CINTAS DECORATIVAS FUCSIA', N'CINTAS DECORATIVAS FUCSIA', N'ROL')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601232040070027', N'CINTAS DECORATIVAS VERDE', N'CINTAS DECORATIVAS VERDE', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601232040080027', N'CINTAS DECORATIVAS DORADA N­40 10 YDS', N'CINTAS DECORATIVAS DORADA N­40 10 YDS', N'ROL')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601232040090027', N'CINTAS DECORATIVAS DE PAPEL CARLING', N'CINTAS DECORATIVAS DE PAPEL CARLING', N'ROL')
@@ -4263,7 +5032,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601315090100032', N'ESTUCHES PARA CD', N'ESTUCHES PARA CD', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601315100100132', N'METRO STRAT/TELE BOLSO P/GUITARRA', N'METRO STRAT/TELE BOLSO P/GUITARRA', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601315100200132', N'METRO BASS BAG BOLSO P/BAJO', N'METRO BASS BAG BOLSO P/BAJO', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601315100300132', N'BOLSO CON ACCESORIOS BORDADOS', N'BOLSO CON ACCESORIOS BORDADOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601315130000132', N'BASTON DE MANDO BRONCE Y MADERA 50 CM', N'BASTON DE MANDO BRONCE Y MADERA 50 CM', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269601315130000232', N'BASTON SE­ALIZACION ALUMINIO', N'BASTON SE­ALIZACION ALUMINIO', N'C/U')
@@ -4313,6 +5081,7 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269801416110100532', N'MOLA FRANKLIN CUSHION 17 D', N'MOLA FRANKLIN CUSHION 17 D', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269801416110100632', N'MOLA FRANKLIN CUSHION 14 C', N'MOLA FRANKLIN CUSHION 14 C', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269801416110100732', N'MOLA FRANKLIN CUSHION 14 B', N'MOLA FRANKLIN CUSHION 14 B', N'C/U')
+GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269801416110100832', N'MOLA FRANKLIN CUSHION 14 E', N'MOLA FRANKLIN CUSHION 14 E', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269801416110100932', N'MOLITAS E 53', N'MOLITAS E 53', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269801416110101032', N'MOLITAS D 53', N'MOLITAS D 53', N'C/U')
@@ -4364,7 +5133,6 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269911016020004132', N'MASCARA EFCTO TOTAL NEGRO', N'MASCARA EFCTO TOTAL NEGRO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269911016020004232', N'MASCARA EFCTO TOTAL CHOCOLATE 9 GRAMOS', N'MASCARA EFCTO TOTAL CHOCOLATE 9 GRAMOS', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269911016020004332', N'PALETA DE SOMBRAS DE 6 COLORES DEGRADADA', N'PALETA DE SOMBRAS DE 6 COLORES DEGRADADA TERRACOTA', N'C/U')
-GO
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269911016020004432', N'PALETA SOMBRAS 6 COLORES DEGRADAD VIOL/R', N'PALETA DE SOMBRAS DE 6 COLORES DEGRADADA VIOLETA Y ROSADO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269911016020004532', N'PALETA SOMBRAS 6COLOR DEGRADADA AMARILLO', N'PALETA DE SOMBRAS DE 6 COLORES DEGRADADA AMARILLO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269911016020004632', N'PALETA SOMBRAS 6 COLOR DEGRADAD VERD/TUR', N'PALETA DE SOMBRAS DE 6 COLORES DEGRADADA VERDE TURQUEZA', N'C/U')
@@ -4398,6 +5166,241 @@ INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269911016020012332', N'KIT O ESTUCHE DE BELLEZA VARIADO', N'KIT O ESTUCHE DE BELLEZA VARIADO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269911017020100032', N'TRENZAS DE CABELLO', N'TRENZAS DE CABELLO', N'C/U')
 INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269931517010100232', N'MONEDAS GIRATORIAS', N'MONEDAS GIRATORIAS', N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'269999937501030005', N'TRIMI BOLSA DE 2OZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271481018000101332', N'TAPA DE 1/2 PARA BANDEJA DE BAÑO MARIA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521415260000832', N'CAFETERA ELECTRICA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521515020001305', N'PLATO PLASTICO #9', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521515050010005', N'REVOLVEDORES DE CAFE', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521515050010132', N'REVOLVEDORES DE CAFE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521517030040223', N'TENEDOR PLASTICOS', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521517040000132', N'KIT DE CUBIERTOS PLASTICOS UNIDAD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521517050001132', N'VASIJA PLASTICA C/TAPA CAPACID 10LTS.', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521520020001232', N'TAPAS TRANSPARENTES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521521020000123', N'VASOS PARA BEBIDA CALIENTE CON ASA', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521521020000905', N'VASO PLASTICO', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521521020000923', N'VASO PLASTICO DE 10 OZ.', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521521020002232', N'VASO CONICO DE CARTON 4 ONZ (118ML)', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'271521521020300023', N'VASOS CONICO DE CARTON', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273141117030000105', N'PAPEL TOALLA INDUSTRIAL', NULL, N'CJ')
+GO
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273141117030200032', N'PAPEL TOALLA EN ROLLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273141117030300032', N'PAPEL TOALLA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273141117031100032', N'PAPEL HIGIENICO INDUSTRIAL BLANCO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273141117031100132', N'PAPEL TOALLA INDUSTRIAL BLANCO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273141117040230332', N'PAPEL HIGIENICO INDUSTRIAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273221016200000032', N'RECOGEDOR DE MANO PLASTICO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273241115030040041', N'BOLSA', NULL, N'MLR')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273422817050200632', N'BOLSAS DE BASURA 32X40', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273422817050201332', N'ESCOBA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273422817050202732', N'RASTRILLO PLASTICO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273441029120000014', N'LIMPIADOR', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471215010000632', N'CARRO DE LIMPIEZA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471215010000732', N'ORGANIZADOR DE LIMPIEZA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217010000132', N'BOLSAS 23 X 30', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217010002541', N'BOLSA DE BASURA TRANSPARENTE 23 X 30', NULL, N'MLR')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217010002641', N'BOLSA DE BASURA TRANSPARENTE 37 X 50', NULL, N'MLR')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217010005032', N'BASURERO C/TAPA DE 13GLS POR PEDAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217010005132', N'BASURERO C/TAPA DE 7 GLS.POR PEDAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217010005232', N'BASURERO C/TAPA DE 21 GLS.POR PEDAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217012602732', N'BOLSA DE BASURA NEGRA 23 ½ X30 FUERTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217020000332', N'CESTO DE BASURA TIPO ESCRITORIO NEGRO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217020001932', N'BASURERO 50GL VERDE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471217020005132', N'RECOJEDOR DE BASURA PLASTICO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471218060000132', N'ESCURRIDOR P/PISOS DE GOMA SUAVE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471315020000332', N'PAÑO DE LIMPIEZA MULTIUSO AMARILLO 12X12', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471315020300032', N'PAÑO ABSORBENTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471315020400032', N'PAÑOS DE LIMPIEZA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316030000132', N'ESPONJAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316030101532', N'BRILLO D/METAL INOXIDABLE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316030101832', N'ESPONJA CON BRILLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316040000132', N'ESCOBA TIPO CEPILLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316040000832', N'ESCOBILLONES (CEPILLO D/CERDAS/PALO COMP', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316040031132', N'ESCOBA PARA BARRER EN FORMA ANGULAR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316040500032', N'ESCOBILLA PLASTICA PARA JARDIN', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316052600232', N'CEPILLO TIPO PLANCHITA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316080100032', N'ESCOBILLA CON BASE PARA INODORO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316090000332', N'MANGO MULTIPROPOSITO DE MADERA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316090001132', N'LAMPAZO COMPLETO DE 36” LARGO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316090400032', N'PALO D/ESCOBILLON', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316130000032', N'PALOS DE ESCOBA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316130010232', N'ESCOBA MANGO DE MADERA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316180000132', N'PALOS DE TRAPEADOR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316180000832', N'MANGO DE ALUMINIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471316180101032', N'MOTAS DE TRAPEAR AZULES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471317040300005', N'JABON LIQUIDO PARA MANOS', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471317040300014', N'JABON LIQUIDO PARA MANOS', NULL, N'GLN')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471317040300032', N'JABON LIQUIDO PARA MANOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471318100000032', N'BRILLOS DE RESTREGAR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471318100000035', N'BRILLOS DE RESTREGAR', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471318100000232', N'BRILLOS DE RESTREGAR DIXIE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471318250010835', N'LIMPIADOR DE VIDRIO EN LIQUIDO', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471318250010941', N'BOLSAS PLASTICAS TRANSPARENTE 32 X 40', NULL, N'MLR')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273471321020000132', N'KITS DE ASEO PERSONAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273521217030100132', N'TOALLITAS DESINFECTANTES DESECHABLES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273521217040500323', N'TOALLITAS DESINFECTANTES Y DESECHABLES', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273521217040600823', N'TOALLITAS DESINFECTANTE 18X18CM', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'273531316080030235', N'JABON DE TOCADOR DE FRAGANCIA 125 GRAMO', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'274411224009029832', N'CUBRE BOTAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'274511715019000032', N'CARBONATO DE CALCIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'274511800000000132', N'HORMONAS CRECIMIENTO SINTETICA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275111517120300435', N'BOLIGRAFOS AZUL D/ACEITE DE PTA DE BOLA', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275111517120300505', N'TACHUELA AZUL DE 1/2', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275111517120300605', N'TACHUELA DE 1/2 P/TAPICERIA', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275111517120300705', N'TACHUELA PARA TAPICERIA #4', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275111517120300805', N'TACHUELA PARA TAPICERIA #8', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275121815000000232', N'CERA CUENTA FACIL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275141115090000623', N'PESTAÑA PARA PENDAFLEX', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275312015000000132', N'CINTA ADHESIVA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275312015000000832', N'CINTA ADHESIVA 3/4X36 YDS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275312015000004232', N'ENGRAPADORA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275312015030000032', N'MASKING TAPE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275312015030000632', N'TAPE TRANSPARENTE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275312015030002132', N'LIQUIDO CORRECTOR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275312015030020232', N'MASKINTAPE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275312015121021023', N'CINTA ADHESIVA DE 1 7/8” X 50 YDS 3 UNI', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275312016031030432', N'GOMA SEMI LIQUIDA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275411116040000032', N'REGLAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275411116040330232', N'REGLA TRANS PLA FLEX 12 STUDMARK', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441017230041432', N'BINDING CASE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441017230042632', N'CUENTA FACIL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441017230045632', N'CLIP SUJETA PAPEL DE METAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441018010000032', N'CALCULADORA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441018020000232', N'SUMADORA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441031058003132', N'CINTA BICOLOR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441031113130832', N'TINTA PARA SELLO DE ALMOHADILLA ROJO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441035023001032', N'CUBIERTAS D/ENCUAD VINIL NEG', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441035040000032', N'ESPIRALES DE 1', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441035040001332', N'ESPIRAL PARA ENCUADERNACION DE 7/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441035040001432', N'ESPIRAL PARA ENCUADERNACION DE 1 1/2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441035040002232', N'ESPIRALES 5/16 8 MM', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441035041400032', N'ESPIRALES PLASTICOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441115000100032', N'BASE PARA TAPE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441115030000132', N'BANDEJA PARA ESCRITORIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441115030000832', N'BANDEJA DE CORRESPONDENCIA TAMAÑO LEGAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441216150000532', N'ENGRAPADORA DE METAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441216180010232', N'TIJERAS SENC AC MGO PLAS 8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441216180110132', N'TIJERAS STUDMARK SENC AC MGO PLAS 6', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441216190030032', N'SACAPUNTAS ELECTRICO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441216190030332', N'SACA GRAPA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441216190040032', N'SACAPUNTA DE METAL', NULL, N'C/U')
+GO
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441216270000632', N'SEPARADORES DE PAPEL CON 5 DIVISIONES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441216280010032', N'DISPENS P/CLIP MGNTC CUAD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217010000005', N'BOLIGRAFO', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217010001832', N'BOLIGRAFOS DE ACEITE AZUL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217011060232', N'BOLIGRAFOS DE GEL AZUL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217011110035', N'BOLIGRAFOS PTA FIN ACE NEG', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217050010531', N'MINAS PARA LAPIZ MECANICO 0.5MM HB BEIFA', NULL, N'TUB')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217080000732', N'KID DE MARCADORES PARA TABLERO CON BORRA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217080001935', N'MARCADOR PERMANENTE NEGRO PUNTA CINCELAD', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217080002835', N'MARCADOR PERMANENTE AZUL CON PUNTA CINCE', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217080010132', N'MARCADORES PARA CD-DVD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217080550232', N'SET MARCADORES CON BORRADOR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217083050032', N'MARCADORES AG NEG', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217083060032', N'MARCADORES AG ROJ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217083070032', N'MARCADORES AGAZU', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217083080032', N'MARCADORES AGVER', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217083180005', N'MARCADORES PERM AZU', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217086600132', N'RESALTADOR AMARILLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217160010232', N'RESALTADOR TIPO PLUMA VER', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217160010332', N'RESALTADOR TIPO PLUMA NAJ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217160020105', N'RESALTADOR FLUORESC TINTA TRANS AMA', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217160020735', N'RESALTADORES ROSADO DE TINTAS TRANSPAREN', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217160030235', N'RESALTADOR TINTA TRANS PTA CINCEL VER', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217160230135', N'RESALTADOR TINTA TRANS PTA CINCEL AMA', NULL, N'DOC')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441217182100032', N'BOLIGRAFO ROJO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441218020012032', N'CORRECTOR LIQUIDO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441218040003932', N'BORRADOR PARA TABLERO BLANCO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441218040010132', N'BORRADOR SUAVE DE LAPIZ STUDMARK', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441218040040032', N'BORRADOR TABLERO P/ TIZA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441220010000532', N'ACORDEON PLASTICO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441220010080032', N'ACORDEON PLASTICO TAM LEGAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441220030100405', N'SUJETA PAPE METAL PLASTIC COLORS #1 33MM', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441220110001032', N'CARPETA PANORAMICA 2 BLANCA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441220120000232', N'TABLA CON GANCHO TAMAÑO LEGAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441220120200232', N'TABLA DE INVENTARIO 8 1/2 X 11', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441220170020032', N'CARPETA COLGANTE TAM LEGAL', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441220230010032', N'BINDING CASE N° 51', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441220230220032', N'PORTF VINYL AZU 2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221010050003', N'LIGAS ELASTICAS', NULL, N'BOL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221040050305', N'CLPS P/PAPEL JUMBO OFFICESTAR', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221040190105', N'CLPS P/PAPEL BINDER N°1 STUDMARK', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221050000005', N'BINDER CLIP', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221050000105', N'BINDER CLIP DE 1 METAL CAJA DE 12 UNI', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221050000205', N'GANCHOS DE LEGAJAR C/50UNIDADES', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221050002032', N'ESPIRAL 1 1/2 FORCE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221050010005', N'BINDER CLIP METAL 3/4 PULG', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221050020905', N'BINDER CLIPS 2', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221050050005', N'BINDER CLIP 3/4', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221050050432', N'BINDER CLIP 3/4', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221060010805', N'PINES C/CABEZ PLAST/PUNT ACER P/TAB CORC', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275441221070001305', N'GRAPAS STANDARD', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275451015080000032', N'PERFORADORAS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275451015080200032', N'PERFORADORAS 2 HUECOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275451015080300032', N'PERFORADORAS 3 HUECOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275551216140500132', N'NOTAS ADHESIVAS 3X3', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275551216160000005', N'BANDERITA ADHESIVA CAJA', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275551216160000132', N'BANDERITAS DE SING HERE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275551216160000323', N'BANDERITA ADHESIVA PAQUETE', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275551216160000423', N'BANDERITA ADHESIVA COLORES', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'275601217020000032', N'ALMOHADILLA PARA SELLO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'277422918020002732', N'CLAMP PROFESIONAL DE ALUMNIO 2', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279231216120100723', N'AGUJA #12', NULL, N'PAQ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279231518200000332', N'KIT DE MALETINES DE 25 CONTROLES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279231518200000432', N'MANGUERA DE 1X 10', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279231518200000532', N'MANGUERA DE PRESION 3/8', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279231518200000632', N'TIZA DE LINEA 8OZ', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279312015030150132', N'MASKING TAPE 1', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279441217100000032', N'TIZA DE SOLDADURA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279471317100001932', N'DISPENSADOR PARA PAPEL HIGIENICO INDUSTR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279471317110020532', N'DISPENSADOR PLASTICO PARA JABON LIQUIDO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279531415010100005', N'ALFILER DE COLOR', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279531416050100932', N'AGUJA CURVA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279999937501030019', N'MICROFONO MULTIMEDIA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279999937501030020', N'REPRODUCTOR DE DVD', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279999937501030021', N'ALAMBRE P/SALIDA DE TELEFONO 1000''', NULL, N'ROL')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'279999937501030024', N'GUANTES DE USO VETERINARIO', NULL, N'CJ')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'280231015120000032', N'REPUESTO DE HOJA CALADORA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'280251319021365932', N'CABLE PARA DIAGNOSTICO COMP. 4 PINES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'280261120000100532', N'DIODO 3300UF  50V', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'280391215490101132', N'TERMOSTATO CONTACTO PARA NEVERA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'280999937501040070', N'RESISTENCIA ELECTRICA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'280999937501040071', N'CERRADURA ESCRITORIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'320451016040070000', N'PROCESADOR DE VIDEOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'320451116030110000', N'PANTALLA PLANA INTERACTIVA DE 75', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'320521615420000400', N'PANTALLA LED 2.5MM PIXEL 0.5X1M', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'331421829010002000', N'CAMILLA FACIAL 185X62X54', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'350561015020020000', N'SOFA 2 PUESTOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'350561015020030000', N'SOFA 3 PUESTOS', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'350561015045270000', N'SILLA OPERATIVA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'350561015047070000', N'SILLA BUTACA DE 1 PUESTO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'350561015048074900', N'SILLA AUXILIAR DE ESTETICA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'350561015201040000', N'CASILLERO 2 PRTAS COL NEG', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'350561017030000000', N'ESCRITORIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'350561017030280700', N'ESCRITORIO FORM L C/3 GAV CAFE TP', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'350999937501030002', N'LAMPARA PARA CUARTO FRIO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370231516070000600', N'PRENSA PARA HIERRO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370231815000200400', N'MAQUINA DE CORTAR CARNES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370231815070080000', N'MAQUINA RECICLADORA DE GASES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370271123000400000', N'TALADRO PERCUTOR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370401015000101500', N'EXTRACTOR DE AIRE', NULL, N'C/U')
+GO
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370401017010000000', N'AIRE ACONDICIONADO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370401017030001700', N'CONDENSADOR DE BAJA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370401017030001800', N'EVAPORADOR DE BAJA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370422800000000100', N'ESTERILIZADOR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370461715060000000', N'CAJAS FUERTES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370461716100090000', N'CAMARAS SEG INFRARROJA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370461915050000800', N'SIST ALARMA CONTRA INTRUSION C/PANEL/TEC', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370481016160400000', N'MAQUINA EMBUTIDORA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370481100000100000', N'MALETA DE TRANSPORTE DE PANTALLA', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370491215100100000', N'CASE PARA TRANSPORTAR', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370521615181000200', N'RACK 6X6', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370999937501040022', N'SUPRESORES DE VOLTAJE', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370999937501040024', N'ESCALERA FIBRA DE VIDRIO TIJERA 6 PIES', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370999937501040025', N'RACK PARA EQUIPO DE COMUNICACION', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370999937501040027', N'ESCANER LECTOR COD DE BARRA DE MANO', NULL, N'C/U')
+INSERT [dbo].[ProductsIstmo] ([codigo], [nombre], [descripcion], [unidad_medida]) VALUES (N'370999937501040029', N'EQUIPO DE VIDEO CONFERENCIA', NULL, N'C/U')
 GO
 SET IDENTITY_INSERT [dbo].[ProductSuppliers] ON 
 
@@ -4406,11 +5409,11 @@ INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID],
 INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (6, 2, 6, N'9987676787667766', 3, CAST(0.0000 AS Decimal(19, 4)), 1, CAST(N'2025-05-02T16:24:13.5730068' AS DateTime2), NULL)
 INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (7, 18, 6, N'516794', 3, CAST(3.7300 AS Decimal(19, 4)), 1, CAST(N'2025-05-27T16:44:54.2117563' AS DateTime2), NULL)
 INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (9, 20, 6, N'7453000908389', 1, CAST(4.9900 AS Decimal(19, 4)), 0, CAST(N'2025-05-28T13:41:06.3109591' AS DateTime2), NULL)
-INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (10, 21, 6, N'7453015114331', 76, CAST(7.2100 AS Decimal(19, 4)), 1, CAST(N'2025-05-28T14:26:38.1790979' AS DateTime2), NULL)
 INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (12, 1, 6, N'67867876867867', 2, CAST(0.0000 AS Decimal(19, 4)), 1, CAST(N'2025-05-28T15:50:49.8500765' AS DateTime2), NULL)
 INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (13, 22, 6, N'7453000940396', 1, CAST(0.1500 AS Decimal(19, 4)), 1, CAST(N'2025-05-29T15:31:11.1873011' AS DateTime2), NULL)
-INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (14, 19, 6, N'7453000908341', 3, CAST(3.0000 AS Decimal(19, 4)), 1, CAST(N'2025-06-02T20:16:57.5668349' AS DateTime2), NULL)
 INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (15, 23, 6, N'7453013153462', 1, CAST(1.9900 AS Decimal(19, 4)), 1, CAST(N'2025-06-04T15:29:21.2193732' AS DateTime2), NULL)
+INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (16, 21, 6, N'7453015114331', 76, CAST(7.2100 AS Decimal(19, 4)), 1, CAST(N'2025-06-07T20:26:01.0262725' AS DateTime2), NULL)
+INSERT [dbo].[ProductSuppliers] ([ProductSupplierID], [ProductID], [SupplierID], [SupplierSKU], [LeadTimeDays], [Cost], [IsPrimarySupplier], [CreatedDate], [ModifiedDate]) VALUES (17, 19, 6, N'7453000908341', 3, CAST(3.0000 AS Decimal(19, 4)), 1, CAST(N'2025-06-07T20:51:17.1869156' AS DateTime2), NULL)
 SET IDENTITY_INSERT [dbo].[ProductSuppliers] OFF
 GO
 INSERT [dbo].[RegionalLocations] ([MainLocationID], [Name], [ShortName], [Address]) VALUES (1, N'CHANGUINOLA', N'CF01', N'BOCAS DEL TORO')
@@ -4490,6 +5493,13 @@ INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System
 INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (37, N'cuarto de galón', N'qt', N'Imperial', 1)
 INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (38, N'pinta', N'pt', N'Imperial', 1)
 INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (39, N'EJEMPLO', N'EJ', N'Personalizado', 1)
+INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (40, N'Pallet (40 cajas)', NULL, N'Personalizado', 1)
+INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (41, N'Pallet (40 x 4)', NULL, N'Personalizado', 1)
+INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (42, N'Pallet (42 x 4)', NULL, N'Personalizado', 1)
+INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (43, N'bolsa (500g)', NULL, N'Personalizado', 1)
+INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (44, N'Caja', NULL, N'Personalizado', 1)
+INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (45, N'bulto', NULL, N'Personalizado', 1)
+INSERT [dbo].[UnitsOfMeasurement] ([UnitID], [UnitName], [Abbreviation], [System], [IsActive]) VALUES (46, N'Cajita', NULL, N'Personalizado', 1)
 SET IDENTITY_INSERT [dbo].[UnitsOfMeasurement] OFF
 GO
 SET IDENTITY_INSERT [dbo].[Users] ON 
@@ -4497,6 +5507,11 @@ SET IDENTITY_INSERT [dbo].[Users] ON
 INSERT [dbo].[Users] ([UserID], [Username], [PasswordHash], [RoleID], [FirstName], [LastName], [Phone], [Email], [IsActive], [CreatedDate], [ModifiedDate]) VALUES (1, N'admin', N'$2b$10$Y06Wwa36lekYUtEU1wIi7e8LRbhgy5ViEqiRC3xqbcRiD2mEYPjCu', 1, N'System', N'Administrator', NULL, NULL, 1, CAST(N'2025-04-28T16:16:55.6506179' AS DateTime2), NULL)
 INSERT [dbo].[Users] ([UserID], [Username], [PasswordHash], [RoleID], [FirstName], [LastName], [Phone], [Email], [IsActive], [CreatedDate], [ModifiedDate]) VALUES (2, N'fernando.dember', N'$2b$10$6UibATs07.N3kB9d1YEBw.fBJCh4fiYMs36.QUi2xdRppxFa8qYkC', 2, N'Fernando', N'Dember', N'69612734', N'fernando.dember@inadeh.edu.pa', 0, CAST(N'2025-05-05T14:33:58.3282242' AS DateTime2), NULL)
 INSERT [dbo].[Users] ([UserID], [Username], [PasswordHash], [RoleID], [FirstName], [LastName], [Phone], [Email], [IsActive], [CreatedDate], [ModifiedDate]) VALUES (1005, N'pdt.inadeh', N'$2b$10$PInaw4taASelLGa3Uf2RZO4YzSH4qY.SEw9OIbZZz3z7.gGoSUQHG', 2, N'pdt', N'inadeh', N'6961-2734', N'pdtinadeh@gmail.com', 1, CAST(N'2025-06-05T17:57:23.4847269' AS DateTime2), NULL)
+INSERT [dbo].[Users] ([UserID], [Username], [PasswordHash], [RoleID], [FirstName], [LastName], [Phone], [Email], [IsActive], [CreatedDate], [ModifiedDate]) VALUES (1006, N'betsabe.bruce', N'$2b$10$nCLG.Xw9S0wrtDa6q6b7geQ4a2tRK0hdWSBw4UoiMi.SlvK7Pai.G', 2, N'Betsabe', N'Bruce', N'1234-5678', N'Betsabe.Bruce@inadeh.edu.pa', 1, CAST(N'2025-06-06T19:40:22.8018387' AS DateTime2), NULL)
+INSERT [dbo].[Users] ([UserID], [Username], [PasswordHash], [RoleID], [FirstName], [LastName], [Phone], [Email], [IsActive], [CreatedDate], [ModifiedDate]) VALUES (1007, N'kassidi.carrera', N'$2b$10$F3B23UZbH5oqWLL7HlPaqeQ4Y94SWFnRA2.btLtIl85GW1/uPz/Lq', 2, N'Kassidi', N'Carrera', N'1234-5678', N'kassidi.carrera@inadeh.edu.pa', 1, CAST(N'2025-06-06T19:41:20.8996459' AS DateTime2), NULL)
+INSERT [dbo].[Users] ([UserID], [Username], [PasswordHash], [RoleID], [FirstName], [LastName], [Phone], [Email], [IsActive], [CreatedDate], [ModifiedDate]) VALUES (1008, N'eligia.blanco', N'$2b$10$0DLla.8Dii.EE.NWnp4kMOZUMTQjyeuRiV9SWp5MpMuoE/nlQDMfi', 2, N'Eligia', N'Blanco', N'1234-5678', N'Eligia.Blanco@inadeh.edu.pa', 1, CAST(N'2025-06-06T19:42:17.8814185' AS DateTime2), NULL)
+INSERT [dbo].[Users] ([UserID], [Username], [PasswordHash], [RoleID], [FirstName], [LastName], [Phone], [Email], [IsActive], [CreatedDate], [ModifiedDate]) VALUES (1009, N'maria.perez', N'$2b$10$e9sdxfx82v3aMxIJBEKa5uaLctLZaqBZ8ufXJ17YG7aO4ypZsj2O.', 2, N'Maria', N'Perez', N'1234-5678', N'maria.perez@inadeh.edu.pa', 1, CAST(N'2025-06-06T19:42:56.2546377' AS DateTime2), NULL)
+INSERT [dbo].[Users] ([UserID], [Username], [PasswordHash], [RoleID], [FirstName], [LastName], [Phone], [Email], [IsActive], [CreatedDate], [ModifiedDate]) VALUES (1010, N'clemente.vergara', N'$2b$10$qBj0ajIscuFsyoT2bf06Ee/iX6uXMecusgeNqbYixoLuYASkh6o72', 2, N'Clemente', N'Vergara', N'1234-5678', N'clemente.vergara@inadeh.edu.pa', 1, CAST(N'2025-06-06T19:45:03.6746299' AS DateTime2), NULL)
 SET IDENTITY_INSERT [dbo].[Users] OFF
 GO
 SET IDENTITY_INSERT [dbo].[Warehouses] ON 
@@ -4520,24 +5535,68 @@ INSERT [dbo].[Warehouses] ([WarehouseID], [WarehouseCode], [WarehouseName], [Loc
 INSERT [dbo].[Warehouses] ([WarehouseID], [WarehouseCode], [WarehouseName], [Location], [IsActive], [CreatedDate], [ModifiedDate], [MainLocationID]) VALUES (24, N'D120', N'Centro India', N'Gonzalo Crance 173, Panamá, Provincia de Panamá, Panamá', 1, CAST(N'2025-05-21T19:56:11.7068955' AS DateTime2), NULL, 18)
 INSERT [dbo].[Warehouses] ([WarehouseID], [WarehouseCode], [WarehouseName], [Location], [IsActive], [CreatedDate], [ModifiedDate], [MainLocationID]) VALUES (25, N'D121', N'Panamá Pacífico', N'Panamá, Provincia de Panamá Oeste, Panamá', 1, CAST(N'2025-05-21T19:56:27.8759443' AS DateTime2), NULL, 22)
 INSERT [dbo].[Warehouses] ([WarehouseID], [WarehouseCode], [WarehouseName], [Location], [IsActive], [CreatedDate], [ModifiedDate], [MainLocationID]) VALUES (1008, N'D118', N'Isla Mir-ya', N'Isla mirya', 1, CAST(N'2025-05-22T13:18:21.6106424' AS DateTime2), NULL, 10)
+INSERT [dbo].[Warehouses] ([WarehouseID], [WarehouseCode], [WarehouseName], [Location], [IsActive], [CreatedDate], [ModifiedDate], [MainLocationID]) VALUES (2008, N'01', N'Almacen Central', N'Tocumen', 1, CAST(N'2025-06-06T15:02:19.3752072' AS DateTime2), NULL, 14)
+INSERT [dbo].[Warehouses] ([WarehouseID], [WarehouseCode], [WarehouseName], [Location], [IsActive], [CreatedDate], [ModifiedDate], [MainLocationID]) VALUES (2009, N'02', N'Almacen Nuevo', N'nuevo', 1, CAST(N'2025-06-06T15:02:54.4440708' AS DateTime2), NULL, 14)
 SET IDENTITY_INSERT [dbo].[Warehouses] OFF
 GO
 SET IDENTITY_INSERT [dbo].[WarehouseUsers] ON 
 
 INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2003, 1005, 21, CAST(N'2025-06-05T18:04:25.7759951' AS DateTime2))
 INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2004, 1005, 23, CAST(N'2025-06-05T18:04:25.7829956' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2011, 1, 2008, CAST(N'2025-06-06T18:16:57.5556966' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2012, 1, 2009, CAST(N'2025-06-06T18:16:57.5587080' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2013, 1006, 2009, CAST(N'2025-06-06T19:40:22.8284044' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2014, 1006, 2008, CAST(N'2025-06-06T19:40:22.8343974' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2015, 1007, 2008, CAST(N'2025-06-06T19:41:20.9016385' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2016, 1007, 2009, CAST(N'2025-06-06T19:41:20.9056390' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2019, 1009, 2008, CAST(N'2025-06-06T19:42:56.2586536' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2020, 1009, 2009, CAST(N'2025-06-06T19:42:56.2616328' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2021, 1010, 2008, CAST(N'2025-06-06T19:45:03.6806327' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2022, 1010, 2009, CAST(N'2025-06-06T19:45:03.6891432' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2023, 1008, 2008, CAST(N'2025-06-06T20:03:46.1839805' AS DateTime2))
+INSERT [dbo].[WarehouseUsers] ([WarehouseUserID], [UserID], [WarehouseID], [CreatedDate]) VALUES (2024, 1008, 2009, CAST(N'2025-06-06T20:03:46.1889796' AS DateTime2))
 SET IDENTITY_INSERT [dbo].[WarehouseUsers] OFF
 GO
-/****** Object:  Index [UQ_Inventory_Product_Warehouse]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Index [UQ_Inventory_Product_Warehouse]    Script Date: 11/06/2025 9:26:37 ******/
 ALTER TABLE [dbo].[Inventory] ADD  CONSTRAINT [UQ_Inventory_Product_Warehouse] UNIQUE NONCLUSTERED 
 (
 	[ProductID] ASC,
 	[WarehouseID] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
+/****** Object:  Index [IX_Inventory_ProductID]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_Inventory_ProductID] ON [dbo].[Inventory]
+(
+	[ProductID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Inventory_WarehouseID]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_Inventory_WarehouseID] ON [dbo].[Inventory]
+(
+	[WarehouseID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_InventoryTransactions_CreatedDate]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_InventoryTransactions_CreatedDate] ON [dbo].[InventoryTransactions]
+(
+	[CreatedDate] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_InventoryTransactions_InventoryID]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_InventoryTransactions_InventoryID] ON [dbo].[InventoryTransactions]
+(
+	[InventoryID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_InventoryTransactions_ProductID]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_InventoryTransactions_ProductID] ON [dbo].[InventoryTransactions]
+(
+	[ProductID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 100, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ__Products__177800D3396C8E14]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Index [UQ__Products__177800D3396C8E14]    Script Date: 11/06/2025 9:26:37 ******/
 ALTER TABLE [dbo].[Products] ADD UNIQUE NONCLUSTERED 
 (
 	[Barcode] ASC
@@ -4545,8 +5604,27 @@ ALTER TABLE [dbo].[Products] ADD UNIQUE NONCLUSTERED
 GO
 SET ANSI_PADDING ON
 GO
-
-/****** Object:  Index [UQ_ProductSupplier]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Index [IX_Products_Barcode]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_Products_Barcode] ON [dbo].[Products]
+(
+	[Barcode] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Products_CategoryID]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_Products_CategoryID] ON [dbo].[Products]
+(
+	[CategoryID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_Products_InternalSKU]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_Products_InternalSKU] ON [dbo].[Products]
+(
+	[InternalSKU] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [UQ_ProductSupplier]    Script Date: 11/06/2025 9:26:37 ******/
 ALTER TABLE [dbo].[ProductSuppliers] ADD  CONSTRAINT [UQ_ProductSupplier] UNIQUE NONCLUSTERED 
 (
 	[ProductID] ASC,
@@ -4555,7 +5633,7 @@ ALTER TABLE [dbo].[ProductSuppliers] ADD  CONSTRAINT [UQ_ProductSupplier] UNIQUE
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ__Roles__8A2B61600135DDBE]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Index [UQ__Roles__8A2B61600135DDBE]    Script Date: 11/06/2025 9:26:37 ******/
 ALTER TABLE [dbo].[Roles] ADD UNIQUE NONCLUSTERED 
 (
 	[RoleName] ASC
@@ -4563,26 +5641,52 @@ ALTER TABLE [dbo].[Roles] ADD UNIQUE NONCLUSTERED
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ__Users__536C85E4FE9CDAF4]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Index [UQ__Users__536C85E4FE9CDAF4]    Script Date: 11/06/2025 9:26:37 ******/
 ALTER TABLE [dbo].[Users] ADD UNIQUE NONCLUSTERED 
 (
 	[Username] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
+/****** Object:  Index [IX_Users_RoleID]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_Users_RoleID] ON [dbo].[Users]
+(
+	[RoleID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ__Warehous__1686A056F7862E4F]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Index [IX_Users_Username]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_Users_Username] ON [dbo].[Users]
+(
+	[Username] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UQ__Warehous__1686A056F7862E4F]    Script Date: 11/06/2025 9:26:37 ******/
 ALTER TABLE [dbo].[Warehouses] ADD UNIQUE NONCLUSTERED 
 (
 	[WarehouseCode] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [UQ_WarehouseUsers_User_Warehouse]    Script Date: 05/06/2025 16:06:48 ******/
+/****** Object:  Index [UQ_WarehouseUsers_User_Warehouse]    Script Date: 11/06/2025 9:26:37 ******/
 ALTER TABLE [dbo].[WarehouseUsers] ADD  CONSTRAINT [UQ_WarehouseUsers_User_Warehouse] UNIQUE NONCLUSTERED 
 (
 	[UserID] ASC,
 	[WarehouseID] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_WarehouseUsers_UserID]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_WarehouseUsers_UserID] ON [dbo].[WarehouseUsers]
+(
+	[UserID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_WarehouseUsers_WarehouseID]    Script Date: 11/06/2025 9:26:37 ******/
+CREATE NONCLUSTERED INDEX [IX_WarehouseUsers_WarehouseID] ON [dbo].[WarehouseUsers]
+(
+	[WarehouseID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[Categories] ADD  DEFAULT (sysutcdatetime()) FOR [CreatedDate]
 GO
@@ -4685,4 +5789,8 @@ GO
 ALTER TABLE [dbo].[InventoryTransactions]  WITH CHECK ADD  CONSTRAINT [CHK_TransactionType] CHECK  (([TransactionType]='SCANNER' OR [TransactionType]='RECEIPT' OR [TransactionType]='SHIPMENT' OR [TransactionType]='ADJUSTMENT' OR [TransactionType]='TRANSFER'))
 GO
 ALTER TABLE [dbo].[InventoryTransactions] CHECK CONSTRAINT [CHK_TransactionType]
+GO
+USE [master]
+GO
+ALTER DATABASE [inventario_prod] SET  READ_WRITE 
 GO
