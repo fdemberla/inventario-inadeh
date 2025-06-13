@@ -6,8 +6,7 @@ import { toast } from "react-hot-toast";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../../../components/DataTable"; // adjust path as needed
 import { useRouter } from "next/navigation";
-import InventoryUpdateModal, {
-} from "../../../components/InventoryUpdateModal";
+import InventoryUpdateModal from "../../../components/InventoryUpdateModal";
 
 type Warehouse = {
   WarehouseID: number;
@@ -94,45 +93,6 @@ export default function InventoryPage() {
     setInventory(data);
     setLastUpdated(new Date());
   };
-
-  // const handleUpdate = useCallback(
-  //   async (item: InventoryItem) => {
-  //     const newQtyStr = item[item.InventoryID];
-  //     const newQty = Number(newQtyStr);
-
-  //     if (
-  //       newQtyStr === undefined || // No update entered
-  //       newQtyStr === "" || // Empty input
-  //       isNaN(newQty) || // Invalid number
-  //       newQty === item.QuantityOnHand // No actual change
-  //     ) {
-  //       toast("Sin cambios válidos para este producto.");
-  //       return;
-  //     }
-
-  //     const response = await fetch("/api/inventory/update", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         productId: item.ProductID,
-  //         warehouseId: selectedWarehouseId,
-  //         newQuantity: newQty,
-  //         notes: "Ajuste manual",
-  //         referenceNumber: `WEB-${new Date().toISOString().slice(0, 10)}`,
-  //         updateType: "table",
-  //       }),
-  //     });
-
-  //     const result = await response.json();
-  //     if (response.ok) {
-  //       toast.success(`Producto ${item.ProductName} actualizado.`);
-  //       fetchInventory(Number(selectedWarehouseId));
-  //     } else {
-  //       toast.error(result.message || "Error al actualizar.");
-  //     }
-  //   },
-  //   [selectedWarehouseId],
-  // );
 
   const columns: ColumnDef<InventoryItem>[] = useMemo(
     () => [
