@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
         );
 
         await rawSql(
-          `INSERT INTO inventario.dbo.InventoryTransactions 
+          `INSERT INTO dbo.InventoryTransactions 
             (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy, ProductID) 
             VALUES (@param0, 'RECEIPT', @param1, NULL, @param2, @param3, @param4)`,
           [
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
         );
 
         await rawSql(
-          `INSERT INTO inventario.dbo.InventoryTransactions 
+          `INSERT INTO dbo.InventoryTransactions 
             (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy, ProductID) 
             VALUES (@param0, 'RECEIPT', @param1, NULL, @param2, @param3, @param4)`,
           [
@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
       );
 
       await rawSql(
-        `INSERT INTO inventario.dbo.InventoryTransactions 
+        `INSERT INTO dbo.InventoryTransactions 
           (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy, ProductID) 
           VALUES (@param0, 'SHIPMENT', @param1, NULL, @param2, @param3, @param4)`,
         [

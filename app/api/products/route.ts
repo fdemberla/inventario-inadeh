@@ -9,6 +9,7 @@ export async function GET() {
       SELECT p.ProductID, p.ProductName, p.InternalSKU, p.Barcode, c.CategoryName
       FROM Products p
       LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+      ORDER BY p.ProductName ASC
     `,
       [],
     );

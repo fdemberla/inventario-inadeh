@@ -11,7 +11,7 @@ export async function GET(
   try {
     const result = await sql(
       `SELECT SupplierID, SupplierName, ContactPerson, Phone, Email, Address, IsActive, CreatedDate, ModifiedDate
-       FROM inventario.dbo.Suppliers WHERE SupplierID = @param0`,
+       FROM dbo.Suppliers WHERE SupplierID = @param0`,
       [supplierId],
     );
 

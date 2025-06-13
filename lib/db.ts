@@ -35,7 +35,9 @@ async function connectWithRetry(
       const mssql = await import("mssql");
       const newPool = new mssql.ConnectionPool(config);
       await newPool.connect();
-      console.log("✅ Successfully connected to SQL Server!");
+      console.log(
+        `✅ Successfully connected to SQL Server! db: ${process.env.DB_DATABASE}`,
+      );
       return newPool;
     } catch (err) {
       lastError = err;

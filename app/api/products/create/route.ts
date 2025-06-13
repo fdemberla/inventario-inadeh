@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           message:
-            "Faltan campos obligatorios: nombre del producto, SKU o categoría.",
+            "Faltan campos obligatorios: nombre del producto, codigo de barras o categoría.",
         },
         { status: 400 },
       );

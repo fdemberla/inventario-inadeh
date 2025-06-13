@@ -12,8 +12,8 @@ export async function GET() {
         U.Email,
         U.IsActive,
         R.RoleName
-      FROM inventario.dbo.Users U
-      INNER JOIN inventario.dbo.Roles R ON U.RoleID = R.RoleID
+      FROM dbo.Users U
+      INNER JOIN dbo.Roles R ON U.RoleID = R.RoleID
       ORDER BY U.FirstName, U.LastName
       `,
       [],

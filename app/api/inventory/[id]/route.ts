@@ -51,9 +51,9 @@ export async function GET(
         p.ProductName,
         p.Barcode,
         uom.UnitName
-      FROM inventario.dbo.Inventory i
-      JOIN inventario.dbo.Products p ON i.ProductID = p.ProductID
-      JOIN inventario.dbo.UnitsOfMeasurement uom  ON p.UnitID = uom.UnitID
+      FROM dbo.Inventory i
+      JOIN dbo.Products p ON i.ProductID = p.ProductID
+      JOIN dbo.UnitsOfMeasurement uom  ON p.UnitID = uom.UnitID
       WHERE i.WarehouseID = @param0
       ORDER BY p.ProductName ASC
       `,

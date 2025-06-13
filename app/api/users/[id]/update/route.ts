@@ -27,7 +27,7 @@ export async function PUT(req: NextRequest) {
     if (Password && Password.trim() !== "") {
       const hashedPassword = await bcrypt.hash(Password, 10);
       updateUserQuery = `
-        UPDATE inventario.dbo.Users
+        UPDATE dbo.Users
         SET
           Username = @param0,
           PasswordHash = @param1,
@@ -52,7 +52,7 @@ export async function PUT(req: NextRequest) {
       ];
     } else {
       updateUserQuery = `
-        UPDATE inventario.dbo.Users
+        UPDATE dbo.Users
         SET
           Username = @param0,
           RoleID = @param1,
@@ -79,14 +79,11 @@ export async function PUT(req: NextRequest) {
     await sql(updateUserQuery, params);
 
     // Clear and insert new warehouse associations
-    await sql(
-      `DELETE FROM inventario.dbo.WarehouseUsers WHERE UserID = @param0`,
-      [id],
-    );
+    await sql(`DELETE FROM dbo.WarehouseUsers WHERE UserID = @param0`, [id]);
 
     for (const WarehouseID of WarehouseIDs) {
       await sql(
-        `INSERT INTO inventario.dbo.WarehouseUsers (UserID, WarehouseID) VALUES (@param0, @param1)`,
+        `INSERT INTO dbo.WarehouseUsers (UserID, WarehouseID) VALUES (@param0, @param1)`,
         [id, WarehouseID],
       );
     }

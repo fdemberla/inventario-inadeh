@@ -21,8 +21,8 @@ export async function GET(
         U.IsActive,
         U.RoleID,
         R.RoleName
-      FROM inventario.dbo.Users U
-      INNER JOIN inventario.dbo.Roles R ON U.RoleID = R.RoleID
+      FROM dbo.Users U
+      INNER JOIN dbo.Roles R ON U.RoleID = R.RoleID
       WHERE U.UserID = @param0
       `,
       [id],
@@ -45,8 +45,8 @@ export async function GET(
         W.WarehouseCode,
         W.WarehouseName,
         W.Location
-      FROM inventario.dbo.Warehouses W
-      INNER JOIN inventario.dbo.WarehouseUsers UW ON W.WarehouseID = UW.WarehouseID
+      FROM dbo.Warehouses W
+      INNER JOIN dbo.WarehouseUsers UW ON W.WarehouseID = UW.WarehouseID
       WHERE UW.UserID = @param0
       `,
       [id],

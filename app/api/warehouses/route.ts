@@ -5,9 +5,9 @@ export async function GET() {
   try {
     const result = await sql(
       `SELECT WarehouseID, WarehouseCode, WarehouseName, RL.Name, RL.Address, Location, IsActive, CreatedDate, ModifiedDate, W.MainLocationID
-FROM inventario.dbo.Warehouses W
-INNER JOIN inventario.dbo.RegionalLocations RL
-ON W.MainLocationID = RL.MainLocationID;`,
+        FROM dbo.Warehouses W
+        INNER JOIN dbo.RegionalLocations RL
+        ON W.MainLocationID = RL.MainLocationID;`,
       [],
     );
     return NextResponse.json({ warehouses: result });

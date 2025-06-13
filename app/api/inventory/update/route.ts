@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         QuantityOnHand: number;
       }>(
         `SELECT InventoryID, QuantityOnHand 
-         FROM inventario.dbo.Inventory 
+         FROM dbo.Inventory 
          WHERE ProductID = @param0 AND WarehouseID = @param1`,
         [productId, warehouseId],
       );
@@ -56,13 +56,13 @@ export async function POST(request: Request) {
           BEGIN TRANSACTION;
           
           -- Update inventory record
-          UPDATE inventario.dbo.Inventory
+          UPDATE dbo.Inventory
           SET QuantityOnHand = @param0,
               ModifiedDate = CURRENT_TIMESTAMP
           WHERE InventoryID = @param1;
           
           -- Create inventory transaction record
-          INSERT INTO inventario.dbo.InventoryTransactions (
+          INSERT INTO dbo.InventoryTransactions (
             InventoryID,
             TransactionType,
             QuantityChange,
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
           BEGIN TRANSACTION;
           
           -- Insert inventory record
-          INSERT INTO inventario.dbo.Inventory (
+          INSERT INTO dbo.Inventory (
             ProductID,
             WarehouseID,
             QuantityOnHand,
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
           );
           
           -- Create inventory transaction record
-          INSERT INTO inventario.dbo.InventoryTransactions (
+          INSERT INTO dbo.InventoryTransactions (
             InventoryID,
             TransactionType,
             QuantityChange,

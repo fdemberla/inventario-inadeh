@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     // Insert user
     const insertUserResult = await sql(
       `
-      INSERT INTO inventario.dbo.Users
+      INSERT INTO dbo.Users
         (Username, PasswordHash, RoleID, FirstName, LastName, Phone, Email, IsActive)
       OUTPUT INSERTED.UserID
       VALUES (@param0, @param1, @param2, @param3, @param4, @param5, @param6, @param7)
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     for (const WarehouseID of WarehouseIDs) {
       await sql(
         `
-        INSERT INTO inventario.dbo.WarehouseUsers (UserID, WarehouseID)
+        INSERT INTO dbo.WarehouseUsers (UserID, WarehouseID)
         VALUES (@param0, @param1)
         `,
         [newUserId, WarehouseID],

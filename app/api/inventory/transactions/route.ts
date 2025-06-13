@@ -21,10 +21,10 @@ export async function GET(req: Request) {
         FORMAT(it.CreatedDate, 'dddd d hh:mm tt MMMM yyyy') AS FormattedDate,
         w.WarehouseName,
         p.ProductName
-      FROM inventario.dbo.InventoryTransactions it
-      LEFT JOIN inventario.dbo.Inventory i on it.InventoryID = i.InventoryID 
-      LEFT JOIN inventario.dbo.Warehouses w ON i.WarehouseID = w.WarehouseID
-      LEFT JOIN inventario.dbo.Products p on i.ProductID = p.ProductID
+      FROM dbo.InventoryTransactions it
+      LEFT JOIN dbo.Inventory i on it.InventoryID = i.InventoryID 
+      LEFT JOIN dbo.Warehouses w ON i.WarehouseID = w.WarehouseID
+      LEFT JOIN dbo.Products p on i.ProductID = p.ProductID
     `;
 
     const params = [limit];
@@ -42,7 +42,7 @@ export async function GET(req: Request) {
   } catch (error) {
     console.error("Error fetching inventory transactions:", error);
     return NextResponse.json(
-      { message: "Error al obtener las transacciones de inventario." },
+      { message: "Error al obtener las transacciones de " },
       { status: 500 },
     );
   }
