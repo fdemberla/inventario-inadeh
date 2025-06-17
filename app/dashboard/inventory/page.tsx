@@ -306,9 +306,7 @@ export default function InventoryPage() {
 
               <button
                 onClick={() =>
-                  router.push(
-                    `/dashboard/inventory/${selectedWarehouseId}/reports`,
-                  )
+                  router.push(`/dashboard/reports/${selectedWarehouseId}`)
                 }
                 className="rounded-lg bg-gray-100 px-4 py-3 font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-200 active:bg-gray-300"
               >

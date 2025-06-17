@@ -1,6 +1,6 @@
 // app/dashboard/page.tsx
 
-import LogViewer from "../components/reports/LogViewer";
+// import LogViewer from "../components/reports/LogViewer";
 
 export default function Dashboard() {
   return (
@@ -9,7 +9,7 @@ export default function Dashboard() {
         <h1 className="mb-6 text-3xl font-bold text-gray-900 dark:text-white">
           Admin Dashboard
         </h1>
-        <LogViewer />
+        {/* <LogViewer /> */}
       </main>
     </div>
   );

@@ -1,842 +1,501 @@
-'use client';
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import Chart from "chart.js/auto";
+import { Filter } from "lucide-react";
+import { useParams } from "next/navigation";
+import TarjetaGroup from "@/app/components/reports/TarjetaGroup";
+import ExcelExportButton from "@/app/components/reports/BotonExportar";
 
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import * as Chart from 'chart.js';
+const COLORES = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
-interface WarehouseInfo {
-  WarehouseID: number;
-  WarehouseCode: string;
-  WarehouseName: string;
-  Name: string;
-  ShortName: string;
-}
-
-interface ProductCategoryData {
-  category: string;
-  totalProducts: number;
-  totalValue: number;
-  avgPrice: number;
-}
-
-interface ProductTrendData {
-  month: string;
-  productsAdded: number;
-  productsRemoved: number;
-  totalValue: number;
-}
-
-interface TopProductsData {
-  productName: string;
-  category: string;
-  quantity: number;
-  value: number;
-}
-
-export default function WarehouseReportsPage() {
+const PanelReportesAlmacen = () => {
   const params = useParams();
-  const router = useRouter();
-  const warehouseId = params.warehouseId as string;
-  
-  const [warehouseInfo, setWarehouseInfo] = useState<WarehouseInfo | null>(null);
-  const [categoryData, setCategoryData] = useState<ProductCategoryData[]>([]);
-  const [trendData, setTrendData] = useState<ProductTrendData[]>([]);
-  const [topProducts, setTopProducts] = useState<TopProductsData[]>([]);
+
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("todas");
+  const [listaCategoria, setCategoria] = useState([]);
+
+  const [almacenActual, setAlmacenActual] = useState(null);
+  const [nivelesInventario, setNivelesInventario] = useState([]);
+  const [movimientos, setMovimientos] = useState([]);
+  const [valorInventario, setValorInventario] = useState([]);
+  const [alertasStockBajo, setAlertasStockBajo] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedDateRange, setSelectedDateRange] = useState('30'); // days
 
-  // Chart references
-  const pieChartRef = useRef<HTMLCanvasElement>(null);
-  const barChartRef = useRef<HTMLCanvasElement>(null);
-  const lineChartRef = useRef<HTMLCanvasElement>(null);
-  const pieChartInstance = useRef<Chart.Chart | null>(null);
-  const barChartInstance = useRef<Chart.Chart | null>(null);
-  const lineChartInstance = useRef<Chart.Chart | null>(null);
+  // Referencias para los charts
+  const nivelInventarioRef = useRef(null);
+  const movimientoStockRef = useRef(null);
+  const valorInventarioRef = useRef(null);
+
+  // Instancias de los charts
+  const chartInstances = useRef({});
+
+  // Función para destruir chart existente
+  const destroyChart = (chartKey) => {
+    if (chartInstances.current[chartKey]) {
+      chartInstances.current[chartKey].destroy();
+      chartInstances.current[chartKey] = null;
+    }
+  };
 
   useEffect(() => {
-    if (warehouseId) {
-      fetchWarehouseData();
-    }
-  }, [warehouseId, selectedDateRange]);
+    const fetchReportData = async () => {
+      if (!params.id) return;
 
-  useEffect(() => {
-    if (!loading && categoryData.length > 0) {
-      createCharts();
-    }
-    
-    // Cleanup function
-    return () => {
-      destroyCharts();
+      try {
+        setLoading(true);
+
+        // Fetch all data in parallel
+        const responses = await Promise.all([
+          fetch(`/api/warehouses/${params.id}`),
+          fetch(`/api/categories`),
+          fetch(
+            `/api/reports/${params.id}/niveles?category=${categoriaSeleccionada}`,
+          ),
+          fetch(
+            `/api/reports/${params.id}/movimiento?category=${categoriaSeleccionada}`,
+          ),
+          fetch(
+            `/api/reports/${params.id}/valor?category=${categoriaSeleccionada}`,
+          ),
+          fetch(
+            `/api/reports/${params.id}/alerta?category=${categoriaSeleccionada}`,
+          ),
+        ]);
+
+        // Parse all responses
+        const [
+          infoWarehouse,
+          categorias,
+          niveles,
+          movimientos,
+          valor,
+          alertas,
+        ] = await Promise.all(responses.map((res) => res.json()));
+
+        // Update all state
+        setAlmacenActual(infoWarehouse);
+        setCategoria(categorias);
+        setNivelesInventario(niveles);
+        setMovimientos(movimientos);
+        setValorInventario(valor);
+        setAlertasStockBajo(alertas);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-  }, [categoryData, trendData, loading]);
 
-  const destroyCharts = () => {
-    if (pieChartInstance.current) {
-      pieChartInstance.current.destroy();
-      pieChartInstance.current = null;
-    }
-    if (barChartInstance.current) {
-      barChartInstance.current.destroy();
-      barChartInstance.current = null;
-    }
-    if (lineChartInstance.current) {
-      lineChartInstance.current.destroy();
-      lineChartInstance.current = null;
-    }
-  };
+    fetchReportData();
+  }, [params.id, categoriaSeleccionada]);
 
-  const createCharts = () => {
-    destroyCharts();
+  useEffect(() => {
+    const createAllCharts = () => {
+      createInventoryLevelsChart();
+      createStockMovementChart();
+      createInventoryValueChart();
+    };
 
-    // Pie Chart - Products by Category
-    if (pieChartRef.current) {
-      const ctx = pieChartRef.current.getContext('2d');
-      if (ctx) {
-        pieChartInstance.current = new Chart.Chart(ctx, {
-          type: 'pie',
-          data: {
-            labels: categoryData.map(item => item.category),
-            datasets: [{
-              data: categoryData.map(item => item.totalProducts),
-              backgroundColor: [
-                '#3B82F6', '#EF4444', '#10B981', '#F59E0B',
-                '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'
-              ],
-              borderColor: [
-                '#2563EB', '#DC2626', '#059669', '#D97706',
-                '#7C3AED', '#DB2777', '#0891B2', '#65A30D'
-              ],
-              borderWidth: 2
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  usePointStyle: true,
-                  padding: 20
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    const label = context.label || '';
-                    const value = context.parsed;
-                    const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-                    const percentage = ((value / total) * 100).toFixed(1);
-                    return `${label}: ${value} (${percentage}%)`;
-                  }
-                }
-              }
-            }
-          }
-        });
-      }
-    }
+    const createInventoryLevelsChart = () => {
+      if (!nivelesInventario.length || !nivelInventarioRef.current) return;
 
-    // Bar Chart - Value by Category
-    if (barChartRef.current) {
-      const ctx = barChartRef.current.getContext('2d');
-      if (ctx) {
-        barChartInstance.current = new Chart.Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: categoryData.map(item => item.category),
-            datasets: [{
-              label: 'Valor Total ($)',
-              data: categoryData.map(item => item.totalValue),
-              backgroundColor: 'rgba(59, 130, 246, 0.8)',
-              borderColor: 'rgb(59, 130, 246)',
+      destroyChart("inventory");
+      const ctx = nivelInventarioRef.current.getContext("2d");
+
+      chartInstances.current.inventory = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: nivelesInventario.map((item) => item.name),
+          datasets: [
+            {
+              label: "Stock Actual",
+              data: nivelesInventario.map((item) => item.nivel),
+              backgroundColor: "#3B82F6",
+              borderColor: "#3B82F6",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: "top" } },
+          scales: { y: { beginAtZero: true } },
+          indexAxis: "y",
+        },
+      });
+    };
+
+    const createStockMovementChart = () => {
+      if (!movimientos.length || !movimientoStockRef.current) return;
+
+      destroyChart("movement");
+      const ctx = movimientoStockRef.current.getContext("2d");
+
+      chartInstances.current.movement = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: movimientos.map((item) => item.date),
+          datasets: [
+            {
+              label: "Entradas",
+              data: movimientos.map((item) => item.inbound),
+              borderColor: "#10B981",
+              backgroundColor: "#10B981",
+              tension: 0.1,
+            },
+            {
+              label: "Salidas",
+              data: movimientos.map((item) => item.outbound),
+              borderColor: "#EF4444",
+              backgroundColor: "#EF4444",
+              tension: 0.1,
+            },
+            {
+              label: "Cambio Neto",
+              data: movimientos.map((item) => item.net),
+              borderColor: "#3B82F6",
+              backgroundColor: "#3B82F6",
+              tension: 0.1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: "top" } },
+          scales: { y: { beginAtZero: true } },
+        },
+      });
+    };
+
+    const createInventoryValueChart = () => {
+      if (!valorInventario.length || !valorInventarioRef.current) return;
+
+      destroyChart("value");
+      const ctx = valorInventarioRef.current.getContext("2d");
+
+      chartInstances.current.value = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: valorInventario.map((item) => item.name),
+          datasets: [
+            {
+              data: valorInventario.map((item) => item.value),
+              backgroundColor: COLORES,
               borderWidth: 2,
-              borderRadius: 4,
-              borderSkipped: false
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: false
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return `${context.dataset.label}: ${context.parsed.y.toLocaleString()}`;
-                  }
-                }
-              }
+              borderColor: "#fff",
             },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  callback: function(value) {
-                    return '
-
-  const fetchWarehouseData = async () => {
-    try {
-      setLoading(true);
-      
-      // For now, using mock data - replace with your actual API calls
-      // You'll need to create these endpoints:
-      // - /api/warehouse/[id]/info
-      // - /api/warehouse/[id]/categories
-      // - /api/warehouse/[id]/trends
-      // - /api/warehouse/[id]/top-products
-      
-      // Mock data - replace with actual API calls
-      setTimeout(() => {
-        setWarehouseInfo({
-          WarehouseID: parseInt(warehouseId),
-          WarehouseCode: 'WH001',
-          WarehouseName: 'Centro de Distribución Principal',
-          Name: 'Ciudad de Panamá',
-          ShortName: 'PTY'
-        });
-
-        setCategoryData([
-          { category: 'Electrónicos', totalProducts: 450, totalValue: 125000, avgPrice: 277.78 },
-          { category: 'Ropa y Accesorios', totalProducts: 850, totalValue: 85000, avgPrice: 100 },
-          { category: 'Hogar y Jardín', totalProducts: 320, totalValue: 65000, avgPrice: 203.13 },
-          { category: 'Deportes', totalProducts: 280, totalValue: 42000, avgPrice: 150 },
-          { category: 'Libros y Medios', totalProducts: 600, totalValue: 18000, avgPrice: 30 },
-          { category: 'Salud y Belleza', totalProducts: 380, totalValue: 38000, avgPrice: 100 },
-          { category: 'Automotriz', totalProducts: 150, totalValue: 75000, avgPrice: 500 }
-        ]);
-
-        setTrendData([
-          { month: 'Ene', productsAdded: 120, productsRemoved: 45, totalValue: 125000 },
-          { month: 'Feb', productsAdded: 95, productsRemoved: 38, totalValue: 132000 },
-          { month: 'Mar', productsAdded: 150, productsRemoved: 52, totalValue: 145000 },
-          { month: 'Abr', productsAdded: 180, productsRemoved: 65, totalValue: 158000 },
-          { month: 'May', productsAdded: 200, productsRemoved: 70, totalValue: 175000 },
-          { month: 'Jun', productsAdded: 165, productsRemoved: 55, totalValue: 168000 }
-        ]);
-
-        setTopProducts([
-          { productName: 'iPhone 15 Pro', category: 'Electrónicos', quantity: 25, value: 25000 },
-          { productName: 'MacBook Air M2', category: 'Electrónicos', quantity: 15, value: 18000 },
-          { productName: 'Nike Air Max', category: 'Deportes', quantity: 45, value: 4500 },
-          { productName: 'Samsung 55" TV', category: 'Electrónicos', quantity: 12, value: 8400 },
-          { productName: 'Sofá Seccional', category: 'Hogar y Jardín', quantity: 8, value: 6400 }
-        ]);
-
-        setLoading(false);
-      }, 1000);
-      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar los datos');
-      setLoading(false);
-    }
-  };
-
-  // Chart configurations
-  // (Removed - now handled in createCharts function)
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded mb-4 w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white p-6 rounded-lg shadow-sm border">
-                  <div className="h-6 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-8 bg-gray-300 rounded"></div>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm border h-96"></div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border h-96"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-red-800 mb-2">Error</h3>
-            <p className="text-red-700">{error}</p>
-            <button
-              onClick={fetchWarehouseData}
-              className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <button
-              onClick={() => router.push('/reports')}
-              className="text-blue-600 hover:text-blue-800 mb-2 flex items-center"
-            >
-              ← Volver a Almacenes
-            </button>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Reportes - {warehouseInfo?.WarehouseName}
-            </h1>
-            <p className="text-lg text-gray-600">
-              {warehouseInfo?.WarehouseCode} • {warehouseInfo?.Name} ({warehouseInfo?.ShortName})
-            </p>
-          </div>
-          
-          {/* Date Range Selector */}
-          <div className="flex items-center gap-4">
-            <label className="text-sm font-medium text-gray-700">Período:</label>
-            <select
-              value={selectedDateRange}
-              onChange={(e) => setSelectedDateRange(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="7">Últimos 7 días</option>
-              <option value="30">Últimos 30 días</option>
-              <option value="90">Últimos 3 meses</option>
-              <option value="365">Último año</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-blue-600 mb-1">
-              {categoryData.reduce((sum, item) => sum + item.totalProducts, 0).toLocaleString()}
-            </div>
-            <div className="text-gray-600">Total Productos</div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-green-600 mb-1">
-              ${categoryData.reduce((sum, item) => sum + item.totalValue, 0).toLocaleString()}
-            </div>
-            <div className="text-gray-600">Valor Total Inventario</div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-purple-600 mb-1">
-              {categoryData.length}
-            </div>
-            <div className="text-gray-600">Categorías Activas</div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-orange-600 mb-1">
-              ${Math.round(categoryData.reduce((sum, item) => sum + item.totalValue, 0) / categoryData.reduce((sum, item) => sum + item.totalProducts, 0)).toLocaleString()}
-            </div>
-            <div className="text-gray-600">Precio Promedio</div>
-          </div>
-        </div>
-
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Products by Category - Pie Chart */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-xl font-semibold mb-4">Distribución de Productos por Categoría</h3>
-            <div className="h-80 relative">
-              <canvas ref={pieChartRef}></canvas>
-            </div>
-          </div>
-
-          {/* Value by Category - Bar Chart */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-xl font-semibold mb-4">Valor por Categoría</h3>
-            <div className="h-80 relative">
-              <canvas ref={barChartRef}></canvas>
-            </div>
-          </div>
-        </div>
-
-        {/* Trend Chart - Full Width */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border mb-8">
-          <h3 className="text-xl font-semibold mb-4">Tendencia de Productos - Últimos 6 Meses</h3>
-          <div className="h-80 relative">
-            <canvas ref={lineChartRef}></canvas>
-          </div>
-        </div>
-
-        {/* Top Products Table */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-xl font-semibold">Top 5 Productos por Valor</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Producto
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Categoría
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cantidad
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Valor Total
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {topProducts.map((product, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {product.productName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.category}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.quantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                      ${product.value.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-} + value.toLocaleString();
-                  }
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const value = context.parsed;
+                  const percentage =
+                    valorInventario[context.dataIndex].percentage;
+                  return `${context.label}: $${(value / 1000).toFixed(0)}K (${percentage}%)`;
                 },
-                grid: {
-                  color: 'rgba(0, 0, 0, 0.1)'
-                }
               },
-              x: {
-                grid: {
-                  display: false
-                }
-              }
-            }
-          }
-        });
-      }
-    }
-
-    // Line Chart - Product Trends
-    if (lineChartRef.current) {
-      const ctx = lineChartRef.current.getContext('2d');
-      if (ctx) {
-        lineChartInstance.current = new Chart.Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: trendData.map(item => item.month),
-            datasets: [
-              {
-                label: 'Productos Agregados',
-                data: trendData.map(item => item.productsAdded),
-                borderColor: 'rgb(16, 185, 129)',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: 'rgb(16, 185, 129)',
-                pointBorderColor: 'rgb(16, 185, 129)',
-                pointRadius: 5,
-                pointHoverRadius: 7
-              },
-              {
-                label: 'Productos Removidos',
-                data: trendData.map(item => item.productsRemoved),
-                borderColor: 'rgb(239, 68, 68)',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: 'rgb(239, 68, 68)',
-                pointBorderColor: 'rgb(239, 68, 68)',
-                pointRadius: 5,
-                pointHoverRadius: 7
-              }
-            ]
+            },
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-              mode: 'index',
-              intersect: false
-            },
-            plugins: {
-              legend: {
-                position: 'top',
-                labels: {
-                  usePointStyle: true,
-                  padding: 20
-                }
-              },
-              tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleColor: 'white',
-                bodyColor: 'white',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                borderWidth: 1
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: {
-                  color: 'rgba(0, 0, 0, 0.1)'
-                }
-              },
-              x: {
-                grid: {
-                  display: false
-                }
-              }
-            }
-          }
-        });
-      }
-    }
-  };
+        },
+      });
+    };
 
-  const fetchWarehouseData = async () => {
-    try {
-      setLoading(true);
-      
-      // For now, using mock data - replace with your actual API calls
-      // You'll need to create these endpoints:
-      // - /api/warehouse/[id]/info
-      // - /api/warehouse/[id]/categories
-      // - /api/warehouse/[id]/trends
-      // - /api/warehouse/[id]/top-products
-      
-      // Mock data - replace with actual API calls
-      setTimeout(() => {
-        setWarehouseInfo({
-          WarehouseID: parseInt(warehouseId),
-          WarehouseCode: 'WH001',
-          WarehouseName: 'Centro de Distribución Principal',
-          Name: 'Ciudad de Panamá',
-          ShortName: 'PTY'
-        });
+    // Create all charts when any data changes
+    createAllCharts();
+  }, [nivelesInventario, movimientos, valorInventario]);
 
-        setCategoryData([
-          { category: 'Electrónicos', totalProducts: 450, totalValue: 125000, avgPrice: 277.78 },
-          { category: 'Ropa y Accesorios', totalProducts: 850, totalValue: 85000, avgPrice: 100 },
-          { category: 'Hogar y Jardín', totalProducts: 320, totalValue: 65000, avgPrice: 203.13 },
-          { category: 'Deportes', totalProducts: 280, totalValue: 42000, avgPrice: 150 },
-          { category: 'Libros y Medios', totalProducts: 600, totalValue: 18000, avgPrice: 30 },
-          { category: 'Salud y Belleza', totalProducts: 380, totalValue: 38000, avgPrice: 100 },
-          { category: 'Automotriz', totalProducts: 150, totalValue: 75000, avgPrice: 500 }
-        ]);
+  // Efecto para crear los gráficos cuando el componente se monta
+  useEffect(() => {
+    // Cleanup al desmontar
+    return () => {
+      Object.values(chartInstances.current).forEach((chart) => {
+        if (chart) chart.destroy();
+      });
+    };
+  }, []);
 
-        setTrendData([
-          { month: 'Ene', productsAdded: 120, productsRemoved: 45, totalValue: 125000 },
-          { month: 'Feb', productsAdded: 95, productsRemoved: 38, totalValue: 132000 },
-          { month: 'Mar', productsAdded: 150, productsRemoved: 52, totalValue: 145000 },
-          { month: 'Abr', productsAdded: 180, productsRemoved: 65, totalValue: 158000 },
-          { month: 'May', productsAdded: 200, productsRemoved: 70, totalValue: 175000 },
-          { month: 'Jun', productsAdded: 165, productsRemoved: 55, totalValue: 168000 }
-        ]);
+  // return (
+  //   <div className="min-h-screen bg-gray-50 p-6">
+  //     <div className="mx-auto max-w-7xl">
+  //       {/* Header */}
+  //       <div className="mb-8">
+  //         <h1 className="mb-2 text-3xl font-bold text-gray-900">
+  //           Reportes de Almacén
+  //         </h1>
+  //         <p className="text-gray-600">
+  //           Análisis integral y perspectivas de gestión de inventario
+  //         </p>
+  //       </div>
 
-        setTopProducts([
-          { productName: 'iPhone 15 Pro', category: 'Electrónicos', quantity: 25, value: 25000 },
-          { productName: 'MacBook Air M2', category: 'Electrónicos', quantity: 15, value: 18000 },
-          { productName: 'Nike Air Max', category: 'Deportes', quantity: 45, value: 4500 },
-          { productName: 'Samsung 55" TV', category: 'Electrónicos', quantity: 12, value: 8400 },
-          { productName: 'Sofá Seccional', category: 'Hogar y Jardín', quantity: 8, value: 6400 }
-        ]);
+  //       {/* Controles */}
+  //       <div className="mb-6 rounded-lg bg-white p-4 shadow-md">
+  //         <div className="flex flex-wrap items-center gap-4">
+  //           <div className="flex items-center gap-2">
+  //             <Filter className="h-5 w-5 text-gray-500" />
+  //             <select
+  //               value={categoriaSeleccionada}
+  //               onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+  //               className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+  //             >
+  //               <option value="todas">Todas las Categorías</option>
+  //               <option value="electronicos">Electrónicos</option>
+  //               <option value="ropa">Ropa</option>
+  //               <option value="hogar">Hogar y Jardín</option>
+  //               <option value="deportes">Deportes</option>
+  //               <option value="libros">Libros</option>
+  //             </select>
+  //           </div>
+  //           <button className="ml-auto flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700">
+  //             <Download className="h-4 w-4" />
+  //             Exportar Datos
+  //           </button>
+  //         </div>
+  //       </div>
 
-        setLoading(false);
-      }, 1000);
-      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar los datos');
-      setLoading(false);
-    }
-  };
+  //       <TarjetaGroup id={params.id} />
 
-  // Chart configurations
-  const categoryChartData = {
-    labels: categoryData.map(item => item.category),
-    datasets: [
-      {
-        label: 'Total de Productos',
-        data: categoryData.map(item => item.totalProducts),
-        backgroundColor: [
-          '#3B82F6', '#EF4444', '#10B981', '#F59E0B',
-          '#8B5CF6', '#EC4899', '#06B6D4'
-        ],
-        borderColor: [
-          '#2563EB', '#DC2626', '#059669', '#D97706',
-          '#7C3AED', '#DB2777', '#0891B2'
-        ],
-        borderWidth: 2
-      }
-    ]
-  };
+  //       {/* Grilla de Gráficos */}
+  //       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+  //         {/* Niveles de Stock Actuales */}
+  //         <div className="rounded-lg bg-white p-6 shadow-md">
+  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
+  //             Niveles de Stock Actuales
+  //           </h3>
+  //           <div className="h-[300px]">
+  //             <canvas ref={nivelInventarioRef}></canvas>
+  //           </div>
+  //         </div>
 
-  const valueChartData = {
-    labels: categoryData.map(item => item.category),
-    datasets: [
-      {
-        label: 'Valor Total ($)',
-        data: categoryData.map(item => item.totalValue),
-        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-        borderColor: 'rgb(59, 130, 246)',
-        borderWidth: 2
-      }
-    ]
-  };
+  //         {/* Tendencias de Movimiento de Stock */}
+  //         <div className="rounded-lg bg-white p-6 shadow-md">
+  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
+  //             Movimiento Diario de Stock
+  //           </h3>
+  //           <div className="h-[300px]">
+  //             <canvas ref={movimientoStockRef}></canvas>
+  //           </div>
+  //         </div>
+  //       </div>
 
-  const trendChartData = {
-    labels: trendData.map(item => item.month),
-    datasets: [
-      {
-        label: 'Productos Agregados',
-        data: trendData.map(item => item.productsAdded),
-        borderColor: 'rgb(16, 185, 129)',
-        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-        fill: true,
-        tension: 0.4
-      },
-      {
-        label: 'Productos Removidos',
-        data: trendData.map(item => item.productsRemoved),
-        borderColor: 'rgb(239, 68, 68)',
-        backgroundColor: 'rgba(239, 68, 68, 0.2)',
-        fill: true,
-        tension: 0.4
-      }
-    ]
-  };
+  //       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+  //         {/* Distribución de Valor de Inventario */}
+  //         <div className="rounded-lg bg-white p-6 shadow-md">
+  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
+  //             Valor de Inventario por Categoría
+  //           </h3>
+  //           <div className="h-[250px]">
+  //             <canvas ref={valorInventarioRef}></canvas>
+  //           </div>
+  //         </div>
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: false,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
-  };
-
-  const pieOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'right' as const,
-      },
-    },
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded mb-4 w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white p-6 rounded-lg shadow-sm border">
-                  <div className="h-6 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-8 bg-gray-300 rounded"></div>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm border h-96"></div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border h-96"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-red-800 mb-2">Error</h3>
-            <p className="text-red-700">{error}</p>
-            <button
-              onClick={fetchWarehouseData}
-              className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  //         {/* Alertas de Stock Bajo */}
+  //         <div className="rounded-lg bg-white p-6 shadow-md">
+  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
+  //             Alertas de Stock Bajo
+  //           </h3>
+  //           <div className="space-y-3">
+  //             {alertasStockBajo.map((item, index) => (
+  //               <div
+  //                 key={index}
+  //                 className={`rounded-md border-l-4 p-3 ${
+  //                   item.Status === "critical"
+  //                     ? "border-red-500 bg-red-50"
+  //                     : "border-yellow-500 bg-yellow-50"
+  //                 }`}
+  //               >
+  //                 <div className="flex items-center justify-between">
+  //                   <div>
+  //                     <p className="font-medium text-gray-900">
+  //                       {item.ProductName}
+  //                     </p>
+  //                     <p className="text-sm text-gray-600">
+  //                       Reordenar en: {item.ReorderLevel}
+  //                     </p>
+  //                   </div>
+  //                   <div className="text-right">
+  //                     <p
+  //                       className={`font-bold ${
+  //                         item.Status === "critical"
+  //                           ? "text-red-600"
+  //                           : "text-yellow-600"
+  //                       }`}
+  //                     >
+  //                       {item.QuantityOnHand}
+  //                     </p>
+  //                     <p className="text-xs text-gray-500">en stock</p>
+  //                   </div>
+  //                 </div>
+  //               </div>
+  //             ))}
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <button
-              onClick={() => router.push('/reports')}
-              className="text-blue-600 hover:text-blue-800 mb-2 flex items-center"
-            >
-              ← Volver a Almacenes
-            </button>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Reportes - {warehouseInfo?.WarehouseName}
+        <div className="mb-8">
+          {almacenActual && (
+            <h1 className="mb-2 text-3xl font-bold text-gray-900">
+              Reportes de {almacenActual.warehouse.WarehouseName}
             </h1>
-            <p className="text-lg text-gray-600">
-              {warehouseInfo?.WarehouseCode} • {warehouseInfo?.Name} ({warehouseInfo?.ShortName})
-            </p>
-          </div>
-          
-          {/* Date Range Selector */}
-          <div className="flex items-center gap-4">
-            <label className="text-sm font-medium text-gray-700">Período:</label>
-            <select
-              value={selectedDateRange}
-              onChange={(e) => setSelectedDateRange(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="7">Últimos 7 días</option>
-              <option value="30">Últimos 30 días</option>
-              <option value="90">Últimos 3 meses</option>
-              <option value="365">Último año</option>
-            </select>
+          )}
+
+          <p className="text-gray-600">
+            Análisis integral y perspectivas de gestión de inventario
+          </p>
+        </div>
+
+        {/* Controles */}
+        <div className="mb-6 rounded-lg bg-white p-4 shadow-md">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-gray-500" />
+              {loading ? (
+                <div className="h-10 w-48 animate-pulse rounded-md bg-gray-200" />
+              ) : (
+                <select
+                  value={categoriaSeleccionada}
+                  onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+                  className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <option value="todas">-- Categorias --</option>
+                  {listaCategoria.map((categoria) => (
+                    <option
+                      value={categoria.CategoryID}
+                      key={categoria.CategoryID}
+                    >
+                      {categoria.CategoryName}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <ExcelExportButton
+              warehouseId={parseInt(params.id)}
+              className={`ml-auto flex items-center gap-2 rounded-md px-4 py-2 text-white transition-colors ${
+                loading
+                  ? "cursor-not-allowed bg-gray-400"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            />
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-blue-600 mb-1">
-              {categoryData.reduce((sum, item) => sum + item.totalProducts, 0).toLocaleString()}
-            </div>
-            <div className="text-gray-600">Total Productos</div>
+        {/* Tarjetas */}
+        {loading ? (
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="h-32 animate-pulse rounded-md bg-gray-200 shadow"
+              />
+            ))}
           </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-green-600 mb-1">
-              ${categoryData.reduce((sum, item) => sum + item.totalValue, 0).toLocaleString()}
+        ) : (
+          <TarjetaGroup id={params.id} category={categoriaSeleccionada} />
+        )}
+
+        {/* Grilla de Gráficos */}
+        <div className="mb-8 grid grid-cols-1 gap-6">
+          {[nivelInventarioRef, movimientoStockRef].map((ref, idx) => (
+            <div key={idx} className="rounded-lg bg-white p-6 shadow-md">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900">
+                {idx === 0
+                  ? "Niveles de Stock Actuales"
+                  : "Movimiento Diario de Stock"}
+              </h3>
+              <div className="h-[500px]">
+                {loading ? (
+                  <div className="h-full w-full animate-pulse rounded bg-gray-200" />
+                ) : (
+                  <canvas ref={ref}></canvas>
+                )}
+              </div>
             </div>
-            <div className="text-gray-600">Valor Total Inventario</div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-purple-600 mb-1">
-              {categoryData.length}
-            </div>
-            <div className="text-gray-600">Categorías Activas</div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-orange-600 mb-1">
-              ${Math.round(categoryData.reduce((sum, item) => sum + item.totalValue, 0) / categoryData.reduce((sum, item) => sum + item.totalProducts, 0)).toLocaleString()}
-            </div>
-            <div className="text-gray-600">Precio Promedio</div>
-          </div>
+          ))}
         </div>
 
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Products by Category - Pie Chart */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-xl font-semibold mb-4">Distribución de Productos por Categoría</h3>
-            <div className="h-80">
-              <Pie data={categoryChartData} options={pieOptions} />
+        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Valor de Inventario */}
+          <div className="rounded-lg bg-white p-6 shadow-md">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+              Valor de Inventario por Categoría
+            </h3>
+            <div className="h-[400px]">
+              {loading ? (
+                <div className="h-full w-full animate-pulse rounded bg-gray-200" />
+              ) : (
+                <canvas ref={valorInventarioRef}></canvas>
+              )}
             </div>
           </div>
 
-          {/* Value by Category - Bar Chart */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-xl font-semibold mb-4">Valor por Categoría</h3>
-            <div className="h-80">
-              <Bar data={valueChartData} options={chartOptions} />
+          {/* Alertas de Stock Bajo */}
+          <div className="col-span-2 rounded-lg bg-white p-6 shadow-md lg:col-span-1">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+              Alertas de Stock Bajo
+            </h3>
+            <div className="space-y-3">
+              {loading
+                ? [...Array(4)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="h-16 animate-pulse rounded-md bg-gray-200"
+                    />
+                  ))
+                : alertasStockBajo.map((item, index) => (
+                    <div
+                      key={index}
+                      className={`rounded-md border-l-4 p-3 ${
+                        item.Status === "critical"
+                          ? "border-red-500 bg-red-50"
+                          : "border-yellow-500 bg-yellow-50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {item.ProductName}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Reordenar en: {item.ReorderLevel}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p
+                            className={`font-bold ${
+                              item.Status === "critical"
+                                ? "text-red-600"
+                                : "text-yellow-600"
+                            }`}
+                          >
+                            {item.QuantityOnHand}
+                          </p>
+                          <p className="text-xs text-gray-500">en stock</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
             </div>
-          </div>
-        </div>
-
-        {/* Trend Chart - Full Width */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border mb-8">
-          <h3 className="text-xl font-semibold mb-4">Tendencia de Productos - Últimos 6 Meses</h3>
-          <div className="h-80">
-            <Line data={trendChartData} options={chartOptions} />
-          </div>
-        </div>
-
-        {/* Top Products Table */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-xl font-semibold">Top 5 Productos por Valor</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Producto
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Categoría
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cantidad
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Valor Total
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {topProducts.map((product, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {product.productName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.category}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.quantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                      ${product.value.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default PanelReportesAlmacen;
