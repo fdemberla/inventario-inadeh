@@ -192,6 +192,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Spinner } from "flowbite-react";
+import { useSession } from "next-auth/react";
 
 // Componente de búsqueda de productos optimizado para móvil
 const ProductSearchSelect = ({
@@ -433,6 +434,7 @@ function AddProductToWarehouse() {
   const params = useParams();
   const router = useRouter();
   const warehouseId = params?.id as string;
+  const { data: session } = useSession();
 
   const [warehouse, setWarehouse] = useState({});
   const [products, setProducts] = useState([]);
@@ -497,6 +499,13 @@ function AddProductToWarehouse() {
     e.preventDefault();
     setSubmitting(true);
 
+    // Get user info for createdBy field
+    const createdBy =
+      session?.user?.username ||
+      session?.user?.email ||
+      session?.user?.name ||
+      "WEB_USER";
+
     try {
       const response = await fetch("/api/inventory/update", {
         method: "POST",
@@ -507,6 +516,8 @@ function AddProductToWarehouse() {
           ...formData,
           warehouseId: warehouseId,
           productId: parseInt(formData.productId),
+          createdBy: createdBy,
+          notes: `Producto agregado por ${session?.user?.firstName || session?.user?.name || createdBy}`,
         }),
       });
 

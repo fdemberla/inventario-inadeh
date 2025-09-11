@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getUserFromToken } from "@/lib/auth_new";
-import { sql } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { getUserFromToken } from "@/lib/auth-config-consolidated";
+import { rawSql } from "@/lib/db";
 
-export async function GET(req: NextRequest) {
-  const user = getUserFromToken(req);
+export async function GET() {
+  const user = await getUserFromToken();
 
   if (!user) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -26,7 +26,7 @@ INNER JOIN dbo.RegionalLocations rl ON w.MainLocationID = rl.MainLocationID
 WHERE wu.UserID = @param0;`;
     }
 
-    const warehouses = await sql(getWarehouseQuery, [user.id]);
+    const warehouses = await rawSql(getWarehouseQuery, [user.id]);
 
     return NextResponse.json(warehouses);
   } catch (error) {

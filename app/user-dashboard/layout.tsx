@@ -1,14 +1,14 @@
 // app/user-dashboard/layout.tsx
-import { getUserFromToken } from "@/lib/auth";
+import { getUserFromToken } from "@/lib/auth-config-consolidated";
 import { redirect } from "next/navigation";
 import SidebarComponent from "../components/Sidebar";
 
-export default function UserDashboardLayout({
+export default async function UserDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = getUserFromToken();
+  const user = await getUserFromToken();
 
   if (!user) redirect("/login");
   if (user.role !== 2) redirect("/dashboard");
@@ -19,7 +19,7 @@ export default function UserDashboardLayout({
         <div className="p-4 text-center text-lg font-bold">
           Hello, {user.username}!
         </div>
-        <SidebarComponent />
+        <SidebarComponent user={user} />
       </aside>
 
       <main className="flex-1 bg-gray-100 p-6">{children}</main>

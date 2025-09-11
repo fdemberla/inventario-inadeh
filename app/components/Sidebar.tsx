@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Sidebar, SidebarItem, SidebarItemGroup, Button } from "flowbite-react";
+import { signOut } from "next-auth/react";
 import {
   HiOutlineCube,
   HiOutlineTag,
@@ -134,10 +135,7 @@ const SIDEBAR_SECTIONS = {
       key: "inventario",
       label: "Inventario",
       icon: MdOutlineInventory,
-      links: [
-        { label: "Actualizar Inventario", path: "/dashboard/inventory/update" },
-        { label: "Scanner", path: "/dashboard/inventory/update/scanner" },
-      ],
+      links: [{ label: "Actualizar Inventario", path: "/dashboard/inventory" }],
     },
   ] as SidebarSection[],
 };
@@ -192,11 +190,17 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
   const handleLogout = useCallback(async () => {
     try {
+      // Limpiar el sistema local primero
       await fetch("/api/logout", { method: "POST" });
-      router.push("/login");
+
+      // Cerrar sesión de Microsoft (NextAuth)
+      await signOut({
+        callbackUrl: "/login",
+        redirect: true,
+      });
     } catch (error) {
       console.error("Error during logout:", error);
-      // Still redirect even if logout fails
+      // Fallback: redirigir al login aunque falle
       router.push("/login");
     }
   }, [router]);
@@ -204,7 +208,7 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
   // Loading state
   if (!user) {
     return (
-      <div className="bg-brand-azul h-screen w-64 animate-pulse">
+      <div className="bg-brand-azul h-screen w-80 animate-pulse">
         <div className="p-6">
           <div className="h-12 w-12 rounded-full bg-white/20"></div>
         </div>
@@ -307,7 +311,7 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
       {/* Sidebar Drawer */}
       <aside
-        className={`bg-brand-azul fixed top-0 left-0 z-40 h-full w-64 transform text-white transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0`}
+        className={`bg-brand-azul fixed top-0 left-0 z-40 h-full w-80 transform text-white transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0`}
         aria-label="Sidebar de navegación"
       >
         {/* Desktop Logo */}

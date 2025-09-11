@@ -1,12 +1,14 @@
 import { Modal, Button, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export type InventoryItem = {
   InventoryID: number;
   ProductID: number;
   ProductName: string;
   QuantityOnHand: number;
+  UnitName?: string;
 };
 
 type Props = {
@@ -23,6 +25,7 @@ export default function InventoryUpdateModal({
   onSuccess,
 }: Props) {
   const [modalQty, setModalQty] = useState<string>("");
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (item) {
@@ -40,6 +43,16 @@ export default function InventoryUpdateModal({
       return;
     }
 
+    // Get user info for createdBy field
+    const createdBy =
+      session?.user?.username ||
+      session?.user?.email ||
+      session?.user?.name ||
+      "WEB_USER";
+
+    // Create detailed notes with user information
+    const detailedNotes = `Ajuste manual realizado por ${session?.user?.firstName || session?.user?.name || createdBy}. Cantidad anterior: ${item.QuantityOnHand}, nueva cantidad: ${newQty}`;
+
     try {
       const res = await fetch("/api/inventory/update", {
         method: "POST",
@@ -48,9 +61,10 @@ export default function InventoryUpdateModal({
           productId: item.ProductID,
           warehouseId,
           newQuantity: newQty,
-          notes: "Ajuste manual",
+          notes: detailedNotes,
           referenceNumber: `WEB-${new Date().toISOString().slice(0, 10)}`,
           updateType: "table",
+          createdBy: createdBy,
         }),
       });
 
@@ -65,7 +79,7 @@ export default function InventoryUpdateModal({
       }
     } catch (err) {
       toast.error("Error de red al actualizar.");
-      console.error(err)
+      console.error(err);
     }
   };
 

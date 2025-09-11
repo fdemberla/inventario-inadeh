@@ -84,10 +84,6 @@ export default function ProductForm({
     unitSystem: initialData.UnitSystem || "",
   });
 
-  useEffect(() => {
-    console.log(form);
-  }, [initialData]);
-
   const [supplierList, setSupplierList] = useState<SupplierEntry[]>(
     initialData.suppliers || [],
   );
@@ -148,9 +144,7 @@ export default function ProductForm({
   ) => {
     const updated = [...supplierList];
     updated[index][key] =
-      key === "isPrimarySupplier"
-        ? (value as any).target?.checked
-        : (value as any).target?.value;
+      key === "isPrimarySupplier" ? value.target?.checked : value.target?.value;
     setSupplierList(updated);
   };
 

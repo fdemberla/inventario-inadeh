@@ -40,12 +40,12 @@ async function connectWithRetry(
       );
       return newPool;
     } catch (err) {
-      lastError = err;
+      lastError = err instanceof Error ? err : new Error(String(err));
       attempt++;
       console.error(
         `❌ Connection attempt ${attempt} failed. Retrying in ${retryDelayMs / 1000}s...`,
       );
-      console.error("Error details:", err.message);
+      console.error("Error details:", lastError.message);
 
       if (attempt < maxRetries) {
         await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
@@ -110,46 +110,25 @@ export async function rawSql(query: string, params: unknown[]) {
 
     return result.recordset;
   } catch (err) {
-    console.error("Error executing raw SQL:", err);
-    throw new Error(`Database query failed: ${err.message} - Query: ${query}`);
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error("Error executing raw SQL:", error);
+    throw new Error(
+      `Database query failed: ${error.message} - Query: ${query}`,
+    );
   }
 }
 
 export async function withTransaction(
-  callback: (transaction) => Promise<unknown>,
+  callback: (transaction: import("mssql").Transaction) => Promise<unknown>,
 ) {
-  const pool = await poolPromise;
-  const transaction = new (await import("mssql")).Transaction(pool);
+  const pool = await getPool();
+  const { Transaction } = await import("mssql");
+  const transaction = new Transaction(pool);
   try {
     await transaction.begin();
     const result = await callback(transaction);
     await transaction.commit();
     return result;
-  } catch (error) {
-    await transaction.rollback();
-    throw error;
-  }
-}
-
-export async function executeInTransaction(
-  queries: { query: string; params: [] }[],
-) {
-  const pool = await getPool();
-  const transaction = new Transaction(pool);
-
-  try {
-    await transaction.begin();
-
-    for (const { query, params } of queries) {
-      const request = new SqlRequest(transaction);
-      params.forEach((param, index) => {
-        request.input(`param${index}`, param);
-      });
-      await request.query(query);
-    }
-
-    await transaction.commit();
-    return true;
   } catch (error) {
     await transaction.rollback();
     throw error;

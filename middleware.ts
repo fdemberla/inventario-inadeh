@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-// import { jwtVerify } from "jose"; // Use jose library for Edge compatibility
 
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   const { pathname } = request.nextUrl;
+
+  // Skip middleware for NextAuth routes and debug routes
+  if (pathname.startsWith("/api/auth/") || pathname.startsWith("/api/debug")) {
+    return NextResponse.next();
+  }
 
   const isApiRoute = pathname.startsWith("/api/");
   const publicRoutes = ["/api/login", "/api/register"];
@@ -19,12 +23,8 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-      // console.log("Verifying token:", token); // Log the token for debugging
-      // const decoded = await jwtVerify(
-      //   token,
-      //   new TextEncoder().encode(process.env.JWT_SECRET!),
-      // ); // Use jose for Edge
-      // console.log("Decoded token:", decoded); // Log decoded token for further insight
+      // Token verification code can be added here if needed
+      // For now, we're allowing all requests with tokens
     } catch (error) {
       console.error("Token verification failed:", error);
       return new NextResponse(JSON.stringify({ error: "Invalid token" }), {
@@ -38,5 +38,15 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/:path*"], // apply only to API routes
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (NextAuth.js routes)
+     * - api/debug (debug routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api/auth|api/debug|_next/static|_next/image|favicon.ico).*)",
+  ],
 };

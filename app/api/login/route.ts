@@ -1,5 +1,5 @@
 // app/api/login/route.ts
-import { loginUser } from "@/lib/login";
+import { loginUser } from "@/lib/auth-config-consolidated";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 

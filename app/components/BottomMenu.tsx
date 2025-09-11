@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { HiOutlineCube, HiOutlineHome } from "react-icons/hi";
 import { MdLogout, MdOutlineInventory } from "react-icons/md";
 import { CiBoxList } from "react-icons/ci";
+import { signOut } from "next-auth/react";
 
 const BottomMenu = ({ user }: { user: { role: number } }) => {
   const pathname = usePathname();
@@ -52,8 +53,20 @@ const BottomMenu = ({ user }: { user: { role: number } }) => {
         ];
 
   const handleLogout = async () => {
-    await fetch("/api/logout", { method: "POST" });
-    router.push("/login");
+    try {
+      // Limpiar el sistema local primero
+      await fetch("/api/logout", { method: "POST" });
+
+      // Cerrar sesión de Microsoft (NextAuth)
+      await signOut({
+        callbackUrl: "/login",
+        redirect: true,
+      });
+    } catch (error) {
+      console.error("Error during logout:", error);
+      // Fallback: redirigir al login aunque falle
+      router.push("/login");
+    }
   };
 
   return (

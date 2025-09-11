@@ -212,135 +212,17 @@ const PanelReportesAlmacen = () => {
     createAllCharts();
   }, [nivelesInventario, movimientos, valorInventario]);
 
-  // Efecto para crear los gráficos cuando el componente se monta
+  // Effect for cleanup - fixed to avoid stale closure warning
   useEffect(() => {
     // Cleanup al desmontar
     return () => {
-      Object.values(chartInstances.current).forEach((chart) => {
+      // Copy the current chart instances to avoid stale closure
+      const chartsToDestroy = chartInstances.current;
+      Object.values(chartsToDestroy).forEach((chart) => {
         if (chart) chart.destroy();
       });
     };
   }, []);
-
-  // return (
-  //   <div className="min-h-screen bg-gray-50 p-6">
-  //     <div className="mx-auto max-w-7xl">
-  //       {/* Header */}
-  //       <div className="mb-8">
-  //         <h1 className="mb-2 text-3xl font-bold text-gray-900">
-  //           Reportes de Almacén
-  //         </h1>
-  //         <p className="text-gray-600">
-  //           Análisis integral y perspectivas de gestión de inventario
-  //         </p>
-  //       </div>
-
-  //       {/* Controles */}
-  //       <div className="mb-6 rounded-lg bg-white p-4 shadow-md">
-  //         <div className="flex flex-wrap items-center gap-4">
-  //           <div className="flex items-center gap-2">
-  //             <Filter className="h-5 w-5 text-gray-500" />
-  //             <select
-  //               value={categoriaSeleccionada}
-  //               onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-  //               className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-  //             >
-  //               <option value="todas">Todas las Categorías</option>
-  //               <option value="electronicos">Electrónicos</option>
-  //               <option value="ropa">Ropa</option>
-  //               <option value="hogar">Hogar y Jardín</option>
-  //               <option value="deportes">Deportes</option>
-  //               <option value="libros">Libros</option>
-  //             </select>
-  //           </div>
-  //           <button className="ml-auto flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700">
-  //             <Download className="h-4 w-4" />
-  //             Exportar Datos
-  //           </button>
-  //         </div>
-  //       </div>
-
-  //       <TarjetaGroup id={params.id} />
-
-  //       {/* Grilla de Gráficos */}
-  //       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-  //         {/* Niveles de Stock Actuales */}
-  //         <div className="rounded-lg bg-white p-6 shadow-md">
-  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-  //             Niveles de Stock Actuales
-  //           </h3>
-  //           <div className="h-[300px]">
-  //             <canvas ref={nivelInventarioRef}></canvas>
-  //           </div>
-  //         </div>
-
-  //         {/* Tendencias de Movimiento de Stock */}
-  //         <div className="rounded-lg bg-white p-6 shadow-md">
-  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-  //             Movimiento Diario de Stock
-  //           </h3>
-  //           <div className="h-[300px]">
-  //             <canvas ref={movimientoStockRef}></canvas>
-  //           </div>
-  //         </div>
-  //       </div>
-
-  //       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-  //         {/* Distribución de Valor de Inventario */}
-  //         <div className="rounded-lg bg-white p-6 shadow-md">
-  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-  //             Valor de Inventario por Categoría
-  //           </h3>
-  //           <div className="h-[250px]">
-  //             <canvas ref={valorInventarioRef}></canvas>
-  //           </div>
-  //         </div>
-
-  //         {/* Alertas de Stock Bajo */}
-  //         <div className="rounded-lg bg-white p-6 shadow-md">
-  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-  //             Alertas de Stock Bajo
-  //           </h3>
-  //           <div className="space-y-3">
-  //             {alertasStockBajo.map((item, index) => (
-  //               <div
-  //                 key={index}
-  //                 className={`rounded-md border-l-4 p-3 ${
-  //                   item.Status === "critical"
-  //                     ? "border-red-500 bg-red-50"
-  //                     : "border-yellow-500 bg-yellow-50"
-  //                 }`}
-  //               >
-  //                 <div className="flex items-center justify-between">
-  //                   <div>
-  //                     <p className="font-medium text-gray-900">
-  //                       {item.ProductName}
-  //                     </p>
-  //                     <p className="text-sm text-gray-600">
-  //                       Reordenar en: {item.ReorderLevel}
-  //                     </p>
-  //                   </div>
-  //                   <div className="text-right">
-  //                     <p
-  //                       className={`font-bold ${
-  //                         item.Status === "critical"
-  //                           ? "text-red-600"
-  //                           : "text-yellow-600"
-  //                       }`}
-  //                     >
-  //                       {item.QuantityOnHand}
-  //                     </p>
-  //                     <p className="text-xs text-gray-500">en stock</p>
-  //                   </div>
-  //                 </div>
-  //               </div>
-  //             ))}
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

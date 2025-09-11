@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
+import AuthProvider from "../components/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,7 +43,6 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   minimumScale: 1,
-  shrinkToFit: "no",
   viewportFit: "cover",
 };
 
@@ -60,7 +60,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-brand-gris dark:bg-gray-900`}
       >
         <ThemeModeScript />
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <Toaster />
         <ServiceWorkerRegister />
       </body>

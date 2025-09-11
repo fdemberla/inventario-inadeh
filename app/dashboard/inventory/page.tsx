@@ -1,70 +1,3 @@
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import { Label, Select, Button } from "flowbite-react";
-// import { toast } from "react-hot-toast";
-// import { useRouter } from "next/navigation";
-
-// type Warehouse = {
-//   WarehouseID: number;
-//   WarehouseName: string;
-//   WarehouseCode: string;
-// };
-
-// export default function InventoryPage() {
-//   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
-//   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string | null>(
-//     null,
-//   );
-
-//   useEffect(() => {
-//     fetchWarehouses();
-//   }, []);
-
-//   const fetchWarehouses = async () => {
-//     try {
-//       const res = await fetch("/api/warehouses/user");
-//       if (!res.ok) throw new Error("Error al cargar almacenes.");
-//       const data = await res.json();
-//       setWarehouses(data.recordset);
-//       if (data.length > 0) setSelectedWarehouseId(data[0].WarehouseID);
-//     } catch (err) {
-//       toast.error((err as Error).message);
-//     }
-//   };
-
-//   const router = useRouter();
-
-//   return (
-//     <div className="space-y-6 p-6">
-//       <div>
-//         <Label htmlFor="warehouse">Almacén</Label>
-//         <Select
-//           id="warehouse"
-//           value={selectedWarehouseId || ""}
-//           onChange={(e) => setSelectedWarehouseId(e.target.value)}
-//         >
-//           <option>-- Seleccione un Deposito --</option>
-//           {warehouses.map((w) => (
-//             <option key={w.WarehouseID} value={w.WarehouseID}>
-//               {w.WarehouseName}
-//             </option>
-//           ))}
-//         </Select>
-//       </div>
-//       {selectedWarehouseId && (
-//         <Button
-//           onClick={() =>
-//             router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)
-//           }
-//         >
-//           Agregar Producto a Deposito
-//         </Button>
-//       )}
-//     </div>
-//   );
-// }
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -78,30 +11,68 @@ type Warehouse = {
   WarehouseCode: string;
 };
 
+type WarehouseStats = {
+  totalProducts: number;
+  inStockProducts: number;
+  lowStockProducts: number;
+  outOfStockProducts: number;
+  totalCategories: number;
+};
+
 export default function InventoryPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string | null>(
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<WarehouseStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   useEffect(() => {
     fetchWarehouses();
   }, []);
+
+  useEffect(() => {
+    if (selectedWarehouseId) {
+      fetchWarehouseStats(selectedWarehouseId);
+    }
+  }, [selectedWarehouseId]);
 
   const fetchWarehouses = async () => {
     try {
       const res = await fetch("/api/warehouses/user");
       if (!res.ok) throw new Error("Error al cargar almacenes.");
       const data = await res.json();
-      setWarehouses(data.recordset);
-      if (data.recordset.length > 0) {
-        setSelectedWarehouseId(data.recordset[0].WarehouseID.toString());
+      setWarehouses(data);
+      if (data.length > 0) {
+        setSelectedWarehouseId(data[0].WarehouseID.toString());
       }
     } catch (err) {
+      console.error("Fetch error:", err); // Debug log
       toast.error((err as Error).message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWarehouseStats = async (warehouseId: string) => {
+    try {
+      setLoadingStats(true);
+      const res = await fetch(`/api/warehouses/${warehouseId}/stats`);
+      if (!res.ok) throw new Error("Error al cargar estadísticas.");
+      const data = await res.json();
+      setStats(data);
+    } catch (err) {
+      console.error("Error fetching warehouse stats:", err);
+      setStats({
+        totalProducts: 0,
+        inStockProducts: 0,
+        lowStockProducts: 0,
+        outOfStockProducts: 0,
+        totalCategories: 0,
+      });
+    } finally {
+      setLoadingStats(false);
     }
   };
 
@@ -154,9 +125,9 @@ export default function InventoryPage() {
             warehouses.map((warehouse) => (
               <button
                 key={warehouse.WarehouseID}
-                onClick={() =>
-                  setSelectedWarehouseId(warehouse.WarehouseID.toString())
-                }
+                onClick={() => {
+                  setSelectedWarehouseId(warehouse.WarehouseID.toString());
+                }}
                 className={`w-full rounded-lg border-2 p-4 text-left transition-all duration-200 ${
                   selectedWarehouseId === warehouse.WarehouseID.toString()
                     ? "border-blue-500 bg-blue-50 shadow-md"
@@ -346,26 +317,71 @@ export default function InventoryPage() {
           </div>
         )}
 
-        {/* Quick Stats (Optional) */}
+        {/* Quick Stats */}
         {selectedWarehouseId && (
           <div className="mt-6 rounded-lg border border-gray-200 bg-white p-4">
             <h3 className="mb-3 text-sm font-medium text-gray-500">
-              Acciones Rápidas
+              Estadísticas del Depósito
             </h3>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="py-2">
-                <div className="text-lg font-bold text-blue-600">127</div>
-                <div className="text-xs text-gray-500">Productos</div>
+            {loadingStats ? (
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div className="py-2">
+                  <div className="mx-auto h-4 w-8 animate-pulse rounded bg-gray-200"></div>
+                  <div className="text-xs text-gray-500">Total Productos</div>
+                </div>
+                <div className="py-2">
+                  <div className="mx-auto h-4 w-8 animate-pulse rounded bg-gray-200"></div>
+                  <div className="text-xs text-gray-500">En Stock</div>
+                </div>
+                <div className="py-2">
+                  <div className="mx-auto h-4 w-8 animate-pulse rounded bg-gray-200"></div>
+                  <div className="text-xs text-gray-500">Stock Bajo</div>
+                </div>
+                <div className="py-2">
+                  <div className="mx-auto h-4 w-8 animate-pulse rounded bg-gray-200"></div>
+                  <div className="text-xs text-gray-500">Sin Stock</div>
+                </div>
               </div>
-              <div className="border-r border-l border-gray-200 py-2">
-                <div className="text-lg font-bold text-green-600">15</div>
-                <div className="text-xs text-gray-500">Stock Bajo</div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div className="py-2">
+                  <div className="text-lg font-bold text-blue-600">
+                    {stats?.totalProducts || 0}
+                  </div>
+                  <div className="text-xs text-gray-500">Total Productos</div>
+                </div>
+                <div className="py-2">
+                  <div className="text-lg font-bold text-green-600">
+                    {stats?.inStockProducts || 0}
+                  </div>
+                  <div className="text-xs text-gray-500">En Stock</div>
+                </div>
+                <div className="py-2">
+                  <div className="text-lg font-bold text-orange-600">
+                    {stats?.lowStockProducts || 0}
+                  </div>
+                  <div className="text-xs text-gray-500">Stock Bajo</div>
+                </div>
+                <div className="py-2">
+                  <div className="text-lg font-bold text-red-600">
+                    {stats?.outOfStockProducts || 0}
+                  </div>
+                  <div className="text-xs text-gray-500">Sin Stock</div>
+                </div>
               </div>
-              <div className="py-2">
-                <div className="text-lg font-bold text-orange-600">3</div>
-                <div className="text-xs text-gray-500">Sin Stock</div>
+            )}
+
+            {/* Additional Stats Row */}
+            {!loadingStats && (
+              <div className="mt-4 border-t pt-3">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-purple-600">
+                    {stats?.totalCategories || 0}
+                  </div>
+                  <div className="text-xs text-gray-500">Categorías</div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>
