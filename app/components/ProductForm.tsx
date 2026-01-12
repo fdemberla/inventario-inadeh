@@ -86,6 +86,7 @@ export default function ProductForm({
 
   useEffect(() => {
     console.log(form);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData]);
 
   const [supplierList, setSupplierList] = useState<SupplierEntry[]>(
@@ -144,13 +145,26 @@ export default function ProductForm({
   const handleSupplierChange = (
     index: number,
     key: keyof SupplierEntry,
-    value: unknown,
+    value:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | boolean
+      | string
+      | number,
   ) => {
     const updated = [...supplierList];
-    updated[index][key] =
-      key === "isPrimarySupplier"
-        ? (value as any).target?.checked
-        : (value as any).target?.value;
+    if (key === "isPrimarySupplier") {
+      updated[index][key] =
+        typeof value === "object" && "target" in value
+          ? (value as React.ChangeEvent<HTMLInputElement>).target.checked
+          : Boolean(value);
+    } else {
+      const rawValue =
+        typeof value === "object" && "target" in value
+          ? (value as React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)
+              .target.value
+          : value;
+      (updated[index] as Record<string, unknown>)[key] = rawValue;
+    }
     setSupplierList(updated);
   };
 

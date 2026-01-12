@@ -214,9 +214,10 @@ const PanelReportesAlmacen = () => {
 
   // Efecto para crear los gráficos cuando el componente se monta
   useEffect(() => {
+    const instances = chartInstances.current;
     // Cleanup al desmontar
     return () => {
-      Object.values(chartInstances.current).forEach((chart) => {
+      Object.values(instances).forEach((chart) => {
         if (chart) chart.destroy();
       });
     };

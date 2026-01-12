@@ -533,14 +533,35 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import ProductForm from "@/app/components/ProductForm";
 
+interface SupplierEntry {
+  supplierID: number;
+  supplierSKU: string;
+  leadTimeDays: number;
+  cost: number;
+  isPrimarySupplier: boolean;
+}
+
+interface ProductFormData {
+  productName: string;
+  sku: string;
+  description: string;
+  barcode: string;
+  categoryID: string;
+  cost: string;
+  unitID: string;
+  unitSystem: string;
+  image?: File;
+  suppliers: SupplierEntry[];
+}
+
 export default function NewProductPage() {
   const router = useRouter();
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: ProductFormData) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (key !== "image" && value !== undefined) {
-        formData.append(key, value.toString());
+        formData.append(key, String(value));
       }
     });
     if (data.image) formData.append("image", data.image);

@@ -414,6 +414,27 @@ import { toast } from "react-hot-toast";
 import ProductForm from "@/app/components/ProductForm";
 import { useEffect, useState } from "react";
 
+interface SupplierEntry {
+  supplierID: number;
+  supplierSKU: string;
+  leadTimeDays: number;
+  cost: number;
+  isPrimarySupplier: boolean;
+}
+
+interface ProductFormData {
+  productName: string;
+  sku: string;
+  description: string;
+  barcode: string;
+  categoryID: string;
+  cost: string;
+  unitID: string;
+  unitSystem: string;
+  image?: File;
+  suppliers: SupplierEntry[];
+}
+
 export default function EditProduct() {
   const { id } = useParams();
   const router = useRouter();
@@ -433,7 +454,7 @@ export default function EditProduct() {
     fetchProduct();
   }, [id]);
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
     try {
       const payload = {
