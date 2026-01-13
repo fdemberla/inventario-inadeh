@@ -345,29 +345,6 @@ export default function InventoryPage() {
             </div>
           </div>
         )}
-
-        {/* Quick Stats (Optional) */}
-        {selectedWarehouseId && (
-          <div className="mt-6 rounded-lg border border-gray-200 bg-white p-4">
-            <h3 className="mb-3 text-sm font-medium text-gray-500">
-              Acciones Rápidas
-            </h3>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="py-2">
-                <div className="text-lg font-bold text-blue-600">127</div>
-                <div className="text-xs text-gray-500">Productos</div>
-              </div>
-              <div className="border-r border-l border-gray-200 py-2">
-                <div className="text-lg font-bold text-green-600">15</div>
-                <div className="text-xs text-gray-500">Stock Bajo</div>
-              </div>
-              <div className="py-2">
-                <div className="text-lg font-bold text-orange-600">3</div>
-                <div className="text-xs text-gray-500">Sin Stock</div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
