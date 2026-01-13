@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { HiOutlineStatusOnline, HiOutlineStatusOffline, HiRefresh, HiExclamation } from "react-icons/hi";
+import {
+  HiOutlineStatusOnline,
+  HiOutlineStatusOffline,
+  HiRefresh,
+  HiExclamation,
+} from "react-icons/hi";
 import {
   isOnline,
   subscribeToOnlineStatus,
@@ -18,11 +23,16 @@ interface OfflineStatusBannerProps {
   className?: string;
 }
 
-export default function OfflineStatusBanner({ onSyncComplete, className = "" }: OfflineStatusBannerProps) {
+export default function OfflineStatusBanner({
+  onSyncComplete,
+  className = "",
+}: OfflineStatusBannerProps) {
   const [online, setOnline] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [stats, setStats] = useState<SyncStats | null>(null);
-  const [blockingStatus, setBlockingStatus] = useState<BlockingStatus | null>(null);
+  const [blockingStatus, setBlockingStatus] = useState<BlockingStatus | null>(
+    null,
+  );
   const [lastSyncMessage, setLastSyncMessage] = useState<string | null>(null);
 
   const refreshStats = useCallback(async () => {
@@ -70,17 +80,18 @@ export default function OfflineStatusBanner({ onSyncComplete, className = "" }: 
 
     try {
       const result = await syncPendingScans();
-      
+
       if (result.success) {
         setLastSyncMessage(
           result.synced > 0
             ? `✓ ${result.synced} escaneo(s) sincronizado(s)`
-            : "Todo está sincronizado"
+            : "Todo está sincronizado",
         );
       } else {
-        const errorMsg = result.errors.length > 0 
-          ? result.errors[0] 
-          : `${result.failed} error(es), ${result.conflicts} conflicto(s)`;
+        const errorMsg =
+          result.errors.length > 0
+            ? result.errors[0]
+            : `${result.failed} error(es), ${result.conflicts} conflicto(s)`;
         setLastSyncMessage(`⚠ ${errorMsg}`);
       }
 
@@ -115,7 +126,12 @@ export default function OfflineStatusBanner({ onSyncComplete, className = "" }: 
   };
 
   // Don't show banner if online and no pending scans
-  if (online && stats?.pendingCount === 0 && !blockingStatus?.shouldBlock && !lastSyncMessage) {
+  if (
+    online &&
+    stats?.pendingCount === 0 &&
+    !blockingStatus?.shouldBlock &&
+    !lastSyncMessage
+  ) {
     return null;
   }
 
@@ -139,7 +155,8 @@ export default function OfflineStatusBanner({ onSyncComplete, className = "" }: 
           {stats && stats.pendingCount > 0 && (
             <div className="flex items-center gap-1">
               <span className="rounded-full bg-white/50 px-2 py-0.5 text-xs font-semibold">
-                {stats.pendingCount} pendiente{stats.pendingCount !== 1 ? "s" : ""}
+                {stats.pendingCount} pendiente
+                {stats.pendingCount !== 1 ? "s" : ""}
               </span>
             </div>
           )}
@@ -149,7 +166,8 @@ export default function OfflineStatusBanner({ onSyncComplete, className = "" }: 
             <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
               <HiExclamation className="h-4 w-4" />
               <span className="text-xs font-medium">
-                {stats.unresolvedConflicts} conflicto{stats.unresolvedConflicts !== 1 ? "s" : ""}
+                {stats.unresolvedConflicts} conflicto
+                {stats.unresolvedConflicts !== 1 ? "s" : ""}
               </span>
             </div>
           )}
@@ -185,7 +203,8 @@ export default function OfflineStatusBanner({ onSyncComplete, className = "" }: 
       {/* Last sync time */}
       {stats?.lastSuccessfulSync && (
         <div className="mt-1 text-xs opacity-75">
-          Última sincronización: {new Date(stats.lastSuccessfulSync).toLocaleTimeString()}
+          Última sincronización:{" "}
+          {new Date(stats.lastSuccessfulSync).toLocaleTimeString()}
         </div>
       )}
     </div>

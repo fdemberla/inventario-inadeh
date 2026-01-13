@@ -31,35 +31,34 @@ export default function WarehouseCard({
   isCached = false,
 }: WarehouseCardProps) {
   const [expanded, setExpanded] = useState(false);
-  
+
   const topCategories = categories.slice(0, 5);
   const remainingCategories = categories.slice(5);
   const totalInventory = categories.reduce((sum, cat) => sum + cat.quantity, 0);
 
   if (isLoading) {
     return (
-      <Card className="h-full flex items-center justify-center min-h-[250px]">
+      <Card className="flex h-full min-h-[250px] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Spinner size="lg" />
-          <p className="text-gray-600 dark:text-gray-400">Cargando inventario...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Cargando inventario...
+          </p>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow">
+    <Card className="h-full transition-shadow hover:shadow-lg">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="mb-4 flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="mb-2 flex items-center gap-2">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
               {warehouseCode}
             </h3>
-            <Badge
-              color={isActive ? "success" : "gray"}
-              size="sm"
-            >
+            <Badge color={isActive ? "success" : "gray"} size="sm">
               {isActive ? "Activo" : "Inactivo"}
             </Badge>
             {isCached && (
@@ -68,26 +67,31 @@ export default function WarehouseCard({
               </Badge>
             )}
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+          <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
             {warehouseName}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-500">
-            {location}
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-500">{location}</p>
         </div>
       </div>
 
       {/* Inventory Summary */}
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
-        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          Inventario Total: <span className="text-lg text-blue-600 dark:text-blue-400">{totalInventory}</span> unidades
+      <div className="mb-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+        <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          Inventario Total:{" "}
+          <span className="text-lg text-blue-600 dark:text-blue-400">
+            {totalInventory}
+          </span>{" "}
+          unidades
         </div>
 
         {/* Top 5 Categories */}
         <div className="space-y-2">
           {topCategories.length > 0 ? (
             topCategories.map((category, idx) => (
-              <div key={idx} className="flex justify-between items-center text-sm">
+              <div
+                key={idx}
+                className="flex items-center justify-between text-sm"
+              >
                 <span className="text-gray-700 dark:text-gray-300">
                   {category.categoryName}
                 </span>
@@ -97,7 +101,7 @@ export default function WarehouseCard({
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+            <p className="text-sm text-gray-500 italic dark:text-gray-400">
               Sin inventario registrado
             </p>
           )}
@@ -108,7 +112,7 @@ export default function WarehouseCard({
           <div className="mt-3">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
             >
               {expanded
                 ? "Ver menos"
@@ -116,9 +120,12 @@ export default function WarehouseCard({
             </button>
 
             {expanded && (
-              <div className="space-y-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <div className="mt-3 space-y-2 border-t border-gray-200 pt-3 dark:border-gray-700">
                 {remainingCategories.map((category, idx) => (
-                  <div key={idx + 5} className="flex justify-between items-center text-sm">
+                  <div
+                    key={idx + 5}
+                    className="flex items-center justify-between text-sm"
+                  >
                     <span className="text-gray-700 dark:text-gray-300">
                       {category.categoryName}
                     </span>
@@ -139,11 +146,7 @@ export default function WarehouseCard({
           href={`/dashboard/inventory?warehouseId=${warehouseId}`}
           className="flex-1"
         >
-          <Button
-            size="sm"
-            color="blue"
-            className="w-full"
-          >
+          <Button size="sm" color="blue" className="w-full">
             Ver Detalle
           </Button>
         </Link>

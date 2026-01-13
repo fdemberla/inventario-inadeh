@@ -4,25 +4,25 @@
  * Tests user CRUD operations and role-based access
  */
 
-import { createTestClient } from '../helpers/testClient';
-import { testData } from '../helpers/testData';
+import { createTestClient } from "../helpers/testClient";
+import { testData } from "../helpers/testData";
 
 const client = createTestClient();
 
-describe('Users Management APIs', () => {
+describe("Users Management APIs", () => {
   beforeEach(async () => {
     client.clear();
     // Login before each test
-    const loginResponse = await client.post('/api/login', {
+    const loginResponse = await client.post("/api/login", {
       username: testData.validCredentials.username,
       password: testData.validCredentials.password,
     });
     expect(loginResponse.status).toBe(200);
   });
 
-  describe('GET /api/users - List All Users', () => {
-    it('should return 200 with user list', async () => {
-      const response = await client.get('/api/users');
+  describe("GET /api/users - List All Users", () => {
+    it("should return 200 with user list", async () => {
+      const response = await client.get("/api/users");
 
       expect(response.status).toBe(200);
       // API may return data directly or wrapped in recordset
@@ -31,22 +31,22 @@ describe('Users Management APIs', () => {
       expect(users).toBeDefined();
     });
 
-    it('should return users with required fields', async () => {
-      const response = await client.get('/api/users');
+    it("should return users with required fields", async () => {
+      const response = await client.get("/api/users");
 
       expect(response.status).toBe(200);
       const users = response.data.recordset || response.data;
 
       if (users.length > 0) {
         const user = users[0];
-        expect(user).toHaveProperty('FirstName');
-        expect(user).toHaveProperty('LastName');
-        expect(user).toHaveProperty('Email');
+        expect(user).toHaveProperty("FirstName");
+        expect(user).toHaveProperty("LastName");
+        expect(user).toHaveProperty("Email");
       }
     });
 
-    it('should include user role information', async () => {
-      const response = await client.get('/api/users');
+    it("should include user role information", async () => {
+      const response = await client.get("/api/users");
 
       expect(response.status).toBe(200);
       const users = response.data.recordset || response.data;
@@ -57,8 +57,8 @@ describe('Users Management APIs', () => {
       }
     });
 
-    it('should include active status', async () => {
-      const response = await client.get('/api/users');
+    it("should include active status", async () => {
+      const response = await client.get("/api/users");
 
       expect(response.status).toBe(200);
       const users = response.data.recordset || response.data;
@@ -69,21 +69,21 @@ describe('Users Management APIs', () => {
       }
     });
 
-    it('should require authentication', async () => {
+    it("should require authentication", async () => {
       client.clear();
-      const response = await client.get('/api/users');
+      const response = await client.get("/api/users");
 
       expect(response.status).toBe(401);
     });
 
-    it('should return empty array if no users exist', async () => {
-      const response = await client.get('/api/users');
+    it("should return empty array if no users exist", async () => {
+      const response = await client.get("/api/users");
 
       expect(response.status).toBe(200);
       // Verify response contains user data in some form
       const data = response.data;
       expect(data).toBeDefined();
-      
+
       // Check if it's an array or has recordset property
       const users = data?.recordset || data;
       if (Array.isArray(users)) {
@@ -92,21 +92,21 @@ describe('Users Management APIs', () => {
     });
   });
 
-  describe('GET /api/users/:id - Get Single User', () => {
+  describe("GET /api/users/:id - Get Single User", () => {
     let userId: number | null = null;
 
     beforeEach(async () => {
       // Get a valid user ID
-      const usersResponse = await client.get('/api/users');
+      const usersResponse = await client.get("/api/users");
       const users = usersResponse.data.recordset || usersResponse.data;
       if (users.length > 0) {
         userId = users[0].UserID || users[0].id;
       }
     });
 
-    it('should return 200 for valid user ID', async () => {
+    it("should return 200 for valid user ID", async () => {
       if (!userId) {
-        console.warn('No user available for testing');
+        console.warn("No user available for testing");
         expect(true).toBe(true);
         return;
       }
@@ -116,7 +116,7 @@ describe('Users Management APIs', () => {
       expect([200, 404]).toContain(response.status);
     });
 
-    it('should return user details', async () => {
+    it("should return user details", async () => {
       if (!userId) return;
 
       const response = await client.get(`/api/users/${userId}`);
@@ -127,38 +127,38 @@ describe('Users Management APIs', () => {
       }
     });
 
-    it('should return 404 for non-existent user', async () => {
-      const response = await client.get('/api/users/99999999');
+    it("should return 404 for non-existent user", async () => {
+      const response = await client.get("/api/users/99999999");
 
       expect([404, 200]).toContain(response.status); // May return 200 with error message
     });
 
-    it('should require authentication', async () => {
+    it("should require authentication", async () => {
       client.clear();
-      const response = await client.get('/api/users/1');
+      const response = await client.get("/api/users/1");
 
       expect(response.status).toBe(401);
     });
 
-    it('should handle invalid user ID format', async () => {
-      const response = await client.get('/api/users/invalid-id');
+    it("should handle invalid user ID format", async () => {
+      const response = await client.get("/api/users/invalid-id");
 
       expect([400, 404]).toContain(response.status);
     });
   });
 
-  describe('POST /api/users/create - Create User', () => {
-    it('should return 200 for valid user creation', async () => {
-      const response = await client.post('/api/users/create', {
+  describe("POST /api/users/create - Create User", () => {
+    it("should return 200 for valid user creation", async () => {
+      const response = await client.post("/api/users/create", {
         ...testData.testUser,
-        password: 'TestPassword123',
+        password: "TestPassword123",
       });
 
       expect([200, 201, 400, 500]).toContain(response.status);
     });
 
-    it('should require FirstName', async () => {
-      const response = await client.post('/api/users/create', {
+    it("should require FirstName", async () => {
+      const response = await client.post("/api/users/create", {
         LastName: testData.testUser.LastName,
         Email: testData.testUser.Email,
         RoleID: testData.testUser.RoleID,
@@ -167,8 +167,8 @@ describe('Users Management APIs', () => {
       expect([400, 422, 500]).toContain(response.status);
     });
 
-    it('should require LastName', async () => {
-      const response = await client.post('/api/users/create', {
+    it("should require LastName", async () => {
+      const response = await client.post("/api/users/create", {
         FirstName: testData.testUser.FirstName,
         Email: testData.testUser.Email,
         RoleID: testData.testUser.RoleID,
@@ -177,8 +177,8 @@ describe('Users Management APIs', () => {
       expect([400, 422, 500]).toContain(response.status);
     });
 
-    it('should require Email', async () => {
-      const response = await client.post('/api/users/create', {
+    it("should require Email", async () => {
+      const response = await client.post("/api/users/create", {
         FirstName: testData.testUser.FirstName,
         LastName: testData.testUser.LastName,
         RoleID: testData.testUser.RoleID,
@@ -187,8 +187,8 @@ describe('Users Management APIs', () => {
       expect([400, 422, 500]).toContain(response.status);
     });
 
-    it('should require RoleID', async () => {
-      const response = await client.post('/api/users/create', {
+    it("should require RoleID", async () => {
+      const response = await client.post("/api/users/create", {
         FirstName: testData.testUser.FirstName,
         LastName: testData.testUser.LastName,
         Email: testData.testUser.Email,
@@ -197,44 +197,47 @@ describe('Users Management APIs', () => {
       expect([400, 422, 500]).toContain(response.status);
     });
 
-    it('should validate email format', async () => {
-      const response = await client.post('/api/users/create', {
+    it("should validate email format", async () => {
+      const response = await client.post("/api/users/create", {
         FirstName: testData.testUser.FirstName,
         LastName: testData.testUser.LastName,
-        Email: 'invalid-email',
+        Email: "invalid-email",
         RoleID: testData.testUser.RoleID,
       });
 
       expect([200, 400, 422, 500]).toContain(response.status); // May or may not validate
     });
 
-    it('should prevent duplicate emails', async () => {
+    it("should prevent duplicate emails", async () => {
       // Create first user
-      const firstResponse = await client.post('/api/users/create', {
+      const firstResponse = await client.post("/api/users/create", {
         ...testData.testUser,
-        password: 'TestPassword123',
+        password: "TestPassword123",
       });
 
       if (firstResponse.status === 200) {
         // Try to create with same email
-        const duplicateResponse = await client.post('/api/users/create', {
+        const duplicateResponse = await client.post("/api/users/create", {
           ...testData.testUser,
-          password: 'TestPassword123',
+          password: "TestPassword123",
         });
 
         expect([400, 409]).toContain(duplicateResponse.status);
       }
     });
 
-    it('should require authentication', async () => {
+    it("should require authentication", async () => {
       client.clear();
-      const response = await client.post('/api/users/create', testData.testUser);
+      const response = await client.post(
+        "/api/users/create",
+        testData.testUser,
+      );
 
       expect(response.status).toBe(401);
     });
 
-    it('should set IsActive to true by default', async () => {
-      const response = await client.post('/api/users/create', {
+    it("should set IsActive to true by default", async () => {
+      const response = await client.post("/api/users/create", {
         FirstName: testData.testUser.FirstName,
         LastName: testData.testUser.LastName,
         Email: `test-${Date.now()}@example.com`,
@@ -244,39 +247,42 @@ describe('Users Management APIs', () => {
 
       if (response.status === 200) {
         // Should be active by default
-        expect(response.data.IsActive === undefined || response.data.IsActive === true).toBeTruthy();
+        expect(
+          response.data.IsActive === undefined ||
+            response.data.IsActive === true,
+        ).toBeTruthy();
       }
     });
   });
 
-  describe('PUT /api/users/:id/update - Update User', () => {
+  describe("PUT /api/users/:id/update - Update User", () => {
     let userId: number | null = null;
 
     beforeEach(async () => {
-      const usersResponse = await client.get('/api/users');
+      const usersResponse = await client.get("/api/users");
       const users = usersResponse.data.recordset || usersResponse.data;
       if (users.length > 0) {
         userId = users[0].UserID || users[0].id;
       }
     });
 
-    it('should return 200 for valid update', async () => {
+    it("should return 200 for valid update", async () => {
       if (!userId) return;
 
       const response = await client.put(`/api/users/${userId}/update`, {
-        FirstName: 'Updated',
-        LastName: 'Name',
+        FirstName: "Updated",
+        LastName: "Name",
       });
 
       expect([200, 400, 404]).toContain(response.status);
     });
 
-    it('should update user fields', async () => {
+    it("should update user fields", async () => {
       if (!userId) return;
 
       const response = await client.put(`/api/users/${userId}/update`, {
-        FirstName: 'NewFirst',
-        LastName: 'NewLast',
+        FirstName: "NewFirst",
+        LastName: "NewLast",
       });
 
       if (response.status === 200) {
@@ -284,17 +290,17 @@ describe('Users Management APIs', () => {
       }
     });
 
-    it('should allow partial updates', async () => {
+    it("should allow partial updates", async () => {
       if (!userId) return;
 
       const response = await client.put(`/api/users/${userId}/update`, {
-        FirstName: 'OnlyFirst',
+        FirstName: "OnlyFirst",
       });
 
       expect([200, 400, 404]).toContain(response.status);
     });
 
-    it('should update IsActive status', async () => {
+    it("should update IsActive status", async () => {
       if (!userId) return;
 
       const response = await client.put(`/api/users/${userId}/update`, {
@@ -304,27 +310,27 @@ describe('Users Management APIs', () => {
       expect([200, 400, 404]).toContain(response.status);
     });
 
-    it('should return 404 for non-existent user', async () => {
-      const response = await client.put('/api/users/99999999/update', {
-        FirstName: 'Test',
+    it("should return 404 for non-existent user", async () => {
+      const response = await client.put("/api/users/99999999/update", {
+        FirstName: "Test",
       });
 
       expect([200, 400, 404]).toContain(response.status);
     });
 
-    it('should require authentication', async () => {
+    it("should require authentication", async () => {
       client.clear();
-      const response = await client.put('/api/users/1/update', {
-        FirstName: 'Test',
+      const response = await client.put("/api/users/1/update", {
+        FirstName: "Test",
       });
 
       expect(response.status).toBe(401);
     });
   });
 
-  describe('Role-Based Access Control', () => {
-    it('should show RoleName for each user', async () => {
-      const response = await client.get('/api/users');
+  describe("Role-Based Access Control", () => {
+    it("should show RoleName for each user", async () => {
+      const response = await client.get("/api/users");
 
       expect(response.status).toBe(200);
       const users = response.data.recordset || response.data;
@@ -334,8 +340,8 @@ describe('Users Management APIs', () => {
       }
     });
 
-    it('should have valid role IDs (1=Admin, 2=General)', async () => {
-      const response = await client.get('/api/users');
+    it("should have valid role IDs (1=Admin, 2=General)", async () => {
+      const response = await client.get("/api/users");
 
       expect(response.status).toBe(200);
       const users = response.data.recordset || response.data;
@@ -347,8 +353,8 @@ describe('Users Management APIs', () => {
       }
     });
 
-    it('should not expose sensitive information in list', async () => {
-      const response = await client.get('/api/users');
+    it("should not expose sensitive information in list", async () => {
+      const response = await client.get("/api/users");
 
       expect(response.status).toBe(200);
       const users = response.data.recordset || response.data;
@@ -361,10 +367,10 @@ describe('Users Management APIs', () => {
     });
   });
 
-  describe('Data Validation', () => {
-    it('should validate FirstName length', async () => {
-      const response = await client.post('/api/users/create', {
-        FirstName: 'A'.repeat(256), // Very long name
+  describe("Data Validation", () => {
+    it("should validate FirstName length", async () => {
+      const response = await client.post("/api/users/create", {
+        FirstName: "A".repeat(256), // Very long name
         LastName: testData.testUser.LastName,
         Email: testData.testUser.Email,
         RoleID: testData.testUser.RoleID,
@@ -374,10 +380,10 @@ describe('Users Management APIs', () => {
       expect([200, 400, 422, 500]).toContain(response.status);
     });
 
-    it('should handle special characters in names', async () => {
-      const response = await client.post('/api/users/create', {
+    it("should handle special characters in names", async () => {
+      const response = await client.post("/api/users/create", {
         FirstName: "O'Brien",
-        LastName: 'García-López',
+        LastName: "García-López",
         Email: `special-${Date.now()}@example.com`,
         RoleID: testData.testUser.RoleID,
       });
@@ -385,9 +391,9 @@ describe('Users Management APIs', () => {
       expect([200, 400, 422, 500]).toContain(response.status);
     });
 
-    it('should handle whitespace in names', async () => {
-      const response = await client.post('/api/users/create', {
-        FirstName: '  Trimmed  ',
+    it("should handle whitespace in names", async () => {
+      const response = await client.post("/api/users/create", {
+        FirstName: "  Trimmed  ",
         LastName: testData.testUser.LastName,
         Email: `trim-${Date.now()}@example.com`,
         RoleID: testData.testUser.RoleID,
@@ -398,10 +404,10 @@ describe('Users Management APIs', () => {
     });
   });
 
-  describe('Performance - User Operations', () => {
-    it('should fetch users within 5 seconds', async () => {
+  describe("Performance - User Operations", () => {
+    it("should fetch users within 5 seconds", async () => {
       const startTime = Date.now();
-      const response = await client.get('/api/users');
+      const response = await client.get("/api/users");
       const endTime = Date.now();
 
       expect(response.status).toBe(200);

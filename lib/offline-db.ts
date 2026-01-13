@@ -51,7 +51,11 @@ export interface SyncConflict {
   quantity: number;
   localTimestamp: string;
   serverTimestamp?: string;
-  conflictType: "quantity_mismatch" | "product_not_found" | "negative_inventory" | "server_error";
+  conflictType:
+    | "quantity_mismatch"
+    | "product_not_found"
+    | "negative_inventory"
+    | "server_error";
   serverMessage: string;
   resolved: boolean;
   resolution?: "keep_local" | "discard" | "manual";
@@ -124,7 +128,9 @@ const DB_VERSION = 2; // Increment from version 1 which only had users store
 
 let dbInstance: IDBPDatabase<OfflineInventoryDBSchema> | null = null;
 
-export async function getOfflineDB(): Promise<IDBPDatabase<OfflineInventoryDBSchema>> {
+export async function getOfflineDB(): Promise<
+  IDBPDatabase<OfflineInventoryDBSchema>
+> {
   if (dbInstance) {
     return dbInstance;
   }
@@ -132,7 +138,7 @@ export async function getOfflineDB(): Promise<IDBPDatabase<OfflineInventoryDBSch
   dbInstance = await openDB<OfflineInventoryDBSchema>(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion) {
       // Handle upgrade from version 1 (which only had 'users' store)
-      
+
       if (oldVersion < 2) {
         // Create pendingScans store
         if (!db.objectStoreNames.contains("pendingScans")) {
@@ -191,7 +197,7 @@ export async function getOfflineDB(): Promise<IDBPDatabase<OfflineInventoryDBSch
 
 export function getDeviceId(): string {
   if (typeof window === "undefined") return "server";
-  
+
   let deviceId = localStorage.getItem("offline-device-id");
   if (!deviceId) {
     deviceId = `device-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -202,10 +208,12 @@ export function getDeviceId(): string {
 
 // ============ Pending Scans Operations ============
 
-export async function queueScan(scan: Omit<PendingScan, "id" | "synced" | "syncAttempts" | "deviceId">): Promise<number> {
+export async function queueScan(
+  scan: Omit<PendingScan, "id" | "synced" | "syncAttempts" | "deviceId">,
+): Promise<number> {
   const db = await getOfflineDB();
   const deviceId = getDeviceId();
-  
+
   const pendingScan: Omit<PendingScan, "id"> = {
     ...scan,
     deviceId,
@@ -217,13 +225,15 @@ export async function queueScan(scan: Omit<PendingScan, "id" | "synced" | "syncA
   return id;
 }
 
-export async function getPendingScans(warehouseId?: number): Promise<PendingScan[]> {
+export async function getPendingScans(
+  warehouseId?: number,
+): Promise<PendingScan[]> {
   const db = await getOfflineDB();
-  
+
   if (warehouseId) {
     return db.getAllFromIndex("pendingScans", "by-warehouse", warehouseId);
   }
-  
+
   return db.getAll("pendingScans");
 }
 
@@ -231,7 +241,7 @@ export async function getUnsyncedScans(): Promise<PendingScan[]> {
   const db = await getOfflineDB();
   // Get all scans where synced = false (0 in IndexedDB)
   const allScans = await db.getAll("pendingScans");
-  return allScans.filter(scan => !scan.synced);
+  return allScans.filter((scan) => !scan.synced);
 }
 
 export async function markScanAsSynced(id: number): Promise<void> {
@@ -243,7 +253,10 @@ export async function markScanAsSynced(id: number): Promise<void> {
   }
 }
 
-export async function markScanAsFailed(id: number, error: string): Promise<void> {
+export async function markScanAsFailed(
+  id: number,
+  error: string,
+): Promise<void> {
   const db = await getOfflineDB();
   const scan = await db.get("pendingScans", id);
   if (scan) {
@@ -257,10 +270,10 @@ export async function deleteSyncedScans(): Promise<number> {
   const db = await getOfflineDB();
   const tx = db.transaction("pendingScans", "readwrite");
   const store = tx.objectStore("pendingScans");
-  
+
   let deletedCount = 0;
   let cursor = await store.openCursor();
-  
+
   while (cursor) {
     if (cursor.value.synced) {
       await cursor.delete();
@@ -268,23 +281,25 @@ export async function deleteSyncedScans(): Promise<number> {
     }
     cursor = await cursor.continue();
   }
-  
+
   await tx.done;
   return deletedCount;
 }
 
-export async function cleanupExpiredScans(maxAgeHours: number = 48): Promise<number> {
+export async function cleanupExpiredScans(
+  maxAgeHours: number = 48,
+): Promise<number> {
   const db = await getOfflineDB();
   const tx = db.transaction("pendingScans", "readwrite");
   const store = tx.objectStore("pendingScans");
-  
+
   const cutoffTime = new Date();
   cutoffTime.setHours(cutoffTime.getHours() - maxAgeHours);
   const cutoffTimestamp = cutoffTime.toISOString();
-  
+
   let deletedCount = 0;
   let cursor = await store.openCursor();
-  
+
   while (cursor) {
     // Only delete synced scans that are older than cutoff
     if (cursor.value.synced && cursor.value.timestamp < cutoffTimestamp) {
@@ -293,7 +308,7 @@ export async function cleanupExpiredScans(maxAgeHours: number = 48): Promise<num
     }
     cursor = await cursor.continue();
   }
-  
+
   await tx.done;
   return deletedCount;
 }
@@ -311,32 +326,34 @@ export interface BlockingStatus {
 export async function getBlockingStatus(): Promise<BlockingStatus> {
   const db = await getOfflineDB();
   const unsyncedScans = await getUnsyncedScans();
-  
+
   const pendingCount = unsyncedScans.length;
-  
+
   // Find oldest unsynced scan
   let oldestPendingHours: number | null = null;
   if (unsyncedScans.length > 0) {
-    const timestamps = unsyncedScans.map(s => new Date(s.timestamp).getTime());
+    const timestamps = unsyncedScans.map((s) =>
+      new Date(s.timestamp).getTime(),
+    );
     const oldestTimestamp = Math.min(...timestamps);
     const hoursOld = (Date.now() - oldestTimestamp) / (1000 * 60 * 60);
     oldestPendingHours = Math.round(hoursOld * 10) / 10;
   }
-  
+
   // Check for unresolved conflicts
   const conflicts = await db.getAllFromIndex("syncConflicts", "by-resolved", 0);
   const hasUnresolvedConflicts = conflicts.length > 0;
-  
+
   // Determine warning level and blocking
   let warningLevel: BlockingStatus["warningLevel"] = "none";
   let shouldBlock = false;
   let reason: string | null = null;
-  
+
   if (hasUnresolvedConflicts) {
     warningLevel = "high";
     reason = `Hay ${conflicts.length} conflicto(s) sin resolver. Revíselos antes de continuar.`;
   }
-  
+
   if (pendingCount >= 10) {
     shouldBlock = true;
     warningLevel = "critical";
@@ -350,7 +367,7 @@ export async function getBlockingStatus(): Promise<BlockingStatus> {
   } else if (pendingCount >= 1) {
     warningLevel = "low";
   }
-  
+
   if (oldestPendingHours !== null && oldestPendingHours >= 24) {
     shouldBlock = true;
     warningLevel = "critical";
@@ -361,7 +378,7 @@ export async function getBlockingStatus(): Promise<BlockingStatus> {
       reason = `Escaneos pendientes de más de ${Math.floor(oldestPendingHours)} horas. Sincronice pronto.`;
     }
   }
-  
+
   return {
     shouldBlock,
     reason,
@@ -382,7 +399,7 @@ export async function cacheProducts(
     categoryName?: string;
     unitName?: string;
     currentQuantity?: number;
-  }>
+  }>,
 ): Promise<void> {
   const db = await getOfflineDB();
   const tx = db.transaction("cachedProducts", "readwrite");
@@ -419,23 +436,28 @@ export async function cacheProducts(
 
 export async function getCachedProduct(
   warehouseId: number,
-  barcode: string
+  barcode: string,
 ): Promise<CachedProduct | undefined> {
   const db = await getOfflineDB();
   return db.get("cachedProducts", [warehouseId, barcode]);
 }
 
-export async function getCachedProductsByWarehouse(warehouseId: number): Promise<CachedProduct[]> {
+export async function getCachedProductsByWarehouse(
+  warehouseId: number,
+): Promise<CachedProduct[]> {
   const db = await getOfflineDB();
   return db.getAllFromIndex("cachedProducts", "by-warehouse", warehouseId);
 }
 
-export async function updateWarehouseCache(warehouseId: number, productCount: number): Promise<void> {
+export async function updateWarehouseCache(
+  warehouseId: number,
+  productCount: number,
+): Promise<void> {
   const db = await getOfflineDB();
-  
+
   // Try to get existing warehouse info or create minimal entry
   const existing = await db.get("cachedWarehouses", warehouseId);
-  
+
   await db.put("cachedWarehouses", {
     warehouseId,
     warehouseName: existing?.warehouseName || `Almacén ${warehouseId}`,
@@ -454,7 +476,7 @@ export async function cacheWarehouse(warehouse: {
 }): Promise<void> {
   const db = await getOfflineDB();
   const existing = await db.get("cachedWarehouses", warehouse.warehouseId);
-  
+
   await db.put("cachedWarehouses", {
     ...warehouse,
     cachedAt: new Date().toISOString(),
@@ -462,31 +484,38 @@ export async function cacheWarehouse(warehouse: {
   });
 }
 
-export async function getCachedWarehouse(warehouseId: number): Promise<CachedWarehouse | undefined> {
+export async function getCachedWarehouse(
+  warehouseId: number,
+): Promise<CachedWarehouse | undefined> {
   const db = await getOfflineDB();
   return db.get("cachedWarehouses", warehouseId);
 }
 
-export async function isProductCacheValid(warehouseId: number, maxAgeHours: number = 24): Promise<boolean> {
+export async function isProductCacheValid(
+  warehouseId: number,
+  maxAgeHours: number = 24,
+): Promise<boolean> {
   const warehouse = await getCachedWarehouse(warehouseId);
   if (!warehouse) return false;
-  
+
   const cacheAge = Date.now() - new Date(warehouse.cachedAt).getTime();
   const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
-  
+
   return cacheAge < maxAgeMs;
 }
 
 // ============ Conflict Operations ============
 
-export async function addConflict(conflict: Omit<SyncConflict, "id" | "resolved">): Promise<number> {
+export async function addConflict(
+  conflict: Omit<SyncConflict, "id" | "resolved">,
+): Promise<number> {
   const db = await getOfflineDB();
-  
+
   const newConflict: Omit<SyncConflict, "id"> = {
     ...conflict,
     resolved: false,
   };
-  
+
   const id = await db.add("syncConflicts", newConflict as SyncConflict);
   return id;
 }
@@ -500,11 +529,11 @@ export async function getUnresolvedConflicts(): Promise<SyncConflict[]> {
 export async function resolveConflict(
   id: number,
   resolution: "keep_local" | "discard" | "manual",
-  resolvedBy: string
+  resolvedBy: string,
 ): Promise<void> {
   const db = await getOfflineDB();
   const conflict = await db.get("syncConflicts", id);
-  
+
   if (conflict) {
     conflict.resolved = true;
     conflict.resolution = resolution;
@@ -521,7 +550,10 @@ export async function getAllConflicts(): Promise<SyncConflict[]> {
 
 // ============ Sync Metadata Operations ============
 
-export async function setSyncMetadata(key: string, value: string | number | boolean): Promise<void> {
+export async function setSyncMetadata(
+  key: string,
+  value: string | number | boolean,
+): Promise<void> {
   const db = await getOfflineDB();
   await db.put("syncMetadata", {
     key,
@@ -530,7 +562,9 @@ export async function setSyncMetadata(key: string, value: string | number | bool
   });
 }
 
-export async function getSyncMetadata(key: string): Promise<SyncMetadata | undefined> {
+export async function getSyncMetadata(
+  key: string,
+): Promise<SyncMetadata | undefined> {
   const db = await getOfflineDB();
   return db.get("syncMetadata", key);
 }
@@ -539,28 +573,29 @@ export async function getSyncMetadata(key: string): Promise<SyncMetadata | undef
 
 export async function getSyncStats(): Promise<SyncStats> {
   const db = await getOfflineDB();
-  
+
   const allScans = await db.getAll("pendingScans");
-  const unsyncedScans = allScans.filter(s => !s.synced);
-  const failedScans = allScans.filter(s => !s.synced && s.syncAttempts > 0);
-  
+  const unsyncedScans = allScans.filter((s) => !s.synced);
+  const failedScans = allScans.filter((s) => !s.synced && s.syncAttempts > 0);
+
   let oldestPendingTimestamp: string | null = null;
   if (unsyncedScans.length > 0) {
-    const timestamps = unsyncedScans.map(s => s.timestamp);
+    const timestamps = unsyncedScans.map((s) => s.timestamp);
     oldestPendingTimestamp = timestamps.sort()[0];
   }
-  
+
   const lastSyncAttemptMeta = await getSyncMetadata("lastSyncAttempt");
   const lastSuccessfulSyncMeta = await getSyncMetadata("lastSuccessfulSync");
-  
+
   const conflicts = await getUnresolvedConflicts();
-  
+
   return {
     pendingCount: unsyncedScans.length,
     oldestPendingTimestamp,
     failedCount: failedScans.length,
-    lastSyncAttempt: lastSyncAttemptMeta?.value as string | null ?? null,
-    lastSuccessfulSync: lastSuccessfulSyncMeta?.value as string | null ?? null,
+    lastSyncAttempt: (lastSyncAttemptMeta?.value as string | null) ?? null,
+    lastSuccessfulSync:
+      (lastSuccessfulSyncMeta?.value as string | null) ?? null,
     unresolvedConflicts: conflicts.length,
   };
 }
@@ -569,12 +604,18 @@ export async function getSyncStats(): Promise<SyncStats> {
 
 export async function clearAllOfflineData(): Promise<void> {
   const db = await getOfflineDB();
-  
+
   const tx = db.transaction(
-    ["pendingScans", "cachedProducts", "cachedWarehouses", "syncConflicts", "syncMetadata"],
-    "readwrite"
+    [
+      "pendingScans",
+      "cachedProducts",
+      "cachedWarehouses",
+      "syncConflicts",
+      "syncMetadata",
+    ],
+    "readwrite",
   );
-  
+
   await Promise.all([
     tx.objectStore("pendingScans").clear(),
     tx.objectStore("cachedProducts").clear(),
@@ -582,6 +623,6 @@ export async function clearAllOfflineData(): Promise<void> {
     tx.objectStore("syncConflicts").clear(),
     tx.objectStore("syncMetadata").clear(),
   ]);
-  
+
   await tx.done;
 }

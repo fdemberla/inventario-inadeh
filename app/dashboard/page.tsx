@@ -57,7 +57,7 @@ export default function Dashboard() {
       setError(null);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error al cargar almacenes"
+        err instanceof Error ? err.message : "Error al cargar almacenes",
       );
     }
   }, []);
@@ -78,13 +78,13 @@ export default function Dashboard() {
           const quantity = item.QuantityOnHand || 0;
           categoryMap.set(
             categoryName,
-            (categoryMap.get(categoryName) || 0) + quantity
+            (categoryMap.get(categoryName) || 0) + quantity,
           );
         });
 
         // Convert to sorted array (descending by quantity)
         const categories: CategoryInventory[] = Array.from(
-          categoryMap.entries()
+          categoryMap.entries(),
         )
           .map(([name, quantity]) => ({
             categoryName: name,
@@ -102,10 +102,13 @@ export default function Dashboard() {
           return newMap;
         });
       } catch (err) {
-        console.error(`Error fetching inventory for warehouse ${warehouseId}:`, err);
+        console.error(
+          `Error fetching inventory for warehouse ${warehouseId}:`,
+          err,
+        );
       }
     },
-    []
+    [],
   );
 
   // Load all data
@@ -115,9 +118,7 @@ export default function Dashboard() {
     try {
       await fetchWarehouses();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Error al cargar datos"
-      );
+      setError(err instanceof Error ? err.message : "Error al cargar datos");
     } finally {
       setLoading(false);
     }
@@ -149,10 +150,13 @@ export default function Dashboard() {
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const interval = setInterval(() => {
-      setLastUpdate(new Date());
-      fetchAllInventories();
-    }, 5 * 60 * 1000); // 5 minutes
+    const interval = setInterval(
+      () => {
+        setLastUpdate(new Date());
+        fetchAllInventories();
+      },
+      5 * 60 * 1000,
+    ); // 5 minutes
 
     return () => clearInterval(interval);
   }, [autoRefresh, fetchAllInventories]);

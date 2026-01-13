@@ -4,7 +4,11 @@ import { toast } from "react-hot-toast";
 import { Label, Spinner, TextInput, Badge } from "flowbite-react";
 import { useRouter, useParams } from "next/navigation";
 import { CiBarcode } from "react-icons/ci";
-import { HiOutlineCloud, HiOutlineCloudDownload, HiOutlineDatabase } from "react-icons/hi";
+import {
+  HiOutlineCloud,
+  HiOutlineCloudDownload,
+  HiOutlineDatabase,
+} from "react-icons/hi";
 import OfflineStatusBanner from "@/app/components/OfflineStatusBanner";
 import {
   processScan,
@@ -16,7 +20,11 @@ import {
   getSyncStats,
   getBlockingStatus,
 } from "@/lib/sync-service";
-import { isProductCacheValid, getCachedProductsByWarehouse, getPendingScans } from "@/lib/offline-db";
+import {
+  isProductCacheValid,
+  getCachedProductsByWarehouse,
+  getPendingScans,
+} from "@/lib/offline-db";
 
 interface ScanEntry {
   barcode: string;
@@ -48,7 +56,9 @@ function ScannerPage() {
   const [loading, setLoading] = useState(false);
   const [scannedCode, setScannedCode] = useState("");
   const [scanHistory, setScanHistory] = useState<ScanEntry[]>([]);
-  const [operationType, setOperationType] = useState<"entrada" | "salida">("entrada");
+  const [operationType, setOperationType] = useState<"entrada" | "salida">(
+    "entrada",
+  );
   const [online, setOnline] = useState(true);
   const [cacheStatus, setCacheStatus] = useState<{
     valid: boolean;
@@ -90,12 +100,16 @@ function ScannerPage() {
         queued: true,
         verified: scan.verified,
       }));
-    
+
     // Prepend pending scans that aren't already in history
     setScanHistory((prev) => {
-      const existingBarcodes = new Set(prev.filter(p => p.queued).map(p => p.timestamp));
-      const newPending = pendingHistory.filter(p => !existingBarcodes.has(p.timestamp));
-      return [...newPending, ...prev.filter(p => !p.queued)];
+      const existingBarcodes = new Set(
+        prev.filter((p) => p.queued).map((p) => p.timestamp),
+      );
+      const newPending = pendingHistory.filter(
+        (p) => !existingBarcodes.has(p.timestamp),
+      );
+      return [...newPending, ...prev.filter((p) => !p.queued)];
     });
   }, []);
 
@@ -105,30 +119,48 @@ function ScannerPage() {
 
     try {
       const cacheValid = await isProductCacheValid(warehouseId, 24);
-      
+
       if (cacheValid) {
         const cachedProducts = await getCachedProductsByWarehouse(warehouseId);
-        setCacheStatus({ valid: true, productCount: cachedProducts.length, loading: false });
+        setCacheStatus({
+          valid: true,
+          productCount: cachedProducts.length,
+          loading: false,
+        });
         return;
       }
 
       // Try to refresh cache if online
       if (isOnline()) {
-        const toastId = toast.loading("Cargando productos para modo offline...");
+        const toastId = toast.loading(
+          "Cargando productos para modo offline...",
+        );
         const result = await refreshProductCache(warehouseId);
-        
+
         if (result.success) {
-          toast.success(`${result.productCount} productos cargados`, { id: toastId });
-          setCacheStatus({ valid: true, productCount: result.productCount, loading: false });
+          toast.success(`${result.productCount} productos cargados`, {
+            id: toastId,
+          });
+          setCacheStatus({
+            valid: true,
+            productCount: result.productCount,
+            loading: false,
+          });
         } else {
-          toast.error(result.error || "Error al cargar productos", { id: toastId });
+          toast.error(result.error || "Error al cargar productos", {
+            id: toastId,
+          });
           setCacheStatus({ valid: false, productCount: 0, loading: false });
         }
       } else {
         // Offline and no valid cache
         const cachedProducts = await getCachedProductsByWarehouse(warehouseId);
         if (cachedProducts.length > 0) {
-          setCacheStatus({ valid: true, productCount: cachedProducts.length, loading: false });
+          setCacheStatus({
+            valid: true,
+            productCount: cachedProducts.length,
+            loading: false,
+          });
           toast("Usando caché de productos anterior", { icon: "📦" });
         } else {
           setCacheStatus({ valid: false, productCount: 0, loading: false });
@@ -154,8 +186,14 @@ function ScannerPage() {
     try {
       const result = await refreshProductCache(warehouse.WarehouseID);
       if (result.success) {
-        toast.success(`${result.productCount} productos actualizados`, { id: toastId });
-        setCacheStatus({ valid: true, productCount: result.productCount, loading: false });
+        toast.success(`${result.productCount} productos actualizados`, {
+          id: toastId,
+        });
+        setCacheStatus({
+          valid: true,
+          productCount: result.productCount,
+          loading: false,
+        });
       } else {
         toast.error(result.error || "Error al actualizar", { id: toastId });
         setCacheStatus((prev) => ({ ...prev, loading: false }));
@@ -214,7 +252,12 @@ function ScannerPage() {
     };
 
     fetchWarehouse();
-  }, [params?.id, checkAndRefreshCache, loadPendingScansToHistory, checkBlockingStatus]);
+  }, [
+    params?.id,
+    checkAndRefreshCache,
+    loadPendingScansToHistory,
+    checkBlockingStatus,
+  ]);
 
   // Focus input when warehouse is loaded
   useEffect(() => {
@@ -228,14 +271,16 @@ function ScannerPage() {
     if (warehouse) {
       await loadPendingScansToHistory(warehouse.WarehouseID);
       await checkBlockingStatus();
-      
+
       // Update history to mark synced items
       const stats = await getSyncStats();
       if (stats.pendingCount === 0) {
         setScanHistory((prev) =>
           prev.map((entry) =>
-            entry.queued ? { ...entry, status: "success" as const, queued: false } : entry
-          )
+            entry.queued
+              ? { ...entry, status: "success" as const, queued: false }
+              : entry,
+          ),
         );
       }
     }
@@ -331,15 +376,28 @@ function ScannerPage() {
           onClick={() => router.push(`/dashboard/inventory`)}
           className="flex items-center text-blue-600 hover:text-blue-700"
         >
-          <svg className="mr-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg
+            className="mr-1 h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           Volver
         </button>
       </div>
 
       {/* Offline Status Banner */}
-      <OfflineStatusBanner onSyncComplete={handleSyncComplete} className="mb-4" />
+      <OfflineStatusBanner
+        onSyncComplete={handleSyncComplete}
+        className="mb-4"
+      />
 
       <h1 className="mb-4 text-2xl font-bold">Escáner</h1>
 
@@ -356,7 +414,10 @@ function ScannerPage() {
             <h2 className="text-xl font-semibold">{warehouse.WarehouseName}</h2>
             <div className="mt-1 flex items-center gap-2">
               {/* Online/Offline indicator */}
-              <Badge color={online ? "success" : "warning"} className="flex items-center gap-1">
+              <Badge
+                color={online ? "success" : "warning"}
+                className="flex items-center gap-1"
+              >
                 {online ? (
                   <>
                     <HiOutlineCloud className="h-3 w-3" /> En línea
@@ -389,7 +450,9 @@ function ScannerPage() {
             }`}
             title="Actualizar caché de productos"
           >
-            <HiOutlineCloudDownload className={`h-4 w-4 ${cacheStatus.loading ? "animate-bounce" : ""}`} />
+            <HiOutlineCloudDownload
+              className={`h-4 w-4 ${cacheStatus.loading ? "animate-bounce" : ""}`}
+            />
             {cacheStatus.loading ? "Cargando..." : "Actualizar caché"}
           </button>
         </div>
@@ -446,7 +509,13 @@ function ScannerPage() {
           onChange={(e) => setScannedCode(e.target.value)}
           onKeyDown={handleScanSubmit}
           disabled={isBlocked}
-          color={isBlocked ? "gray" : operationType === "entrada" ? "success" : "failure"}
+          color={
+            isBlocked
+              ? "gray"
+              : operationType === "entrada"
+                ? "success"
+                : "failure"
+          }
           className={`rounded-xl border-none px-5 py-3 text-lg font-semibold shadow-md transition-all duration-200 focus:shadow-lg focus:outline-none ${
             isBlocked
               ? "cursor-not-allowed bg-gray-100 ring-2 ring-gray-300"
@@ -522,7 +591,9 @@ function ScannerPage() {
                 </span>
               </div>
 
-              <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">{entry.message}</p>
+              <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
+                {entry.message}
+              </p>
 
               {entry.product?.name && (
                 <div className="text-sm text-gray-700 dark:text-gray-300">
