@@ -17,7 +17,7 @@ interface ApiResponse<T = unknown> {
 }
 
 // Use global fetch (available in Node 18+) or require node-fetch
-const fetchFn = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
+const fetchFn = typeof fetch !== "undefined" ? fetch : require("node-fetch");
 
 export class TestClient {
   private baseUrl: string;
@@ -25,7 +25,7 @@ export class TestClient {
   private cookies: Map<string, string> = new Map();
 
   constructor(options: TestClientOptions = {}) {
-    this.baseUrl = options.baseUrl || 'http://localhost:3000';
+    this.baseUrl = options.baseUrl || "http://localhost:3000";
     this.token = options.token || null;
   }
 
@@ -47,7 +47,7 @@ export class TestClient {
    * Perform GET request
    */
   async get<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>('GET', endpoint);
+    return this.request<T>("GET", endpoint);
   }
 
   /**
@@ -57,7 +57,7 @@ export class TestClient {
     endpoint: string,
     body?: unknown,
   ): Promise<ApiResponse<T>> {
-    return this.request<T>('POST', endpoint, body);
+    return this.request<T>("POST", endpoint, body);
   }
 
   /**
@@ -67,14 +67,14 @@ export class TestClient {
     endpoint: string,
     body?: unknown,
   ): Promise<ApiResponse<T>> {
-    return this.request<T>('PUT', endpoint, body);
+    return this.request<T>("PUT", endpoint, body);
   }
 
   /**
    * Perform DELETE request
    */
   async delete<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>('DELETE', endpoint);
+    return this.request<T>("DELETE", endpoint);
   }
 
   /**
@@ -87,19 +87,19 @@ export class TestClient {
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
     // Add token to Authorization header if available
     if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+      headers["Authorization"] = `Bearer ${this.token}`;
     }
 
     // Add stored cookies
     if (this.cookies.size > 0) {
-      headers['Cookie'] = Array.from(this.cookies.entries())
+      headers["Cookie"] = Array.from(this.cookies.entries())
         .map(([key, value]) => `${key}=${value}`)
-        .join('; ');
+        .join("; ");
     }
 
     const options: RequestInit = {
@@ -107,17 +107,17 @@ export class TestClient {
       headers,
     };
 
-    if (body && (method === 'POST' || method === 'PUT')) {
+    if (body && (method === "POST" || method === "PUT")) {
       options.body = JSON.stringify(body);
     }
 
     try {
       const response = await fetchFn(url, options);
       let data: T = {} as T;
-      
+
       try {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
           data = await response.json();
         }
       } catch (e) {
@@ -125,7 +125,7 @@ export class TestClient {
       }
 
       // Extract and store cookies from Set-Cookie header
-      const setCookie = response.headers.get('set-cookie');
+      const setCookie = response.headers.get("set-cookie");
       if (setCookie) {
         this.parseCookie(setCookie);
       }
@@ -138,10 +138,12 @@ export class TestClient {
       };
     } catch (error) {
       // If fetch itself fails (network error, etc), return error response
-      console.error('Test client error:', error);
+      console.error("Test client error:", error);
       return {
         status: 0,
-        data: { error: error instanceof Error ? error.message : 'Network error' } as T,
+        data: {
+          error: error instanceof Error ? error.message : "Network error",
+        } as T,
         headers: {},
       };
     }
@@ -151,7 +153,7 @@ export class TestClient {
    * Parse cookie from Set-Cookie header
    */
   private parseCookie(setCookieHeader: string): void {
-    const cookieParts = setCookieHeader.split(';')[0].split('=');
+    const cookieParts = setCookieHeader.split(";")[0].split("=");
     if (cookieParts.length === 2) {
       this.cookies.set(cookieParts[0].trim(), cookieParts[1].trim());
     }

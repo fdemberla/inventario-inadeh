@@ -37,7 +37,7 @@ const buttonVariants = cva(
       variant: "primary",
       size: "md",
     },
-  }
+  },
 );
 
 export interface ButtonProps
@@ -74,7 +74,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <button
@@ -85,7 +85,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading && (
           <svg
-            className="animate-spin h-4 w-4"
+            className="h-4 w-4 animate-spin"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -105,12 +105,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ></path>
           </svg>
         )}
-        {!isLoading && leftIcon && <span>{leftIcon}</span>}
-        <span>{children}</span>
-        {!isLoading && rightIcon && <span>{rightIcon}</span>}
+        {!isLoading && leftIcon && (
+          <span className="inline-flex items-center">{leftIcon}</span>
+        )}
+        {children && <span>{children}</span>}
+        {!isLoading && rightIcon && (
+          <span className="inline-flex items-center">{rightIcon}</span>
+        )}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

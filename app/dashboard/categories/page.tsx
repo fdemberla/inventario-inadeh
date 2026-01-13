@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Spinner, Button } from "flowbite-react";
+import { Button } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "../../components/DataTable"; // Make sure the path is correct
+import { DataTable } from "../../components/DataTable";
 
 type Category = {
   CategoryID: number;
@@ -43,7 +44,8 @@ export default function ViewAllCategories() {
       header: "",
       cell: ({ row }) => (
         <Button
-          size="xs"
+          size="sm"
+          variant="secondary"
           onClick={() =>
             router.push(`/dashboard/categories/edit/${row.original.CategoryID}`)
           }
@@ -56,18 +58,32 @@ export default function ViewAllCategories() {
 
   if (loading) {
     return (
-      <div className="flex justify-center p-6">
-        <Spinner size="xl" />
-      </div>
+      <PageLayout title="Categorías">
+        <div className="flex justify-center p-6">
+          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+        </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="p-6">
-      <h1 className="mb-4 text-2xl font-bold text-white">
-        Todas las Categorías
-      </h1>
+    <PageLayout
+      title="Todas las Categorías"
+      subtitle="Administra las categorías de productos"
+      breadcrumbs={[
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Categorías" },
+      ]}
+      actions={
+        <Button
+          variant="primary"
+          onClick={() => router.push("/dashboard/categories/create")}
+        >
+          Crear Categoría
+        </Button>
+      }
+    >
       <DataTable data={categories} columns={columns} />
-    </div>
+    </PageLayout>
   );
 }

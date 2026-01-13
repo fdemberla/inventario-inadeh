@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Spinner, Button } from "flowbite-react";
+import { Button } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "../../components/DataTable";
 
 type Product = {
@@ -57,7 +58,8 @@ export default function ViewAllProducts() {
       id: "actions",
       cell: ({ row }: unknown) => (
         <Button
-          size="xs"
+          size="sm"
+          variant="secondary"
           onClick={() =>
             router.push(`/dashboard/products/edit/${row.original.ProductID}`)
           }
@@ -70,26 +72,32 @@ export default function ViewAllProducts() {
 
   if (loading) {
     return (
-      <div className="flex justify-center p-6 align-middle">
-        <Spinner size="xl" />
-      </div>
+      <PageLayout title="Productos">
+        <div className="flex justify-center p-6 align-middle">
+          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+        </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold dark:text-white">
-          Todos los Productos
-        </h1>
+    <PageLayout
+      title="Todos los Productos"
+      subtitle="Gestiona tu catálogo de productos"
+      breadcrumbs={[
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Productos" },
+      ]}
+      actions={
         <Button
+          variant="primary"
           onClick={() => router.push("/dashboard/products/create")}
-          className="bg-brand-verde"
         >
           Crear Producto
         </Button>
-      </div>
+      }
+    >
       <DataTable data={products} columns={columns} />
-    </div>
+    </PageLayout>
   );
 }

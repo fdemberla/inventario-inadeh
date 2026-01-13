@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Spinner } from "flowbite-react";
+import { Button } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "@/app/components/DataTable";
 import { useRouter } from "next/navigation";
-
 
 type Unit = {
   UnitID: number;
@@ -16,16 +16,13 @@ type Unit = {
 export default function ViewAllUnits() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
-
-      const router = useRouter();
-
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUnits = async () => {
       try {
         const res = await fetch("/api/units");
         const data = await res.json();
-        // ⬇️ Access the actual array inside `recordset`
         setUnits(data);
       } catch (error) {
         console.error("Error fetching units:", error);
@@ -39,9 +36,11 @@ export default function ViewAllUnits() {
 
   if (loading) {
     return (
-      <div className="flex justify-center p-6">
-        <Spinner size="xl" />
-      </div>
+      <PageLayout title="Unidades">
+        <div className="flex justify-center p-6">
+          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+        </div>
+      </PageLayout>
     );
   }
 
@@ -58,22 +57,41 @@ export default function ViewAllUnits() {
       header: "Sistema",
       accessorKey: "System",
     },
+    {
+      header: "Acciones",
+      id: "actions",
+      cell: ({ row }) => (
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() =>
+            router.push(`/dashboard/units/${row.original.UnitID}/edit`)
+          }
+        >
+          Editar
+        </Button>
+      ),
+    },
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="mb-4 text-2xl font-bold dark:text-white">
-        Unidades de Medida
-      </h1>
-              <Button
-                onClick={() => router.push("/dashboard/units/create")}
-                className="bg-brand-verde"
-              >
-                Crear Unidad
-              </Button>
-      <>
-        <DataTable data={units} columns={columns} />
-      </>
-    </div>
+    <PageLayout
+      title="Unidades de Medida"
+      subtitle="Administra las unidades de medida"
+      breadcrumbs={[
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Unidades" },
+      ]}
+      actions={
+        <Button
+          variant="primary"
+          onClick={() => router.push("/dashboard/units/create")}
+        >
+          Crear Unidad
+        </Button>
+      }
+    >
+      <DataTable data={units} columns={columns} />
+    </PageLayout>
   );
 }

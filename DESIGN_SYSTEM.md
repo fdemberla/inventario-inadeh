@@ -5,6 +5,7 @@ Sistema integral de tokens de diseño y componentes UI reutilizables para el app
 ## 📦 Componentes Disponibles
 
 ### 1. **Button** - Componente de Botón
+
 Botón reutilizable con múltiples variantes y tamaños.
 
 ```tsx
@@ -42,6 +43,7 @@ import { Button } from "@/app/components/ui";
 ```
 
 **Props:**
+
 - `variant`: "primary" | "secondary" | "danger" | "ghost" | "outline" (default: "primary")
 - `size`: "sm" | "md" | "lg" (default: "md")
 - `isLoading`: boolean
@@ -52,6 +54,7 @@ import { Button } from "@/app/components/ui";
 ---
 
 ### 2. **Input** - Componente de Campo de Entrada
+
 Input con soporte para errores, labels, y helper text.
 
 ```tsx
@@ -94,6 +97,7 @@ import { Input } from "@/app/components/ui";
 ```
 
 **Props:**
+
 - `type`: string (default: "text")
 - `placeholder`: string
 - `label`: string
@@ -105,6 +109,7 @@ import { Input } from "@/app/components/ui";
 ---
 
 ### 3. **FormField** - Campo de Formulario
+
 Wrapper que combina Input + Label + Error message.
 
 ```tsx
@@ -135,6 +140,7 @@ import { FormField } from "@/app/components/ui";
 ```
 
 **Props:**
+
 - `label`: string (requerido)
 - `required`: boolean
 - `error`: string
@@ -145,6 +151,7 @@ import { FormField } from "@/app/components/ui";
 ---
 
 ### 4. **Card** - Componente de Tarjeta
+
 Contenedor flexible con opciones de bordes, sombras, y efectos hover.
 
 ```tsx
@@ -181,6 +188,7 @@ import { Card, CardHeader, CardBody, CardFooter } from "@/app/components/ui";
 ```
 
 **Props:**
+
 - `noPadding`: boolean
 - `noBorder`: boolean
 - `noShadow`: boolean
@@ -189,6 +197,7 @@ import { Card, CardHeader, CardBody, CardFooter } from "@/app/components/ui";
 ---
 
 ### 5. **Modal** - Modal Personalizado
+
 Modal wrapper con overlay, animaciones y control total.
 
 ```tsx
@@ -228,6 +237,7 @@ function MyComponent() {
 ```
 
 **Props:**
+
 - `isOpen`: boolean (requerido)
 - `onClose`: () => void (requerido)
 - `title`: string
@@ -241,6 +251,7 @@ function MyComponent() {
 ---
 
 ### 6. **PageLayout** - Layout de Página
+
 Estructura reutilizable para todas las páginas con breadcrumbs, título, y acciones.
 
 ```tsx
@@ -267,15 +278,14 @@ function ProductsPage() {
         </Button>
       }
     >
-      <Card>
-        {/* Contenido de la página */}
-      </Card>
+      <Card>{/* Contenido de la página */}</Card>
     </PageLayout>
   );
 }
 ```
 
 **Props:**
+
 - `title`: string (requerido)
 - `subtitle`: string
 - `actions`: ReactNode
@@ -290,36 +300,42 @@ function ProductsPage() {
 Acceso a tokens de diseño centralizados:
 
 ```tsx
-import { colors, spacing, typography, shadows, borders } from "@/lib/design-tokens";
+import {
+  colors,
+  spacing,
+  typography,
+  shadows,
+  borders,
+} from "@/lib/design-tokens";
 
 // Colores
-colors.brand.azul;      // #004A98
-colors.brand.naranja;   // #ED7625
-colors.brand.verde;     // #44A147
-colors.brand.gris;      // #D1D3D4
-colors.success;         // #44A147
-colors.warning;         // #FFB81C
-colors.error;           // #DC2626
-colors.info;            // #0EA5E9
+colors.brand.azul; // #004A98
+colors.brand.naranja; // #ED7625
+colors.brand.verde; // #44A147
+colors.brand.gris; // #D1D3D4
+colors.success; // #44A147
+colors.warning; // #FFB81C
+colors.error; // #DC2626
+colors.info; // #0EA5E9
 
 // Espaciado
-spacing.xs;             // 0.5rem (8px)
-spacing.sm;             // 0.75rem (12px)
-spacing.md;             // 1rem (16px)
-spacing.lg;             // 1.5rem (24px)
-spacing.xl;             // 2rem (32px)
+spacing.xs; // 0.5rem (8px)
+spacing.sm; // 0.75rem (12px)
+spacing.md; // 1rem (16px)
+spacing.lg; // 1.5rem (24px)
+spacing.xl; // 2rem (32px)
 
 // Tipografía
-typography.sizes.base.size;        // 1rem
-typography.sizes.lg.lineHeight;    // 1.75rem
-typography.weights.bold;           // 700
+typography.sizes.base.size; // 1rem
+typography.sizes.lg.lineHeight; // 1.75rem
+typography.weights.bold; // 700
 
 // Sombras
-shadows.md;  // "0 4px 6px -1px rgba(0, 0, 0, 0.1)..."
+shadows.md; // "0 4px 6px -1px rgba(0, 0, 0, 0.1)..."
 
 // Bordes
-borders.radius.lg;      // 0.5rem
-borders.width.sm;       // 1px
+borders.radius.lg; // 0.5rem
+borders.width.sm; // 1px
 ```
 
 ---
@@ -373,6 +389,7 @@ Los componentes son totalmente responsivos desde WVGA (800x480):
 ```
 
 **Breakpoints disponibles:**
+
 - `base` (0px) - Móvil
 - `sm` (640px) - Tablet pequeña
 - `md` (768px) - Tablet
@@ -393,13 +410,13 @@ import { cn, formatDate, formatCurrency, getErrorMessage } from "@/lib/utils";
 cn("px-4", error && "border-red-500", className);
 
 // Formatear fecha
-formatDate(new Date());  // "13 de enero de 2026"
+formatDate(new Date()); // "13 de enero de 2026"
 
 // Formatear moneda
-formatCurrency(1500);    // "$1,500.00 MXN"
+formatCurrency(1500); // "$1,500.00 MXN"
 
 // Obtener mensaje de error
-getErrorMessage(error);  // "Error message"
+getErrorMessage(error); // "Error message"
 ```
 
 ---
@@ -433,7 +450,8 @@ export default function ProductsPage() {
 
   const handleSubmit = async () => {
     // Validar
-    if (!formData.name) setErrors({ ...errors, name: "El nombre es requerido" });
+    if (!formData.name)
+      setErrors({ ...errors, name: "El nombre es requerido" });
     // Guardar
     setIsModalOpen(false);
   };
@@ -471,10 +489,7 @@ export default function ProductsPage() {
         title="Crear Nuevo Producto"
         footer={
           <ModalFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setIsModalOpen(false)}
-            >
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancelar
             </Button>
             <Button variant="primary" onClick={handleSubmit}>
@@ -489,9 +504,7 @@ export default function ProductsPage() {
           required
           error={errors.name}
           value={formData.name}
-          onChange={(e) =>
-            setFormData({ ...formData, name: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
         <FormField
           label="Descripción"
@@ -506,9 +519,7 @@ export default function ProductsPage() {
           type="number"
           placeholder="0.00"
           value={formData.price}
-          onChange={(e) =>
-            setFormData({ ...formData, price: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
         />
       </Modal>
     </PageLayout>

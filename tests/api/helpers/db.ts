@@ -4,7 +4,7 @@
  * Ensures data isolation between tests using automatic rollback
  */
 
-import { ConnectionPool, Transaction } from 'mssql';
+import { ConnectionPool, Transaction } from "mssql";
 
 let testPool: ConnectionPool | null = null;
 
@@ -20,8 +20,8 @@ export async function getTestPool(): Promise<ConnectionPool> {
   const config = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER || 'mssql',
-    database: process.env.DB_DATABASE || 'InventarioInadeh',
+    server: process.env.DB_SERVER || "mssql",
+    database: process.env.DB_DATABASE || "InventarioInadeh",
     options: {
       encrypt: true,
       trustServerCertificate: true,
@@ -33,14 +33,14 @@ export async function getTestPool(): Promise<ConnectionPool> {
     },
   };
 
-  const mssql = await import('mssql');
+  const mssql = await import("mssql");
   testPool = new mssql.ConnectionPool(config);
 
   try {
     await testPool.connect();
-    console.log('✅ Test database connected');
+    console.log("✅ Test database connected");
   } catch (error) {
-    console.error('❌ Test database connection failed:', error);
+    console.error("❌ Test database connection failed:", error);
     throw error;
   }
 
@@ -55,7 +55,7 @@ export async function executeInTestTransaction<T>(
   callback: (transaction: Transaction) => Promise<T>,
 ): Promise<T> {
   const pool = await getTestPool();
-  const mssql = await import('mssql');
+  const mssql = await import("mssql");
   const transaction = new mssql.Transaction(pool);
 
   try {
@@ -67,7 +67,7 @@ export async function executeInTestTransaction<T>(
     try {
       await transaction.rollback();
     } catch (rollbackError) {
-      console.error('Rollback error:', rollbackError);
+      console.error("Rollback error:", rollbackError);
     }
     throw error;
   }
@@ -91,7 +91,7 @@ export async function executeSql(
     const result = await request.query(query);
     return result.recordset;
   } catch (error) {
-    console.error('SQL execution error:', error);
+    console.error("SQL execution error:", error);
     throw error;
   }
 }
@@ -102,7 +102,7 @@ export async function executeSql(
 export async function getById(
   table: string,
   id: number,
-  idColumn: string = 'ID',
+  idColumn: string = "ID",
 ): Promise<any> {
   const query = `SELECT * FROM ${table} WHERE ${idColumn} = @param0`;
   const result = await executeSql(query, [id]);
@@ -118,8 +118,8 @@ export async function insertTestData(
 ): Promise<any> {
   const columns = Object.keys(data);
   const values = Object.values(data);
-  const columnList = columns.join(', ');
-  const paramList = columns.map((_, i) => `@param${i}`).join(', ');
+  const columnList = columns.join(", ");
+  const paramList = columns.map((_, i) => `@param${i}`).join(", ");
 
   const query = `
     INSERT INTO ${table} (${columnList})
@@ -162,9 +162,9 @@ export async function closeTestPool(): Promise<void> {
     try {
       await testPool.close();
       testPool = null;
-      console.log('✅ Test database connection closed');
+      console.log("✅ Test database connection closed");
     } catch (error) {
-      console.error('Error closing test pool:', error);
+      console.error("Error closing test pool:", error);
     }
   }
 }

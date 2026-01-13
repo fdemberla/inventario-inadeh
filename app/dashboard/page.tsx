@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button, Spinner, Alert } from "flowbite-react";
 import { HiRefresh } from "react-icons/hi";
+import { Button } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 import WarehouseCard from "../components/WarehouseCard";
 
 interface Warehouse {
@@ -178,91 +179,81 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Spinner size="xl" />
-          <p className="text-gray-600 dark:text-gray-400">
-            Cargando dashboard...
-          </p>
+      <PageLayout title="Resumen de Almacenes">
+        <div className="flex min-h-96 items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Cargando dashboard...
+            </p>
+          </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="flex-1 p-6">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-            Resumen de Almacenes
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Última actualización: {formatLastUpdate()}
-          </p>
+    <PageLayout
+      title="Resumen de Almacenes"
+      subtitle={`Última actualización: ${formatLastUpdate()}`}
+      actions={
+        <Button
+          onClick={handleRefresh}
+          variant="primary"
+          leftIcon={<HiRefresh className="h-4 w-4" />}
+        >
+          Actualizar Ahora
+        </Button>
+      }
+    >
+      {/* Controls */}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={autoRefresh}
+            onChange={(e) => setAutoRefresh(e.target.checked)}
+            className="text-brand-azul focus:ring-brand-azul h-4 w-4 rounded border-gray-300"
+          />
+          <span className="text-sm text-gray-700 dark:text-gray-300">
+            Auto-actualizar cada 5 minutos
+          </span>
+        </label>
+      </div>
+
+      {/* Error Alert */}
+      {error && (
+        <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-800 dark:bg-red-900/20 dark:text-red-200">
+          <span className="font-medium">{error}</span>
         </div>
+      )}
 
-        {/* Controls */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-          <Button
-            onClick={handleRefresh}
-            color="blue"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <HiRefresh className="h-4 w-4" />
-            Actualizar Ahora
-          </Button>
+      {/* Empty State */}
+      {warehouses.length === 0 && !error && (
+        <div className="mb-6 rounded-lg bg-blue-50 p-4 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200">
+          <span>No tienes almacenes asignados. Contacta al administrador.</span>
+        </div>
+      )}
 
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+      {/* Warehouses Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {warehouses.map((warehouse) => {
+          const inventoryData = warehouseInventory.get(warehouse.WarehouseID);
+          return (
+            <WarehouseCard
+              key={warehouse.WarehouseID}
+              warehouseId={warehouse.WarehouseID}
+              warehouseCode={warehouse.WarehouseCode}
+              warehouseName={warehouse.WarehouseName}
+              location={warehouse.Name}
+              isActive={true}
+              categories={inventoryData?.categories || []}
+              isLoading={!inventoryData}
+              isCached={inventoryData?.isCached || false}
             />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              Auto-actualizar cada 5 minutos
-            </span>
-          </label>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <Alert color="failure" className="mb-6">
-            <span className="font-medium">{error}</span>
-          </Alert>
-        )}
-
-        {/* Empty State */}
-        {warehouses.length === 0 && !error && (
-          <Alert color="info" className="mb-6">
-            <span>
-              No tienes almacenes asignados. Contacta al administrador.
-            </span>
-          </Alert>
-        )}
-
-        {/* Warehouses Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {warehouses.map((warehouse) => {
-            const inventoryData = warehouseInventory.get(warehouse.WarehouseID);
-            return (
-              <WarehouseCard
-                key={warehouse.WarehouseID}
-                warehouseId={warehouse.WarehouseID}
-                warehouseCode={warehouse.WarehouseCode}
-                warehouseName={warehouse.WarehouseName}
-                location={warehouse.Name}
-                isActive={true}
-                categories={inventoryData?.categories || []}
-                isLoading={!inventoryData}
-                isCached={inventoryData?.isCached || false}
-              />
-            );
-          })}
-        </div>
-      </main>
-    </div>
+          );
+        })}
+      </div>
+    </PageLayout>
   );
 }

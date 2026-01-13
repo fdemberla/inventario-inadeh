@@ -35,7 +35,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
       className,
       ...inputProps
     },
-    ref
+    ref,
   ) => {
     return (
       <div className={cn("w-full space-y-2", className)}>
@@ -88,7 +88,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 FormField.displayName = "FormField";

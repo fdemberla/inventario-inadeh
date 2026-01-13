@@ -134,10 +134,7 @@ const SIDEBAR_SECTIONS = {
       key: "inventario",
       label: "Inventario",
       icon: MdOutlineInventory,
-      links: [
-        { label: "Actualizar Inventario", path: "/dashboard/inventory/update" },
-        { label: "Scanner", path: "/dashboard/inventory/update/scanner" },
-      ],
+      links: [{ label: "Actualizar Inventario", path: "/dashboard/inventory" }],
     },
   ] as SidebarSection[],
 };
@@ -174,7 +171,12 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
   const isActive = useCallback(
     (path: string) => {
-      return pathname?.startsWith(path);
+      if (!pathname) return false;
+      // Exact match or path is a prefix with a / boundary
+      if (pathname === path) return true;
+      // Check if it's a sub-route (e.g., /dashboard/products is active for /dashboard/products/create)
+      if (pathname.startsWith(path + "/")) return true;
+      return false;
     },
     [pathname],
   );
@@ -234,7 +236,7 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
           aria-expanded={hasLinks ? isOpen : undefined}
           aria-controls={hasLinks ? `section-${section.key}` : undefined}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <Icon className="flex-shrink-0 text-base" aria-hidden="true" />
             <span className="truncate">{section.label}</span>
           </div>
@@ -260,13 +262,13 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
                 <SidebarItem
                   key={link.path}
                   onClick={() => handleNavigation(link.path)}
-                  className={`cursor-pointer rounded-lg px-4 py-2 text-sm text-white transition-colors duration-150 hover:bg-amber-600 focus:ring-2 focus:ring-amber-600/50 focus:outline-none ${
+                  className={`cursor-pointer overflow-hidden rounded-lg px-4 py-2 text-sm text-white transition-colors duration-150 hover:bg-amber-600 focus:ring-2 focus:ring-amber-600/50 focus:outline-none ${
                     isActive(link.path)
                       ? "bg-amber-600 font-medium"
                       : "bg-brand-azul hover:bg-brand-azul/80"
                   } `}
                 >
-                  <span className="truncate">{link.label}</span>
+                  <span className="block truncate">{link.label}</span>
                 </SidebarItem>
               ))}
             </div>
@@ -307,7 +309,7 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
       {/* Sidebar Drawer */}
       <aside
-        className={`bg-brand-azul fixed top-0 left-0 z-40 h-full w-64 transform text-white transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0`}
+        className={`bg-brand-azul fixed top-0 left-0 z-40 h-full w-72 transform overflow-hidden text-white transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0`}
         aria-label="Sidebar de navegación"
       >
         {/* Desktop Logo */}

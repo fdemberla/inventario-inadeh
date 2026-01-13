@@ -36,7 +36,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       {/* Sidebar for Desktop */}
-      <aside className="bg-brand-azul hidden w-64 md:block">
+      <aside className="bg-brand-azul hidden w-72 md:block">
         <SidebarComponent user={user} />
       </aside>
 

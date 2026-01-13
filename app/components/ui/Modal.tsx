@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +40,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
       size = "md",
       isDismissable = true,
     },
-    ref
+    ref,
   ) => {
     // Prevenir scroll del body cuando el modal está abierto
     useEffect(() => {
@@ -71,7 +73,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
       <>
         {/* Overlay oscuro */}
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out"
+          className="bg-opacity-50 fixed inset-0 z-40 bg-black transition-opacity duration-300 ease-in-out"
           onClick={handleOverlayClick}
           aria-hidden="true"
         />
@@ -82,8 +84,8 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
           <div
             ref={ref}
             className={cn(
-              "relative w-full rounded-xl bg-white shadow-xl dark:bg-gray-800 dark:shadow-2xl animate-in fade-in zoom-in-95 duration-300 ease-out",
-              sizeClasses[size]
+              "animate-in fade-in zoom-in-95 relative w-full rounded-xl bg-white shadow-xl duration-300 ease-out dark:bg-gray-800 dark:shadow-2xl",
+              sizeClasses[size],
             )}
             role="dialog"
             aria-modal="true"
@@ -144,7 +146,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
         </div>
       </>
     );
-  }
+  },
 );
 
 Modal.displayName = "Modal";
@@ -156,7 +158,11 @@ const ModalFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("flex justify-end gap-3", className)} {...props} />
+  <div
+    ref={ref}
+    className={cn("flex justify-end gap-3", className)}
+    {...props}
+  />
 ));
 
 ModalFooter.displayName = "ModalFooter";
