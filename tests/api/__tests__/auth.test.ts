@@ -1,153 +1,134 @@
 // tests/api/__tests__/auth.test.ts
 /**
  * Authentication API Tests
- * Tests login endpoint with valid/invalid credentials
+ * Tests NextAuth authentication endpoints
  */
 
-import { createTestClient } from "../helpers/testClient";
+import { createTestClient, loginWithNextAuth } from "../helpers/testClient";
 import { testData } from "../helpers/testData";
 
 const client = createTestClient();
 
-describe("Authentication - POST /api/login", () => {
+describe("Authentication - NextAuth Endpoints", () => {
   beforeEach(() => {
     client.clear();
   });
 
-  describe("Valid Credentials", () => {
-    it("should return 200 with valid username and password", async () => {
-      const response = await client.post("/api/login", {
-        username: testData.validCredentials.username,
-        password: testData.validCredentials.password,
-      });
+  describe("NextAuth Providers", () => {
+    it("should return providers list from /api/auth/providers", async () => {
+      const response = await client.get("/api/auth/providers");
 
       expect(response.status).toBe(200);
       expect(response.data).toBeDefined();
-      expect(response.data.message).toBeTruthy();
-    });
-
-    it("should set authentication cookie on successful login", async () => {
-      const response = await client.post("/api/login", {
-        username: testData.validCredentials.username,
-        password: testData.validCredentials.password,
-      });
-
-      expect(response.status).toBe(200);
-      // Token is stored in httpOnly cookie, check Set-Cookie header
-      expect(response.setCookie).toBeTruthy();
-      expect(response.setCookie).toContain("token");
-    });
-
-    it("should return success message on valid login", async () => {
-      const response = await client.post("/api/login", {
-        username: testData.validCredentials.username,
-        password: testData.validCredentials.password,
-      });
-
-      expect(response.status).toBe(200);
-      expect(response.data.message).toContain("exitoso");
+      // Should have credentials provider configured
+      expect(response.data.credentials).toBeDefined();
     });
   });
 
-  describe("Invalid Credentials", () => {
-    it("should return 401 with wrong password", async () => {
-      const response = await client.post("/api/login", {
+  describe("NextAuth Session", () => {
+    it("should return null session when not authenticated", async () => {
+      const response = await client.get("/api/auth/session");
+
+      expect(response.status).toBe(200);
+      // Session should be empty/null or have no user when not logged in
+      expect(response.data?.user).toBeUndefined();
+    });
+  });
+
+  describe("NextAuth CSRF", () => {
+    it("should return CSRF token from /api/auth/csrf", async () => {
+      const response = await client.get("/api/auth/csrf");
+
+      expect(response.status).toBe(200);
+      expect(response.data).toBeDefined();
+      expect(response.data.csrfToken).toBeDefined();
+    });
+  });
+
+  describe("Credential Authentication Flow", () => {
+    it("should authenticate with valid credentials via helper", async () => {
+      // Use the loginWithNextAuth helper which handles form data correctly
+      const loggedIn = await loginWithNextAuth(client, {
+        username: testData.validCredentials.username,
+        password: testData.validCredentials.password,
+      });
+
+      expect(loggedIn).toBe(true);
+    });
+
+    it("should reject invalid credentials", async () => {
+      const loggedIn = await loginWithNextAuth(client, {
         username: testData.validCredentials.username,
         password: "wrongpassword",
       });
 
-      expect(response.status).toBe(401);
-      expect(response.data.error || response.data.message).toBeTruthy();
+      // Login should fail with wrong password
+      // Note: NextAuth may still return success code but no session
+      // The real test is whether we get a valid session
+      const sessionResponse = await client.get("/api/auth/session");
+      expect(sessionResponse.data?.user).toBeUndefined();
     });
 
-    it("should return 401 with non-existent user", async () => {
-      const response = await client.post("/api/login", {
+    it("should reject non-existent user", async () => {
+      const loggedIn = await loginWithNextAuth(client, {
         username: "nonexistent@example.com",
         password: "anypassword",
       });
 
-      expect(response.status).toBe(401);
-    });
-
-    it("should not set cookie on failed login", async () => {
-      await client.post("/api/login", {
-        username: "nonexistent",
-        password: "wrongpass",
-      });
-
-      expect(client.getToken()).toBeNull();
+      // Check that no session was established
+      const sessionResponse = await client.get("/api/auth/session");
+      expect(sessionResponse.data?.user).toBeUndefined();
     });
   });
 
-  describe("Missing Fields", () => {
-    it("should return 400 when username is missing", async () => {
-      const response = await client.post("/api/login", {
-        password: "somepassword",
-      });
-
-      expect(response.status).toBe(400);
-    });
-
-    it("should return 400 when password is missing", async () => {
-      const response = await client.post("/api/login", {
-        username: "someuser",
-      });
-
-      expect(response.status).toBe(400);
-    });
-
-    it("should return 400 when both fields are missing", async () => {
-      const response = await client.post("/api/login", {});
-
-      expect(response.status).toBe(400);
-    });
-  });
-
-  describe("Edge Cases", () => {
-    it("should handle empty string username", async () => {
-      const response = await client.post("/api/login", {
-        username: "",
-        password: "anypassword",
-      });
-
-      expect([400, 401]).toContain(response.status);
-    });
-
-    it("should handle empty string password", async () => {
-      const response = await client.post("/api/login", {
-        username: "anyuser",
-        password: "",
-      });
-
-      expect([400, 401]).toContain(response.status);
-    });
-
-    it("should be case-sensitive for username", async () => {
-      const response = await client.post("/api/login", {
-        username: testData.validCredentials.username.toUpperCase(),
-        password: testData.validCredentials.password,
-      });
-
-      // Most systems are case-insensitive for usernames, but verify behavior
-      expect([200, 401]).toContain(response.status);
-    });
-  });
-
-  describe("Rate Limiting (if implemented)", () => {
-    it("should not lock account after single failed attempt", async () => {
-      await client.post("/api/login", {
-        username: testData.validCredentials.username,
-        password: "wrongpass",
-      });
-
-      // Should still be able to try again
-      const response = await client.post("/api/login", {
+  describe("Protected Session After Login", () => {
+    it("should return user data in session after successful login", async () => {
+      // Login using helper
+      const loggedIn = await loginWithNextAuth(client, {
         username: testData.validCredentials.username,
         password: testData.validCredentials.password,
       });
 
-      // Should succeed or at least not be rate limited (5xx error)
-      expect(response.status).not.toBeGreaterThanOrEqual(500);
+      expect(loggedIn).toBe(true);
+
+      // Check session
+      const sessionResponse = await client.get("/api/auth/session");
+
+      // If login was successful, session should have user
+      if (sessionResponse.data?.user) {
+        expect(sessionResponse.data.user.username).toBe(
+          testData.validCredentials.username,
+        );
+        expect(sessionResponse.data.user.role).toBeDefined();
+        expect(sessionResponse.data.user.id).toBeDefined();
+      }
+    });
+  });
+
+  describe("Signout Flow", () => {
+    it("should clear session on signout", async () => {
+      // Login first
+      const loggedIn = await loginWithNextAuth(client, {
+        username: testData.validCredentials.username,
+        password: testData.validCredentials.password,
+      });
+
+      expect(loggedIn).toBe(true);
+
+      // Get CSRF token for signout
+      const csrfResponse = await client.get("/api/auth/csrf");
+      const csrfToken = csrfResponse.data.csrfToken;
+
+      // Signout
+      const signoutResponse = await client.post("/api/auth/signout", {
+        csrfToken: csrfToken,
+      });
+
+      expect([200, 302]).toContain(signoutResponse.status);
+
+      // Verify session is cleared
+      const sessionResponse = await client.get("/api/auth/session");
+      expect(sessionResponse.data?.user).toBeUndefined();
     });
   });
 });

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { Sidebar, SidebarItem, SidebarItemGroup, Button } from "flowbite-react";
 import {
   HiOutlineCube,
@@ -19,12 +20,16 @@ import { MdOutlineInventory } from "react-icons/md";
 import { FaHome } from "react-icons/fa";
 import Image from "next/image";
 import type { IconType } from "react-icons";
+import { USER_ROLES } from "@/lib/constants";
 
 // Types
 type User = {
   id: number;
   username: string;
   role: number;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
 };
 
 type SidebarLink = {
@@ -39,11 +44,7 @@ type SidebarSection = {
   links: SidebarLink[];
 };
 
-// Constants
-const USER_ROLES = {
-  ADMIN: 1,
-  GENERAL: 2,
-} as const;
+// Use USER_ROLES from constants
 
 const SIDEBAR_SECTIONS = {
   ADMIN: [
@@ -194,8 +195,7 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
   const handleLogout = useCallback(async () => {
     try {
-      await fetch("/api/logout", { method: "POST" });
-      router.push("/login");
+      await signOut({ callbackUrl: "/login" });
     } catch (error) {
       console.error("Error during logout:", error);
       // Still redirect even if logout fails

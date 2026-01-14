@@ -1,7 +1,7 @@
 // app/api/inventory/scanner/sync/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql, withTransaction } from "@/lib/db";
-import jwt from "jsonwebtoken";
+import { auth } from "@/auth";
 
 interface ScanItem {
   id: number;
@@ -30,21 +30,16 @@ interface SyncResultItem {
 }
 
 export async function POST(req: NextRequest) {
-  // Validate user from token
-  let currentUser: string = "sync-api";
-  try {
-    const token = req.cookies.get("token")?.value;
-    if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as Record<
-        string,
-        unknown
-      >;
-      currentUser =
-        (decoded?.username as string) || (decoded?.id as string) || currentUser;
-    }
-  } catch (err: unknown) {
-    console.warn("Token decode warning in sync:", err);
+  // Authentication check - require valid session
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json(
+      { success: false, message: "No autorizado" },
+      { status: 401 }
+    );
   }
+
+  const currentUser = session.user.username || String(session.user.id) || "sync-api";
 
   try {
     const body: BulkSyncPayload = await req.json();

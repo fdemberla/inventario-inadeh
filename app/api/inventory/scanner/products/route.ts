@@ -1,22 +1,14 @@
 // app/api/inventory/scanner/products/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
-import jwt from "jsonwebtoken";
+import { auth } from "@/auth";
 
 export async function GET(req: NextRequest) {
-  // Validate user from token
-  try {
-    const token = req.cookies.get("token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "No autorizado" },
-        { status: 401 },
-      );
-    }
-    jwt.verify(token, process.env.JWT_SECRET!);
-  } catch {
+  // Validate user from session
+  const session = await auth();
+  if (!session?.user) {
     return NextResponse.json(
-      { success: false, message: "Token inválido" },
+      { success: false, message: "No autorizado" },
       { status: 401 },
     );
   }

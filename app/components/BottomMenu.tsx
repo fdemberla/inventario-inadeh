@@ -1,16 +1,27 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { HiOutlineCube, HiOutlineHome } from "react-icons/hi";
 import { MdLogout, MdOutlineInventory } from "react-icons/md";
 import { CiBoxList } from "react-icons/ci";
+import { USER_ROLES } from "@/lib/constants";
 
-const BottomMenu = ({ user }: { user: { role: number } }) => {
+type User = {
+  id: number;
+  username: string;
+  role: number;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+};
+
+const BottomMenu = ({ user }: { user: User }) => {
   const pathname = usePathname();
   const router = useRouter();
 
   const menuItems =
-    user.role === 1
+    user.role === USER_ROLES.ADMIN
       ? [
           {
             label: "Inicio",
@@ -52,8 +63,7 @@ const BottomMenu = ({ user }: { user: { role: number } }) => {
         ];
 
   const handleLogout = async () => {
-    await fetch("/api/logout", { method: "POST" });
-    router.push("/login");
+    await signOut({ callbackUrl: "/login" });
   };
 
   return (

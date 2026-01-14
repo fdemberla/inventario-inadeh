@@ -1,11 +1,29 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { auth } from "@/auth";
 
 export async function GET(
   req: Request,
   { params }: { params: { id: string } },
 ) {
+  // Authentication check
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json(
+      { message: "No autorizado" },
+      { status: 401 }
+    );
+  }
+
   const id = parseInt(params.id);
+
+  // Validate ID format
+  if (isNaN(id) || id <= 0) {
+    return NextResponse.json(
+      { message: "ID de usuario inválido." },
+      { status: 400 }
+    );
+  }
 
   try {
     // Get user info

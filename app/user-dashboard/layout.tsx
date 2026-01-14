@@ -1,17 +1,20 @@
 // app/user-dashboard/layout.tsx
-import { getUserFromToken } from "@/lib/auth";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import SidebarComponent from "../components/Sidebar";
+import { USER_ROLES } from "@/lib/constants";
 
-export default function UserDashboardLayout({
+export default async function UserDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = getUserFromToken();
+  const session = await auth();
 
-  if (!user) redirect("/login");
-  if (user.role !== 2) redirect("/dashboard");
+  if (!session?.user) redirect("/login");
+  if (session.user.role !== USER_ROLES.GENERAL) redirect("/dashboard");
+
+  const user = session.user;
 
   return (
     <div className="flex min-h-screen">
@@ -19,7 +22,7 @@ export default function UserDashboardLayout({
         <div className="p-4 text-center text-lg font-bold">
           Hello, {user.username}!
         </div>
-        <SidebarComponent />
+        <SidebarComponent user={user} />
       </aside>
 
       <main className="flex-1 bg-gray-100 p-6">{children}</main>

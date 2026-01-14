@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { auth } from "@/auth";
 
 export async function GET(req: Request) {
+  // Authentication check
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json(
+      { message: "No autorizado" },
+      { status: 401 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "100", 10);

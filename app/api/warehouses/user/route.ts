@@ -1,16 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getUserFromToken } from "@/lib/auth_new";
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { sql } from "@/lib/db";
+import { USER_ROLES } from "@/lib/constants";
 
-export async function GET(req: NextRequest) {
-  const user = getUserFromToken(req);
+export async function GET() {
+  const session = await auth();
 
-  if (!user) {
+  if (!session?.user) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const user = session.user;
+
   try {
-    const isUserAdmin = user.role == 1 ? true : false;
+    const isUserAdmin = user.role === USER_ROLES.ADMIN;
 
     let getWarehouseQuery = `SELECT w.WarehouseID, w.WarehouseCode, rl.Name, rl.ShortName, w.WarehouseName, CONCAT(w.WarehouseCode, ' - ', rl.Name, ' - ', w.WarehouseName) AS NombreWarehouse
 FROM dbo.WarehouseUsers wu

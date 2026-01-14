@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import { getDB } from "@/lib/localdb";
@@ -47,22 +48,22 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username, password }),
+      const result = await signIn("credentials", {
+        username,
+        password,
+        redirect: false,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (result?.error) {
+        const errorMsg = "Credenciales incorrectas";
+        setErrors({ submit: errorMsg });
+        toast.error(errorMsg);
+      } else if (result?.ok) {
         toast.success(`Bienvenido ${username}`);
+        // Save credentials for offline login
         await db.put("users", { username, password });
         router.push("/dashboard");
-      } else {
-        setErrors({ submit: data.message || "Credenciales incorrectas" });
-        toast.error(data.message || "Credenciales incorrectas");
+        router.refresh();
       }
     } catch (error) {
       console.error("Login error:", error);

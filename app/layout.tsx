@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
+import { Providers } from "./components/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,10 +60,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-brand-gris dark:bg-gray-900`}
       >
-        <ThemeModeScript />
-        {children}
-        <Toaster />
-        <ServiceWorkerRegister />
+        <Providers>
+          <ThemeModeScript />
+          {children}
+          <Toaster />
+          <ServiceWorkerRegister />
+        </Providers>
       </body>
     </html>
   );

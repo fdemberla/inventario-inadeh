@@ -1,7 +1,7 @@
 // api/inventory/scanner/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
-import jwt from "jsonwebtoken";
+import { auth } from "@/auth";
 
 export async function POST(req: NextRequest) {
   if (req.method !== "POST") {
@@ -23,14 +23,13 @@ export async function POST(req: NextRequest) {
 
   let createdBy: string | number = "scanner";
   try {
-    const token = req.cookies.get("token")?.value;
-    if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as unknown;
-      createdBy = decoded?.username || decoded?.id || createdBy;
+    const session = await auth();
+    if (session?.user) {
+      createdBy = session.user.username || session.user.id || createdBy;
     }
   } catch (err: unknown) {
     console.warn(
-      "No se pudo decodificar el token, usando 'scanner' como usuario",
+      "No se pudo obtener la sesión, usando 'scanner' como usuario",
       err,
     );
   }

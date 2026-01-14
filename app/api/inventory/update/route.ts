@@ -1,8 +1,18 @@
 // app/api/inventory/update/route.ts
 import { NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
+import { auth } from "@/auth";
 
 export async function POST(request: Request) {
+  // Authentication check
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json(
+      { message: "No autorizado" },
+      { status: 401 }
+    );
+  }
+
   try {
     const {
       productId,

@@ -166,6 +166,13 @@ export class TestClient {
     this.token = null;
     this.cookies.clear();
   }
+
+  /**
+   * Set a cookie for subsequent requests
+   */
+  setCookie(name: string, value: string): void {
+    this.cookies.set(name, value);
+  }
 }
 
 /**
@@ -173,4 +180,68 @@ export class TestClient {
  */
 export function createTestClient(options?: TestClientOptions): TestClient {
   return new TestClient(options);
+}
+
+/**
+ * Authenticate using NextAuth credentials provider
+ * This is used for integration tests that need authenticated sessions
+ */
+export async function loginWithNextAuth(
+  client: TestClient,
+  credentials: { username: string; password: string },
+): Promise<boolean> {
+  try {
+    // Step 1: Get CSRF token
+    const csrfResponse = await client.get<{ csrfToken: string }>(
+      "/api/auth/csrf",
+    );
+    const csrfToken = csrfResponse.data?.csrfToken;
+
+    if (!csrfToken) {
+      console.error("Failed to get CSRF token");
+      return false;
+    }
+
+    // Step 2: Authenticate with NextAuth credentials endpoint
+    // NextAuth expects form data, but our client sends JSON
+    // We need to make a direct fetch call for this
+    const baseUrl = "http://localhost:3000";
+    const formData = new URLSearchParams();
+    formData.append("csrfToken", csrfToken);
+    formData.append("username", credentials.username);
+    formData.append("password", credentials.password);
+    formData.append("json", "true");
+
+    const response = await fetchFn(`${baseUrl}/api/auth/callback/credentials`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formData.toString(),
+      redirect: "manual", // Don't follow redirects automatically
+    });
+
+    // NextAuth sets session cookie on successful auth
+    const setCookie = response.headers.get("set-cookie");
+    if (setCookie) {
+      // Parse and store all cookies
+      const cookies = setCookie.split(",").map((c) => c.trim());
+      for (const cookie of cookies) {
+        const cookieParts = cookie.split(";")[0].split("=");
+        if (cookieParts.length >= 2) {
+          const name = cookieParts[0].trim();
+          const value = cookieParts.slice(1).join("=").trim();
+          // Store cookie in client (need to add method for this)
+          client.setCookie(name, value);
+        }
+      }
+    }
+
+    // Check if authentication was successful
+    // NextAuth redirects on success, or returns error on failure
+    return response.status === 200 || response.status === 302;
+  } catch (error) {
+    console.error("NextAuth login error:", error);
+    return false;
+  }
 }

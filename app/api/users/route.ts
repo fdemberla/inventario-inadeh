@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { auth } from "@/auth";
 
 export async function GET() {
+  // Authentication check
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json(
+      { message: "No autorizado" },
+      { status: 401 }
+    );
+  }
+
   try {
     const result = await sql(
       `

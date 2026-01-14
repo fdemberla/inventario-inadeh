@@ -1,9 +1,19 @@
 import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { auth } from "@/auth";
 
 // Extract `id` from route params using the new Next.js route handlers style
 export async function PUT(req: NextRequest) {
+  // Authentication check
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json(
+      { message: "No autorizado" },
+      { status: 401 }
+    );
+  }
+
   try {
     const url = new URL(req.url);
     const id = url.pathname.split("/").at(-2);

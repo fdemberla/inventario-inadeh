@@ -70,9 +70,6 @@ const withPWA = require("next-pwa")({
 const baseConfig: NextConfig = {
   basePath: "",
   reactStrictMode: true,
-  env: {
-    JWT_SECRET: process.env.JWT_SECRET,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
