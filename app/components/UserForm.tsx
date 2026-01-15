@@ -31,7 +31,10 @@ interface FormDataType {
   WarehouseIDs: number[];
 }
 
-export default function UserForm({ userId, isEditMode = false }: UserFormProps) {
+export default function UserForm({
+  userId,
+  isEditMode = false,
+}: UserFormProps) {
   const router = useRouter();
 
   const [roles, setRoles] = useState([]);
@@ -77,7 +80,9 @@ export default function UserForm({ userId, isEditMode = false }: UserFormProps) 
   useEffect(() => {
     async function fetchData() {
       const loadingToast = toast.loading(
-        isEditMode ? "Cargando datos del usuario..." : "Cargando roles y depósitos...",
+        isEditMode
+          ? "Cargando datos del usuario..."
+          : "Cargando roles y depósitos...",
       );
       try {
         const requests: Promise<Response>[] = [
@@ -100,7 +105,8 @@ export default function UserForm({ userId, isEditMode = false }: UserFormProps) 
           const userData = await responses[2].json();
           setFormData({
             ...userData.user,
-            WarehouseIDs: userData.user.Warehouses?.map((w: any) => w.WarehouseID) || [],
+            WarehouseIDs:
+              userData.user.Warehouses?.map((w: any) => w.WarehouseID) || [],
           });
         }
 
@@ -197,11 +203,16 @@ export default function UserForm({ userId, isEditMode = false }: UserFormProps) 
       }
 
       const submittedData = { ...formData };
-      if (isEditMode && (!submittedData.Password || submittedData.Password.trim() === "")) {
+      if (
+        isEditMode &&
+        (!submittedData.Password || submittedData.Password.trim() === "")
+      ) {
         delete submittedData.Password;
       }
 
-      const endpoint = isEditMode ? `/api/users/${userId}/update` : "/api/users/create";
+      const endpoint = isEditMode
+        ? `/api/users/${userId}/update`
+        : "/api/users/create";
       const method = isEditMode ? "PUT" : "POST";
 
       const res = await fetch(withBasePath(endpoint), {
@@ -216,7 +227,9 @@ export default function UserForm({ userId, isEditMode = false }: UserFormProps) 
       }
 
       toast.success(
-        isEditMode ? "Usuario actualizado con éxito." : "Usuario creado con éxito.",
+        isEditMode
+          ? "Usuario actualizado con éxito."
+          : "Usuario creado con éxito.",
       );
       router.push("/dashboard/users");
     } catch (err) {
@@ -234,8 +247,12 @@ export default function UserForm({ userId, isEditMode = false }: UserFormProps) 
     );
 
   return (
-    <div className={isEditMode ? "max-w-xl p-6" : "mx-auto max-w-2xl px-4 py-6"}>
-      <h1 className={`mb-6 text-center font-bold ${isEditMode ? "text-2xl" : "text-3xl"} dark:text-white`}>
+    <div
+      className={isEditMode ? "max-w-xl p-6" : "mx-auto max-w-2xl px-4 py-6"}
+    >
+      <h1
+        className={`mb-6 text-center font-bold ${isEditMode ? "text-2xl" : "text-3xl"} dark:text-white`}
+      >
         {isEditMode ? "Editar Usuario" : "Crear Usuario"}
       </h1>
 
@@ -314,7 +331,9 @@ export default function UserForm({ userId, isEditMode = false }: UserFormProps) 
               name="Password"
               value={formData.Password || ""}
               onChange={handleChange}
-              placeholder={isEditMode ? "Deja en blanco para mantener la contraseña" : ""}
+              placeholder={
+                isEditMode ? "Deja en blanco para mantener la contraseña" : ""
+              }
               className="mt-1 text-gray-900 dark:bg-gray-700 dark:text-white"
               required={!isEditMode}
             />
