@@ -7,10 +7,7 @@ export async function POST(request: Request) {
   // Authentication check
   const session = await auth();
   if (!session?.user) {
-    return NextResponse.json(
-      { message: "No autorizado" },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
   }
 
   try {

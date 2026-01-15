@@ -52,7 +52,12 @@ describe("Dashboard - Landing Page APIs", () => {
       const warehouses = response.data?.recordset || response.data;
 
       // Should return data in some format (may be array, object, or null)
-      expect(warehouses === null || warehouses === undefined || Array.isArray(warehouses) || typeof warehouses === 'object').toBe(true);
+      expect(
+        warehouses === null ||
+          warehouses === undefined ||
+          Array.isArray(warehouses) ||
+          typeof warehouses === "object",
+      ).toBe(true);
     });
 
     it("should return empty array if user has no warehouses", async () => {
@@ -61,7 +66,12 @@ describe("Dashboard - Landing Page APIs", () => {
       expect(response.status).toBe(200);
       const warehouses = response.data?.recordset || response.data;
       // Verify response is some form of data
-      expect(warehouses === null || warehouses === undefined || Array.isArray(warehouses) || typeof warehouses === 'object').toBe(true);
+      expect(
+        warehouses === null ||
+          warehouses === undefined ||
+          Array.isArray(warehouses) ||
+          typeof warehouses === "object",
+      ).toBe(true);
     });
 
     it("should require authentication", async () => {
@@ -183,7 +193,12 @@ describe("Dashboard - Landing Page APIs", () => {
       inventoryResponses.forEach((response) => {
         expect(response.status).toBe(200);
         const data = response.data?.recordset || response.data;
-        expect(data === null || data === undefined || Array.isArray(data) || typeof data === 'object').toBe(true);
+        expect(
+          data === null ||
+            data === undefined ||
+            Array.isArray(data) ||
+            typeof data === "object",
+        ).toBe(true);
       });
     });
 
@@ -193,7 +208,12 @@ describe("Dashboard - Landing Page APIs", () => {
 
       const warehouses = response.data?.recordset || response.data || [];
       // Just verify we got some response data back
-      expect(warehouses === null || warehouses === undefined || Array.isArray(warehouses) || typeof warehouses === 'object').toBe(true);
+      expect(
+        warehouses === null ||
+          warehouses === undefined ||
+          Array.isArray(warehouses) ||
+          typeof warehouses === "object",
+      ).toBe(true);
     });
 
     it("should properly aggregate inventory by category on client side", async () => {
@@ -253,7 +273,7 @@ describe("Dashboard - Landing Page APIs", () => {
         expect(true).toBe(true);
         return;
       }
-      
+
       const categories = new Set<string>();
       inventory.forEach((item: any) => {
         categories.add(item.ProductName || "Sin categoría");

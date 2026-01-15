@@ -9,10 +9,7 @@ export async function GET(
   // Authentication check
   const session = await auth();
   if (!session?.user) {
-    return NextResponse.json(
-      { message: "No autorizado" },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
   }
 
   const id = parseInt(params.id);
@@ -21,7 +18,7 @@ export async function GET(
   if (isNaN(id) || id <= 0) {
     return NextResponse.json(
       { message: "ID de usuario inválido." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

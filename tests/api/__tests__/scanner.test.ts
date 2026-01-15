@@ -46,7 +46,7 @@ describe("Scanner Operations - POST /api/inventory/scanner", () => {
       // Should return success status or indicate product not found
       expect(response.status).toBeGreaterThanOrEqual(200);
       expect(response.status).toBeLessThan(500);
-      
+
       // Response should contain some data
       if (response.status === 200) {
         expect(response.data).toBeDefined();

@@ -7,10 +7,7 @@ export async function POST(req: Request) {
   // Authentication check
   const session = await auth();
   if (!session?.user) {
-    return NextResponse.json(
-      { message: "No autorizado" },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
   }
 
   try {
@@ -32,37 +29,37 @@ export async function POST(req: Request) {
     if (!Username || Username.trim() === "") {
       return NextResponse.json(
         { message: "El nombre de usuario es requerido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!Password || Password.trim() === "") {
       return NextResponse.json(
         { message: "La contraseña es requerida." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!FirstName || FirstName.trim() === "") {
       return NextResponse.json(
         { message: "El nombre es requerido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!LastName || LastName.trim() === "") {
       return NextResponse.json(
         { message: "El apellido es requerido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!Email || Email.trim() === "") {
       return NextResponse.json(
         { message: "El email es requerido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!RoleID) {
       return NextResponse.json(
         { message: "El rol es requerido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -71,19 +68,19 @@ export async function POST(req: Request) {
     if (!emailRegex.test(Email)) {
       return NextResponse.json(
         { message: "El formato del email es inválido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Check for duplicate email
     const existingUser = await sql(
       `SELECT UserID FROM dbo.Users WHERE Email = @param0`,
-      [Email]
+      [Email],
     );
     if (existingUser.recordset.length > 0) {
       return NextResponse.json(
         { message: "Ya existe un usuario con este email." },
-        { status: 409 }
+        { status: 409 },
       );
     }
 

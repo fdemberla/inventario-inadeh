@@ -35,11 +35,12 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json(
       { success: false, message: "No autorizado" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
-  const currentUser = session.user.username || String(session.user.id) || "sync-api";
+  const currentUser =
+    session.user.username || String(session.user.id) || "sync-api";
 
   try {
     const body: BulkSyncPayload = await req.json();
