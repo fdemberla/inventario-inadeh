@@ -116,7 +116,7 @@ export default function InventoryPage() {
       <div className="mb-6">
         <button
           type="button"
-          onClick={() => router.push(withBasePath(`/dashboard/inventory`))}
+          onClick={() => router.push(`/dashboard/inventory`)}
           className="mb-4 flex items-center text-blue-600 hover:text-blue-700"
         >
           <svg
@@ -138,9 +138,7 @@ export default function InventoryPage() {
       {selectedWarehouseId && (
         <Button
           onClick={() =>
-            router.push(
-              withBasePath(`/dashboard/inventory/${selectedWarehouseId}/add`),
-            )
+            router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)
           }
         >
           Agregar Producto a Deposito

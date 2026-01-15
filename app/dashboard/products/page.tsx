@@ -62,11 +62,7 @@ export default function ViewAllProducts() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(
-              withBasePath(
-                `/dashboard/products/edit/${row.original.ProductID}`,
-              ),
-            )
+            router.push(`/dashboard/products/edit/${row.original.ProductID}`)
           }
         >
           Editar
@@ -96,7 +92,7 @@ export default function ViewAllProducts() {
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push(withBasePath("/dashboard/products/create"))}
+          onClick={() => router.push("/dashboard/products/create")}
         >
           Crear Producto
         </Button>

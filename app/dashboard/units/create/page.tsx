@@ -7,7 +7,7 @@ export default function CreateUnitPage() {
   const router = useRouter();
 
   const handleSuccess = () => {
-    router.push(withBasePath("/dashboard/units"));
+    router.push("/dashboard/units");
   };
 
   return <UnitForm onSuccess={handleSuccess} />;

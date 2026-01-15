@@ -186,7 +186,8 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
   const handleNavigation = useCallback(
     (path: string) => {
-      router.push(withBasePath(path));
+      // router.push() automatically prepends basePath, don't use withBasePath()
+      router.push(path);
       // Close sidebar on mobile after navigation
       if (window.innerWidth < 768) {
         closeSidebar();
@@ -197,11 +198,12 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
   const handleLogout = useCallback(async () => {
     try {
-      await signOut({ callbackUrl: withBasePath("/login") });
+      // signOut with callbackUrl - don't use withBasePath here as signOut handles it
+      await signOut({ callbackUrl: "/login" });
     } catch (error) {
       console.error("Error during logout:", error);
       // Still redirect even if logout fails
-      router.push(withBasePath("/login"));
+      router.push("/login");
     }
   }, [router]);
 

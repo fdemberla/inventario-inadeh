@@ -46,11 +46,7 @@ export default function WarehouseListPage() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(
-              withBasePath(
-                `/dashboard/warehouse/${row.original.WarehouseID}/edit`,
-              ),
-            )
+            router.push(`/dashboard/warehouse/${row.original.WarehouseID}/edit`)
           }
         >
           Editar
@@ -79,7 +75,7 @@ export default function WarehouseListPage() {
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push(withBasePath("/dashboard/warehouse/create"))}
+          onClick={() => router.push("/dashboard/warehouse/create")}
         >
           Crear Depósito
         </Button>

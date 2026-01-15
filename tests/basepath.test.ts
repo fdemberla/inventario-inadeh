@@ -25,9 +25,7 @@ describe("basePath helpers", () => {
     expect(getBasePath()).toBe("/inventario");
     expect(withBasePath("/dashboard")).toBe("/inventario/dashboard");
     expect(withBasePath("dashboard")).toBe("/inventario/dashboard");
-    expect(withBasePath("/inventario/dashboard")).toBe(
-      "/inventario/dashboard",
-    );
+    expect(withBasePath("/inventario/dashboard")).toBe("/inventario/dashboard");
   });
 
   it("strips basePath from paths", () => {

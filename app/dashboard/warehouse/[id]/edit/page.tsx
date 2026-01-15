@@ -78,7 +78,7 @@ export default function EditWarehousePage() {
 
       if (res.ok) {
         toast.success("Almacén actualizado con éxito", { id: toastId });
-        router.push(withBasePath("/dashboard/warehouse"));
+        router.push("/dashboard/warehouse");
       } else {
         const errorText = await res.text();
         console.error("Error updating warehouse:", errorText);

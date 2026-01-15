@@ -72,11 +72,7 @@ export default function SuppliersPage() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(
-              withBasePath(
-                `/dashboard/suppliers/${row.original.SupplierID}/edit`,
-              ),
-            )
+            router.push(`/dashboard/suppliers/${row.original.SupplierID}/edit`)
           }
         >
           Editar
@@ -106,7 +102,7 @@ export default function SuppliersPage() {
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push(withBasePath("/dashboard/suppliers/create"))}
+          onClick={() => router.push("/dashboard/suppliers/create")}
         >
           Crear Proveedor
         </Button>

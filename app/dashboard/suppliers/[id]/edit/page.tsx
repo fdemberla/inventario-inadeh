@@ -82,7 +82,7 @@ export default function EditSupplier() {
       if (!res.ok) throw new Error("Error actualizando proveedor");
 
       toast.success("Proveedor actualizado correctamente.");
-      router.push(withBasePath("/dashboard/suppliers"));
+      router.push("/dashboard/suppliers");
     } catch (error) {
       console.error(error);
       toast.error("No se pudo actualizar el proveedor.");

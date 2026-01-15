@@ -66,9 +66,7 @@ export default function ViewAllUnits() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(
-              withBasePath(`/dashboard/units/${row.original.UnitID}/edit`),
-            )
+            router.push(`/dashboard/units/${row.original.UnitID}/edit`)
           }
         >
           Editar
@@ -82,13 +80,13 @@ export default function ViewAllUnits() {
       title="Unidades de Medida"
       subtitle="Administra las unidades de medida"
       breadcrumbs={[
-        { label: "Dashboard", href: withBasePath("/dashboard") },
+        { label: "Dashboard", href: "/dashboard" },
         { label: "Unidades" },
       ]}
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push(withBasePath("/dashboard/units/create"))}
+          onClick={() => router.push("/dashboard/units/create")}
         >
           Crear Unidad
         </Button>

@@ -155,9 +155,7 @@ export default function InventoryPage() {
       {selectedWarehouseId && (
         <Button
           onClick={() =>
-            router.push(
-              withBasePath(`/dashboard/inventory/${selectedWarehouseId}/add`),
-            )
+            router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)
           }
         >
           Agregar Producto a Deposito

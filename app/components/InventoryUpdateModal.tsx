@@ -66,7 +66,7 @@ export default function InventoryUpdateModal({
       }
     } catch (err) {
       toast.error("Error de red al actualizar.");
-      console.error(err)
+      console.error(err);
     }
   };
 

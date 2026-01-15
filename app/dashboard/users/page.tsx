@@ -49,9 +49,7 @@ export default function UserListPage() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(
-              withBasePath(`/dashboard/users/${row.original.UserID}/update`),
-            )
+            router.push(`/dashboard/users/${row.original.UserID}/update`)
           }
         >
           Editar
@@ -74,13 +72,13 @@ export default function UserListPage() {
       title="Gestión de Usuarios"
       subtitle="Administra los usuarios del sistema"
       breadcrumbs={[
-        { label: "Dashboard", href: withBasePath("/dashboard") },
+        { label: "Dashboard", href: "/dashboard" },
         { label: "Usuarios" },
       ]}
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push(withBasePath("/dashboard/users/create"))}
+          onClick={() => router.push("/dashboard/users/create")}
         >
           Crear Usuario
         </Button>

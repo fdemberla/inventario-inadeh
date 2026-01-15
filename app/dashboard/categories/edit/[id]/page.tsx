@@ -33,9 +33,7 @@ export default function EditCategoryPage() {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const categoryRes = await fetch(
-          withBasePath(`/api/categories/${id}`),
-        );
+        const categoryRes = await fetch(withBasePath(`/api/categories/${id}`));
         const categoryData = await categoryRes.json();
         setCategoryName(categoryData.category.CategoryName || "");
         setDescription(categoryData.category.Description || "");
@@ -74,7 +72,7 @@ export default function EditCategoryPage() {
         toast.success("Categoría actualizada correctamente.");
 
         // Optionally refresh categories or navigate away
-        router.push(withBasePath("/dashboard/categories"));
+        router.push("/dashboard/categories");
       } else {
         const data = await res.json();
         toast.error(data.message || "Error al actualizar.");

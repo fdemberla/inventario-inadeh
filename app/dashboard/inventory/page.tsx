@@ -1,70 +1,3 @@
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import { Label, Select, Button } from "flowbite-react";
-// import { toast } from "react-hot-toast";
-// import { useRouter } from "next/navigation";
-
-// type Warehouse = {
-//   WarehouseID: number;
-//   WarehouseName: string;
-//   WarehouseCode: string;
-// };
-
-// export default function InventoryPage() {
-//   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
-//   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string | null>(
-//     null,
-//   );
-
-//   useEffect(() => {
-//     fetchWarehouses();
-//   }, []);
-
-//   const fetchWarehouses = async () => {
-//     try {
-//       const res = await fetch("/api/warehouses/user");
-//       if (!res.ok) throw new Error("Error al cargar almacenes.");
-//       const data = await res.json();
-//       setWarehouses(data.recordset);
-//       if (data.length > 0) setSelectedWarehouseId(data[0].WarehouseID);
-//     } catch (err) {
-//       toast.error((err as Error).message);
-//     }
-//   };
-
-//   const router = useRouter();
-
-//   return (
-//     <div className="space-y-6 p-6">
-//       <div>
-//         <Label htmlFor="warehouse">Almacén</Label>
-//         <Select
-//           id="warehouse"
-//           value={selectedWarehouseId || ""}
-//           onChange={(e) => setSelectedWarehouseId(e.target.value)}
-//         >
-//           <option>-- Seleccione un Deposito --</option>
-//           {warehouses.map((w) => (
-//             <option key={w.WarehouseID} value={w.WarehouseID}>
-//               {w.WarehouseName}
-//             </option>
-//           ))}
-//         </Select>
-//       </div>
-//       {selectedWarehouseId && (
-//         <Button
-//           onClick={() =>
-//             router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)
-//           }
-//         >
-//           Agregar Producto a Deposito
-//         </Button>
-//       )}
-//     </div>
-//   );
-// }
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -256,11 +189,7 @@ export default function InventoryPage() {
             size="md"
             className="w-full"
             onClick={() =>
-              router.push(
-                withBasePath(
-                  `/dashboard/inventory/${selectedWarehouseId}/add`,
-                ),
-              )
+              router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)
             }
             leftIcon={
               <svg
@@ -287,11 +216,7 @@ export default function InventoryPage() {
               variant="outline"
               size="md"
               onClick={() =>
-                router.push(
-                  withBasePath(
-                    `/dashboard/inventory/${selectedWarehouseId}/view`,
-                  ),
-                )
+                router.push(`/dashboard/inventory/${selectedWarehouseId}/view`)
               }
               leftIcon={
                 <svg
@@ -322,9 +247,7 @@ export default function InventoryPage() {
               variant="outline"
               size="md"
               onClick={() =>
-                router.push(
-                  withBasePath(`/dashboard/reports/${selectedWarehouseId}`),
-                )
+                router.push(`/dashboard/reports/${selectedWarehouseId}`)
               }
               leftIcon={
                 <svg
@@ -352,9 +275,7 @@ export default function InventoryPage() {
             className="w-full"
             onClick={() =>
               router.push(
-                withBasePath(
-                  `/dashboard/inventory/update/scanner/${selectedWarehouseId}`,
-                ),
+                `/dashboard/inventory/update/scanner/${selectedWarehouseId}`,
               )
             }
             leftIcon={<BiBarcodeReader className="h-5 w-5" />}

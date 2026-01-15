@@ -75,7 +75,7 @@ const BottomMenu = ({ user }: { user: User }) => {
         return (
           <button
             key={item.path}
-            onClick={() => router.push(withBasePath(item.path))}
+            onClick={() => router.push(item.path)}
             aria-label={`Ir a ${item.label}`}
             className={`flex flex-col items-center justify-center text-xs transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${
               isActive

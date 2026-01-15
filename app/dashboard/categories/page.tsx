@@ -82,9 +82,7 @@ export default function ViewAllCategories() {
       actions={
         <Button
           variant="primary"
-          onClick={() =>
-            router.push(withBasePath("/dashboard/categories/create"))
-          }
+          onClick={() => router.push("/dashboard/categories/create")}
         >
           Crear Categoría
         </Button>

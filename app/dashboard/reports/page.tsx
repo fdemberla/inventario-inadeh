@@ -64,7 +64,7 @@ export default function ReportsPage() {
   const handleWarehouseSelect = (warehouseId: number) => {
     setSelectedWarehouse(warehouseId);
     // Navigate to warehouse-specific reports
-    router.push(withBasePath(`/dashboard/reports/${warehouseId}`));
+    router.push(`/dashboard/reports/${warehouseId}`);
   };
 
   const getStatusColor = (status: string = "active") => {

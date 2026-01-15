@@ -19,7 +19,10 @@ const bufferToHex = (buffer: ArrayBuffer): string =>
 const generateSalt = (): string =>
   bufferToHex(crypto.getRandomValues(new Uint8Array(16)));
 
-const hashPassword = async (password: string, salt: string): Promise<string> => {
+const hashPassword = async (
+  password: string,
+  salt: string,
+): Promise<string> => {
   const data = textEncoder.encode(`${salt}:${password}`);
   const hash = await crypto.subtle.digest("SHA-256", data);
   return bufferToHex(hash);

@@ -76,7 +76,7 @@ export default function CreateWarehousePage() {
 
       if (res.ok) {
         toast.success("Almacén creado con éxito", { id: toastId });
-        router.push(withBasePath("/dashboard/warehouse"));
+        router.push("/dashboard/warehouse");
       } else {
         const errorText = await res.text();
         console.error("Error creating warehouse:", errorText);

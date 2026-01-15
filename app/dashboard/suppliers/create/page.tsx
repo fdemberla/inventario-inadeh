@@ -60,7 +60,7 @@ export default function CreateSupplier() {
       }
 
       toast.success("Proveedor creado exitosamente.");
-      router.push(withBasePath("/dashboard/suppliers"));
+      router.push("/dashboard/suppliers");
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Hubo un error al crear el proveedor.");

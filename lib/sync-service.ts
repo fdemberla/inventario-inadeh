@@ -442,7 +442,9 @@ export async function refreshProductCache(
   try {
     // Fetch products for this warehouse
     const response = await fetch(
-      withBasePath(`/api/inventory/scanner/products?warehouseId=${warehouseId}`),
+      withBasePath(
+        `/api/inventory/scanner/products?warehouseId=${warehouseId}`,
+      ),
       {
         credentials: "include",
       },
