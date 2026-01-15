@@ -31,14 +31,25 @@ interface FormDataType {
   WarehouseIDs: number[];
 }
 
+interface Role {
+  RoleID: number;
+  RoleName: string;
+}
+
+interface Warehouse {
+  WarehouseID: number;
+  WarehouseCode: string;
+  WarehouseName: string;
+}
+
 export default function UserForm({
   userId,
   isEditMode = false,
 }: UserFormProps) {
   const router = useRouter();
 
-  const [roles, setRoles] = useState([]);
-  const [warehouses, setWarehouses] = useState([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -106,7 +117,7 @@ export default function UserForm({
           setFormData({
             ...userData.user,
             WarehouseIDs:
-              userData.user.Warehouses?.map((w: any) => w.WarehouseID) || [],
+              userData.user.Warehouses?.map((w: Warehouse) => w.WarehouseID) || [],
           });
         }
 
@@ -377,7 +388,7 @@ export default function UserForm({
               className="mt-1 text-gray-900 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Selecciona un rol</option>
-              {roles.map((r: any) => (
+              {roles.map((r: Role) => (
                 <option key={r.RoleID} value={r.RoleID}>
                   {r.RoleName}
                 </option>
@@ -390,7 +401,7 @@ export default function UserForm({
         <div>
           <Label>Depósitos asignados</Label>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {warehouses.map((w: any) => (
+            {warehouses.map((w: Warehouse) => (
               <label key={w.WarehouseID} className="flex items-center">
                 <Checkbox
                   id={`warehouse-${w.WarehouseID}`}

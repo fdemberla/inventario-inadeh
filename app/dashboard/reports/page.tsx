@@ -33,9 +33,6 @@ export default function ReportsPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedWarehouse, setSelectedWarehouse] = useState<number | null>(
-    null,
-  );
 
   useEffect(() => {
     fetchWarehouses();
@@ -62,7 +59,6 @@ export default function ReportsPage() {
   };
 
   const handleWarehouseSelect = (warehouseId: number) => {
-    setSelectedWarehouse(warehouseId);
     // Navigate to warehouse-specific reports
     router.push(`/dashboard/reports/${warehouseId}`);
   };
