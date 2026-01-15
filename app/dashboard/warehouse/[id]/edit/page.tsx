@@ -11,6 +11,7 @@ import {
   Spinner,
 } from "flowbite-react";
 import toast from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 type MainLocation = {
   MainLocationID: number;
@@ -37,8 +38,8 @@ export default function EditWarehousePage() {
       const toastId = toast.loading("Cargando almacén...");
       try {
         const [warehouseRes, locationsRes] = await Promise.all([
-          fetch(`/api/warehouses/${id}`),
-          fetch("/api/locations"),
+          fetch(withBasePath(`/api/warehouses/${id}`)),
+          fetch(withBasePath("/api/locations")),
         ]);
 
         const warehouseData = await warehouseRes.json();
@@ -69,7 +70,7 @@ export default function EditWarehousePage() {
     const toastId = toast.loading("Actualizando almacén...");
 
     try {
-      const res = await fetch(`/api/warehouses/${id}/update`, {
+      const res = await fetch(withBasePath(`/api/warehouses/${id}/update`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -77,7 +78,7 @@ export default function EditWarehousePage() {
 
       if (res.ok) {
         toast.success("Almacén actualizado con éxito", { id: toastId });
-        router.push("/dashboard/warehouse");
+        router.push(withBasePath("/dashboard/warehouse"));
       } else {
         const errorText = await res.text();
         console.error("Error updating warehouse:", errorText);

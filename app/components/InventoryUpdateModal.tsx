@@ -1,6 +1,7 @@
 import { Modal, Button, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 export type InventoryItem = {
   InventoryID: number;
@@ -41,7 +42,7 @@ export default function InventoryUpdateModal({
     }
 
     try {
-      const res = await fetch("/api/inventory/update", {
+      const res = await fetch(withBasePath("/api/inventory/update"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

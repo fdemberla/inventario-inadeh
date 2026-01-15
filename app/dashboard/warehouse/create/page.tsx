@@ -11,6 +11,7 @@ import {
   Spinner,
 } from "flowbite-react";
 import toast, { Toaster } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 type RegionalLocation = {
   MainLocationID: number;
@@ -35,7 +36,7 @@ export default function CreateWarehousePage() {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const res = await fetch("/api/locations");
+        const res = await fetch(withBasePath("/api/locations"));
         const data = await res.json();
         setLocations(data.locations.recordset);
       } catch (err) {
@@ -68,14 +69,14 @@ export default function CreateWarehousePage() {
 
     const toastId = toast.loading("Guardando Deposito...");
     try {
-      const res = await fetch("/api/warehouses/create", {
+      const res = await fetch(withBasePath("/api/warehouses/create"), {
         method: "POST",
         body: JSON.stringify(form),
       });
 
       if (res.ok) {
         toast.success("Almacén creado con éxito", { id: toastId });
-        router.push("/dashboard/warehouse");
+        router.push(withBasePath("/dashboard/warehouse"));
       } else {
         const errorText = await res.text();
         console.error("Error creating warehouse:", errorText);

@@ -532,6 +532,7 @@
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import ProductForm from "@/app/components/ProductForm";
+import { withBasePath } from "@/lib/utils";
 
 interface SupplierEntry {
   supplierID: number;
@@ -567,7 +568,7 @@ export default function NewProductPage() {
     if (data.image) formData.append("image", data.image);
     formData.append("suppliers", JSON.stringify(data.suppliers));
 
-    const res = await fetch("/api/products/create", {
+    const res = await fetch(withBasePath("/api/products/create"), {
       method: "POST",
       body: formData,
     });
@@ -595,7 +596,7 @@ export default function NewProductPage() {
             <button
               onClick={() => {
                 toast.dismiss(t.id);
-                router.push("/dashboard/products");
+                router.push(withBasePath("/dashboard/products"));
               }}
               className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-100"
             >

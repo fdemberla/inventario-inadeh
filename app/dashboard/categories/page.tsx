@@ -6,6 +6,7 @@ import { Button } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../../components/DataTable";
+import { withBasePath } from "@/lib/utils";
 
 type Category = {
   CategoryID: number;
@@ -20,7 +21,7 @@ export default function ViewAllCategories() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("/api/categories");
+        const res = await fetch(withBasePath("/api/categories"));
         const data = await res.json();
         setCategories(data);
       } catch (error) {
@@ -47,7 +48,11 @@ export default function ViewAllCategories() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(`/dashboard/categories/edit/${row.original.CategoryID}`)
+            router.push(
+              withBasePath(
+                `/dashboard/categories/edit/${row.original.CategoryID}`,
+              ),
+            )
           }
         >
           Editar
@@ -71,13 +76,15 @@ export default function ViewAllCategories() {
       title="Todas las Categorías"
       subtitle="Administra las categorías de productos"
       breadcrumbs={[
-        { label: "Dashboard", href: "/dashboard" },
+        { label: "Dashboard", href: withBasePath("/dashboard") },
         { label: "Categorías" },
       ]}
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push("/dashboard/categories/create")}
+          onClick={() =>
+            router.push(withBasePath("/dashboard/categories/create"))
+          }
         >
           Crear Categoría
         </Button>

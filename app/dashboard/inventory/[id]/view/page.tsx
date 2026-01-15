@@ -6,6 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/app/components/DataTable"; // adjust path as needed
 import InventoryUpdateModal from "@/app/components/InventoryUpdateModal";
 import { useParams, useRouter } from "next/navigation";
+import { withBasePath } from "@/lib/utils";
 
 type InventoryItem = {
   InventoryID: number;
@@ -66,7 +67,7 @@ export default function InventoryPage() {
   }, [selectedWarehouseId]);
 
   const fetchInventory = async (warehouseId: string) => {
-    const res = await fetch(`/api/inventory/${warehouseId}`);
+    const res = await fetch(withBasePath(`/api/inventory/${warehouseId}`));
     const data = await res.json();
     setInventory(data);
     setLastUpdated(new Date());
@@ -115,7 +116,7 @@ export default function InventoryPage() {
       <div className="mb-6">
         <button
           type="button"
-          onClick={() => router.push(`/dashboard/inventory`)}
+          onClick={() => router.push(withBasePath(`/dashboard/inventory`))}
           className="mb-4 flex items-center text-blue-600 hover:text-blue-700"
         >
           <svg
@@ -137,7 +138,9 @@ export default function InventoryPage() {
       {selectedWarehouseId && (
         <Button
           onClick={() =>
-            router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)
+            router.push(
+              withBasePath(`/dashboard/inventory/${selectedWarehouseId}/add`),
+            )
           }
         >
           Agregar Producto a Deposito

@@ -25,6 +25,7 @@ import {
   getCachedProductsByWarehouse,
   getPendingScans,
 } from "@/lib/offline-db";
+import { withBasePath } from "@/lib/utils";
 
 interface ScanEntry {
   barcode: string;
@@ -234,7 +235,9 @@ function ScannerPage() {
       setLoading(true);
       const toastId = toast.loading("Cargando almacén...");
       try {
-        const res = await fetch(`/api/warehouses/${params.id}`);
+        const res = await fetch(
+          withBasePath(`/api/warehouses/${params.id}`),
+        );
         if (!res.ok) throw new Error("Error al cargar el almacén.");
         const data = await res.json();
         setWarehouse(data.warehouse);
@@ -373,7 +376,7 @@ function ScannerPage() {
       <div className="mb-4">
         <button
           type="button"
-          onClick={() => router.push(`/dashboard/inventory`)}
+          onClick={() => router.push(withBasePath(`/dashboard/inventory`))}
           className="flex items-center text-blue-600 hover:text-blue-700"
         >
           <svg

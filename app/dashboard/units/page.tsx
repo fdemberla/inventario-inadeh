@@ -5,6 +5,7 @@ import { Button } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "@/app/components/DataTable";
 import { useRouter } from "next/navigation";
+import { withBasePath } from "@/lib/utils";
 
 type Unit = {
   UnitID: number;
@@ -21,7 +22,7 @@ export default function ViewAllUnits() {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const res = await fetch("/api/units");
+        const res = await fetch(withBasePath("/api/units"));
         const data = await res.json();
         setUnits(data);
       } catch (error) {
@@ -65,7 +66,9 @@ export default function ViewAllUnits() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(`/dashboard/units/${row.original.UnitID}/edit`)
+            router.push(
+              withBasePath(`/dashboard/units/${row.original.UnitID}/edit`),
+            )
           }
         >
           Editar
@@ -79,13 +82,13 @@ export default function ViewAllUnits() {
       title="Unidades de Medida"
       subtitle="Administra las unidades de medida"
       breadcrumbs={[
-        { label: "Dashboard", href: "/dashboard" },
+        { label: "Dashboard", href: withBasePath("/dashboard") },
         { label: "Unidades" },
       ]}
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push("/dashboard/units/create")}
+          onClick={() => router.push(withBasePath("/dashboard/units/create"))}
         >
           Crear Unidad
         </Button>

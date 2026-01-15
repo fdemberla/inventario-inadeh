@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { TextInput, Button, Label, Textarea } from "flowbite-react";
 import { toast } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 export default function EditSupplier() {
   const { id } = useParams();
@@ -21,7 +22,7 @@ export default function EditSupplier() {
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
-        const res = await fetch(`/api/suppliers/${id}`);
+        const res = await fetch(withBasePath(`/api/suppliers/${id}`));
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Error loading supplier");
 
@@ -64,7 +65,7 @@ export default function EditSupplier() {
     }
 
     try {
-      const res = await fetch(`/api/suppliers/${id}/edit`, {
+      const res = await fetch(withBasePath(`/api/suppliers/${id}/edit`), {
         method: "PUT",
         body: JSON.stringify({
           supplierName,
@@ -81,7 +82,7 @@ export default function EditSupplier() {
       if (!res.ok) throw new Error("Error actualizando proveedor");
 
       toast.success("Proveedor actualizado correctamente.");
-      router.push("/dashboard/suppliers");
+      router.push(withBasePath("/dashboard/suppliers"));
     } catch (error) {
       console.error(error);
       toast.error("No se pudo actualizar el proveedor.");

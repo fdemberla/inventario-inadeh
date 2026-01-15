@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "../../components/DataTable";
+import { withBasePath } from "@/lib/utils";
 
 type User = {
   UserID: number;
@@ -21,7 +22,7 @@ export default function UserListPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/users")
+    fetch(withBasePath("/api/users"))
       .then((res) => res.json())
       .then((data) => setUsers(data.users || data))
       .catch(console.error)
@@ -48,7 +49,9 @@ export default function UserListPage() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(`/dashboard/users/${row.original.UserID}/update`)
+            router.push(
+              withBasePath(`/dashboard/users/${row.original.UserID}/update`),
+            )
           }
         >
           Editar
@@ -71,13 +74,13 @@ export default function UserListPage() {
       title="Gestión de Usuarios"
       subtitle="Administra los usuarios del sistema"
       breadcrumbs={[
-        { label: "Dashboard", href: "/dashboard" },
+        { label: "Dashboard", href: withBasePath("/dashboard") },
         { label: "Usuarios" },
       ]}
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push("/dashboard/users/create")}
+          onClick={() => router.push(withBasePath("/dashboard/users/create"))}
         >
           Crear Usuario
         </Button>

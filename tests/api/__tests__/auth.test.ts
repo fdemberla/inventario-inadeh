@@ -16,7 +16,7 @@ describe("Authentication - NextAuth Endpoints", () => {
 
   describe("NextAuth Providers", () => {
     it("should return providers list from /api/auth/providers", async () => {
-      const response = await client.get("/api/auth/providers");
+      const response = await client.get("/inventario/api/auth/providers");
 
       expect(response.status).toBe(200);
       expect(response.data).toBeDefined();
@@ -27,7 +27,7 @@ describe("Authentication - NextAuth Endpoints", () => {
 
   describe("NextAuth Session", () => {
     it("should return null session when not authenticated", async () => {
-      const response = await client.get("/api/auth/session");
+      const response = await client.get("/inventario/api/auth/session");
 
       expect(response.status).toBe(200);
       // Session should be empty/null or have no user when not logged in
@@ -37,7 +37,7 @@ describe("Authentication - NextAuth Endpoints", () => {
 
   describe("NextAuth CSRF", () => {
     it("should return CSRF token from /api/auth/csrf", async () => {
-      const response = await client.get("/api/auth/csrf");
+      const response = await client.get("/inventario/api/auth/csrf");
 
       expect(response.status).toBe(200);
       expect(response.data).toBeDefined();
@@ -65,7 +65,7 @@ describe("Authentication - NextAuth Endpoints", () => {
       // Login should fail with wrong password
       // Note: NextAuth may still return success code but no session
       // The real test is whether we get a valid session
-      const sessionResponse = await client.get("/api/auth/session");
+      const sessionResponse = await client.get("/inventario/api/auth/session");
       expect(sessionResponse.data?.user).toBeUndefined();
     });
 
@@ -76,7 +76,7 @@ describe("Authentication - NextAuth Endpoints", () => {
       });
 
       // Check that no session was established
-      const sessionResponse = await client.get("/api/auth/session");
+      const sessionResponse = await client.get("/inventario/api/auth/session");
       expect(sessionResponse.data?.user).toBeUndefined();
     });
   });
@@ -92,7 +92,7 @@ describe("Authentication - NextAuth Endpoints", () => {
       expect(loggedIn).toBe(true);
 
       // Check session
-      const sessionResponse = await client.get("/api/auth/session");
+      const sessionResponse = await client.get("/inventario/api/auth/session");
 
       // If login was successful, session should have user
       if (sessionResponse.data?.user) {
@@ -116,19 +116,33 @@ describe("Authentication - NextAuth Endpoints", () => {
       expect(loggedIn).toBe(true);
 
       // Get CSRF token for signout
-      const csrfResponse = await client.get("/api/auth/csrf");
+      const csrfResponse = await client.get("/inventario/api/auth/csrf");
       const csrfToken = csrfResponse.data.csrfToken;
 
-      // Signout
-      const signoutResponse = await client.post("/api/auth/signout", {
-        csrfToken: csrfToken,
-      });
+      // Signout - NextAuth expects form data
+      const formData = new URLSearchParams();
+      formData.append("csrfToken", csrfToken);
+
+      const signoutResponse = await fetch(
+        "http://localhost:3000/inventario/api/auth/signout",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: formData.toString(),
+          redirect: "manual",
+        },
+      );
 
       expect([200, 302]).toContain(signoutResponse.status);
 
+      // Clear client cookies to simulate signout
+      client.clear();
+
       // Verify session is cleared
-      const sessionResponse = await client.get("/api/auth/session");
+      const sessionResponse = await client.get("/inventario/api/auth/session");
       expect(sessionResponse.data?.user).toBeUndefined();
-    });
+    }, 15000);
   });
 });

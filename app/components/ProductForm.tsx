@@ -3,6 +3,7 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { toast } from "react-hot-toast";
 import UnitForm from "@/app/components/UnitForm";
+import { withBasePath } from "@/lib/utils";
 
 interface Category {
   CategoryID: number;
@@ -101,17 +102,17 @@ export default function ProductForm({
   const filteredUnits = units.filter((u) => u.System === form.unitSystem);
 
   const fetchUnits = () => {
-    fetch("/api/units")
+    fetch(withBasePath("/api/units"))
       .then((res) => res.json())
       .then((response) => setUnits(response));
   };
 
   useEffect(() => {
-    fetch("/api/categories")
+    fetch(withBasePath("/api/categories"))
       .then((res) => res.json())
       .then((response) => setCategories(response));
     fetchUnits();
-    fetch("/api/suppliers")
+    fetch(withBasePath("/api/suppliers"))
       .then((res) => res.json())
       .then((response) => setSuppliers(response));
   }, []);
@@ -182,7 +183,7 @@ export default function ProductForm({
   const searchIstmoProducts = async (q: string) => {
     try {
       const res = await fetch(
-        `/api/products/search-istmo?q=${encodeURIComponent(q)}`,
+        withBasePath(`/api/products/search-istmo?q=${encodeURIComponent(q)}`),
       );
       const data = await res.json();
       const empty = {

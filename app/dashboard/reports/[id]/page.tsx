@@ -5,6 +5,7 @@ import { Filter } from "lucide-react";
 import { useParams } from "next/navigation";
 import TarjetaGroup from "@/app/components/reports/TarjetaGroup";
 import ExcelExportButton from "@/app/components/reports/BotonExportar";
+import { withBasePath } from "@/lib/utils";
 
 const COLORES = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
@@ -46,19 +47,27 @@ const PanelReportesAlmacen = () => {
 
         // Fetch all data in parallel
         const responses = await Promise.all([
-          fetch(`/api/warehouses/${params.id}`),
-          fetch(`/api/categories`),
+          fetch(withBasePath(`/api/warehouses/${params.id}`)),
+          fetch(withBasePath(`/api/categories`)),
           fetch(
-            `/api/reports/${params.id}/niveles?category=${categoriaSeleccionada}`,
+            withBasePath(
+              `/api/reports/${params.id}/niveles?category=${categoriaSeleccionada}`,
+            ),
           ),
           fetch(
-            `/api/reports/${params.id}/movimiento?category=${categoriaSeleccionada}`,
+            withBasePath(
+              `/api/reports/${params.id}/movimiento?category=${categoriaSeleccionada}`,
+            ),
           ),
           fetch(
-            `/api/reports/${params.id}/valor?category=${categoriaSeleccionada}`,
+            withBasePath(
+              `/api/reports/${params.id}/valor?category=${categoriaSeleccionada}`,
+            ),
           ),
           fetch(
-            `/api/reports/${params.id}/alerta?category=${categoriaSeleccionada}`,
+            withBasePath(
+              `/api/reports/${params.id}/alerta?category=${categoriaSeleccionada}`,
+            ),
           ),
         ]);
 

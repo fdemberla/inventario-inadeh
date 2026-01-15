@@ -4,6 +4,7 @@
 import type { NextAuthConfig } from "next-auth";
 import type { Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
+import { stripBasePath, withBasePath } from "@/lib/utils";
 
 // Extended session user type
 interface ExtendedUser {
@@ -45,16 +46,30 @@ export const authConfig: NextAuthConfig = {
     },
     async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
-      const isOnUserDashboard = nextUrl.pathname.startsWith("/user-dashboard");
-      const isOnLogin = nextUrl.pathname.startsWith("/login");
-      const isOnApi = nextUrl.pathname.startsWith("/api");
+      const pathname = stripBasePath(nextUrl.pathname);
+      const isOnDashboard = pathname.startsWith("/dashboard");
+      const isOnUserDashboard = pathname.startsWith("/user-dashboard");
+      const isOnLogin = pathname.startsWith("/login");
+      const isOnApi = pathname.startsWith("/api");
+
+      const isStaticAsset =
+        pathname.startsWith("/_next/") ||
+        pathname === "/favicon.ico" ||
+        pathname === "/manifest.json" ||
+        pathname === "/service-worker.js" ||
+        pathname === "/sw.js" ||
+        pathname.startsWith("/icons/") ||
+        pathname.startsWith("/screenshots/") ||
+        pathname.startsWith("/uploads/") ||
+        pathname.startsWith("/workbox-");
+
+      if (isStaticAsset) return true;
 
       // Allow public API routes
       if (isOnApi) {
         const publicApiRoutes = ["/api/auth"];
         const isPublicApi = publicApiRoutes.some((route) =>
-          nextUrl.pathname.startsWith(route),
+          pathname.startsWith(route),
         );
         if (isPublicApi) return true;
         return isLoggedIn;
@@ -62,13 +77,13 @@ export const authConfig: NextAuthConfig = {
 
       // Redirect logged-in users away from login page
       if (isOnLogin && isLoggedIn) {
-        return Response.redirect(new URL("/dashboard", nextUrl));
+        return Response.redirect(new URL(withBasePath("/dashboard"), nextUrl));
       }
 
       // Protect dashboard routes
       if (isOnDashboard || isOnUserDashboard) {
         if (!isLoggedIn) {
-          return Response.redirect(new URL("/login", nextUrl));
+          return Response.redirect(new URL(withBasePath("/login"), nextUrl));
         }
         return true;
       }
@@ -77,8 +92,8 @@ export const authConfig: NextAuthConfig = {
     },
   },
   pages: {
-    signIn: "/login",
-    error: "/login",
+    signIn: withBasePath("/login"),
+    error: withBasePath("/login"),
   },
   session: {
     strategy: "jwt",

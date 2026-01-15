@@ -6,6 +6,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import { Providers } from "./components/Providers";
+import { withBasePath } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   title: "Inventario INADEH",
   description: "It's a simple progressive web application made with NextJS",
   generator: "Next.js",
-  manifest: "/manifest.json",
+  manifest: withBasePath("/manifest.json"),
   keywords: ["nextjs", "next14", "pwa", "next-pwa"],
   authors: [
     {
@@ -30,11 +31,11 @@ export const metadata: Metadata = {
     },
   ],
   icons: [
-    { rel: "apple-touch-icon", url: "/icons/icons-128.png" },
-    { rel: "icon", url: "/icons/icons-128.png" },
-    { rel: "icon", url: "/icons/icons-192.png" },
-    { rel: "icon", url: "/icons/icons-256.png" },
-    { rel: "icon", url: "/icons/icons-512.png" },
+    { rel: "apple-touch-icon", url: withBasePath("/icons/icons-128.png") },
+    { rel: "icon", url: withBasePath("/icons/icons-128.png") },
+    { rel: "icon", url: withBasePath("/icons/icons-192.png") },
+    { rel: "icon", url: withBasePath("/icons/icons-256.png") },
+    { rel: "icon", url: withBasePath("/icons/icons-512.png") },
   ],
 };
 

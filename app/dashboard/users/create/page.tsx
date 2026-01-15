@@ -11,6 +11,7 @@ import {
   Spinner,
 } from "flowbite-react";
 import { toast } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 export default function CreateUserPage() {
   const router = useRouter();
@@ -61,8 +62,8 @@ export default function CreateUserPage() {
       const loadingToast = toast.loading("Cargando roles y depósitos...");
       try {
         const [rolesRes, whRes] = await Promise.all([
-          fetch("/api/roles"),
-          fetch("/api/warehouses"),
+          fetch(withBasePath("/api/roles")),
+          fetch(withBasePath("/api/warehouses")),
         ]);
         const rolesData = await rolesRes.json();
         const whData = await whRes.json();
@@ -138,7 +139,7 @@ export default function CreateUserPage() {
     }
 
     try {
-      const res = await fetch("/api/users/create", {
+      const res = await fetch(withBasePath("/api/users/create"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -150,7 +151,7 @@ export default function CreateUserPage() {
       }
 
       toast.success("Usuario creado con éxito.");
-      router.push("/dashboard/users");
+      router.push(withBasePath("/dashboard/users"));
     } catch (err) {
       toast.error(err.message);
     } finally {

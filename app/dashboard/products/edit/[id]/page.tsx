@@ -413,6 +413,7 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import ProductForm from "@/app/components/ProductForm";
 import { useEffect, useState } from "react";
+import { withBasePath } from "@/lib/utils";
 
 interface SupplierEntry {
   supplierID: number;
@@ -444,7 +445,7 @@ export default function EditProduct() {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const res = await fetch(`/api/products/${id}`);
+      const res = await fetch(withBasePath(`/api/products/${id}`));
       const data = await res.json();
       const product = data.product;
       setInitialData(product);
@@ -469,7 +470,7 @@ export default function EditProduct() {
         suppliers: data.suppliers,
       };
 
-      const res = await fetch(`/api/products/${id}/update`, {
+      const res = await fetch(withBasePath(`/api/products/${id}/update`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -479,7 +480,7 @@ export default function EditProduct() {
 
       if (res.ok) {
         toast.success("Producto editado exitosamente!");
-        router.push("/dashboard/products");
+        router.push(withBasePath("/dashboard/products"));
       } else {
         const data = await res.json();
         toast.error(data.message || "Error al editar producto.");

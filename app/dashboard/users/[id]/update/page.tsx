@@ -11,6 +11,7 @@ import {
   Spinner,
 } from "flowbite-react";
 import { toast } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 export default function EditUserPage() {
   const router = useRouter();
@@ -39,9 +40,9 @@ export default function EditUserPage() {
       try {
         // Fetch roles and warehouses
         const [rolesRes, whRes, userRes] = await Promise.all([
-          fetch("/api/roles"),
-          fetch("/api/warehouses"),
-          fetch(`/api/users/${id}`), // Fetch user data by ID
+          fetch(withBasePath("/api/roles")),
+          fetch(withBasePath("/api/warehouses")),
+          fetch(withBasePath(`/api/users/${id}`)), // Fetch user data by ID
         ]);
         const rolesData = await rolesRes.json();
         const whData = await whRes.json();
@@ -137,7 +138,7 @@ export default function EditUserPage() {
     }
 
     try {
-      const res = await fetch(`/api/users/${id}/update`, {
+      const res = await fetch(withBasePath(`/api/users/${id}/update`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedData),
@@ -149,7 +150,7 @@ export default function EditUserPage() {
       }
 
       toast.success("Usuario actualizado con éxito.");
-      router.push("/dashboard/users");
+      router.push(withBasePath("/dashboard/users"));
     } catch (err) {
       toast.error(err.message);
     } finally {

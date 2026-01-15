@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import SidebarComponent from "../components/Sidebar";
 import { USER_ROLES } from "@/lib/constants";
+import { withBasePath } from "@/lib/utils";
 
 export default async function UserDashboardLayout({
   children,
@@ -11,8 +12,9 @@ export default async function UserDashboardLayout({
 }) {
   const session = await auth();
 
-  if (!session?.user) redirect("/login");
-  if (session.user.role !== USER_ROLES.GENERAL) redirect("/dashboard");
+  if (!session?.user) redirect(withBasePath("/login"));
+  if (session.user.role !== USER_ROLES.GENERAL)
+    redirect(withBasePath("/dashboard"));
 
   const user = session.user;
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "../../components/DataTable";
+import { withBasePath } from "@/lib/utils";
 
 type Warehouse = {
   WarehouseID: number;
@@ -20,7 +21,7 @@ export default function WarehouseListPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/warehouses")
+    fetch(withBasePath("/api/warehouses"))
       .then((res) => res.json())
       .then((data) => setWarehouses(data.warehouses.recordset))
       .catch(console.error)
@@ -45,7 +46,11 @@ export default function WarehouseListPage() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(`/dashboard/warehouse/${row.original.WarehouseID}/edit`)
+            router.push(
+              withBasePath(
+                `/dashboard/warehouse/${row.original.WarehouseID}/edit`,
+              ),
+            )
           }
         >
           Editar
@@ -68,13 +73,13 @@ export default function WarehouseListPage() {
       title="Gestión de Depósitos"
       subtitle="Administra tus almacenes"
       breadcrumbs={[
-        { label: "Dashboard", href: "/dashboard" },
+        { label: "Dashboard", href: withBasePath("/dashboard") },
         { label: "Depósitos" },
       ]}
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push("/dashboard/warehouse/create")}
+          onClick={() => router.push(withBasePath("/dashboard/warehouse/create"))}
         >
           Crear Depósito
         </Button>

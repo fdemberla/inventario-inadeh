@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "../../components/DataTable";
+import { withBasePath } from "@/lib/utils";
 
 type Product = {
   ProductID: number;
@@ -22,7 +23,7 @@ export default function ViewAllProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("/api/products");
+        const res = await fetch(withBasePath("/api/products"));
         const data = await res.json();
         setProducts(data.products);
       } catch (error) {
@@ -61,7 +62,11 @@ export default function ViewAllProducts() {
           size="sm"
           variant="secondary"
           onClick={() =>
-            router.push(`/dashboard/products/edit/${row.original.ProductID}`)
+            router.push(
+              withBasePath(
+                `/dashboard/products/edit/${row.original.ProductID}`,
+              ),
+            )
           }
         >
           Editar
@@ -85,13 +90,13 @@ export default function ViewAllProducts() {
       title="Todos los Productos"
       subtitle="Gestiona tu catálogo de productos"
       breadcrumbs={[
-        { label: "Dashboard", href: "/dashboard" },
+        { label: "Dashboard", href: withBasePath("/dashboard") },
         { label: "Productos" },
       ]}
       actions={
         <Button
           variant="primary"
-          onClick={() => router.push("/dashboard/products/create")}
+          onClick={() => router.push(withBasePath("/dashboard/products/create"))}
         >
           Crear Producto
         </Button>

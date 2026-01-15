@@ -21,6 +21,7 @@ import { FaHome } from "react-icons/fa";
 import Image from "next/image";
 import type { IconType } from "react-icons";
 import { USER_ROLES } from "@/lib/constants";
+import { stripBasePath, withBasePath } from "@/lib/utils";
 
 // Types
 type User = {
@@ -173,10 +174,11 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
   const isActive = useCallback(
     (path: string) => {
       if (!pathname) return false;
+      const normalizedPathname = stripBasePath(pathname);
       // Exact match or path is a prefix with a / boundary
-      if (pathname === path) return true;
+      if (normalizedPathname === path) return true;
       // Check if it's a sub-route (e.g., /dashboard/products is active for /dashboard/products/create)
-      if (pathname.startsWith(path + "/")) return true;
+      if (normalizedPathname.startsWith(path + "/")) return true;
       return false;
     },
     [pathname],
@@ -184,7 +186,7 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
   const handleNavigation = useCallback(
     (path: string) => {
-      router.push(path);
+      router.push(withBasePath(path));
       // Close sidebar on mobile after navigation
       if (window.innerWidth < 768) {
         closeSidebar();
@@ -195,11 +197,11 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
   const handleLogout = useCallback(async () => {
     try {
-      await signOut({ callbackUrl: "/login" });
+      await signOut({ callbackUrl: withBasePath("/login") });
     } catch (error) {
       console.error("Error during logout:", error);
       // Still redirect even if logout fails
-      router.push("/login");
+      router.push(withBasePath("/login"));
     }
   }, [router]);
 
@@ -285,7 +287,7 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
             <Image
-              src="/favicon.png"
+              src={withBasePath("/favicon.png")}
               alt="Logo"
               width={24}
               height={24}
@@ -316,7 +318,7 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
         <div className="hidden items-center justify-center border-b border-white/20 p-6 md:flex">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
             <Image
-              src="/favicon.png"
+              src={withBasePath("/favicon.png")}
               alt="Logo de la aplicación"
               width={48}
               height={48}

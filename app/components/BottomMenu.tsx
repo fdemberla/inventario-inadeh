@@ -6,6 +6,7 @@ import { HiOutlineCube, HiOutlineHome } from "react-icons/hi";
 import { MdLogout, MdOutlineInventory } from "react-icons/md";
 import { CiBoxList } from "react-icons/ci";
 import { USER_ROLES } from "@/lib/constants";
+import { stripBasePath, withBasePath } from "@/lib/utils";
 
 type User = {
   id: number;
@@ -63,17 +64,18 @@ const BottomMenu = ({ user }: { user: User }) => {
         ];
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" });
+    await signOut({ callbackUrl: withBasePath("/login") });
   };
 
   return (
     <div className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t border-gray-200 bg-white py-2 shadow md:hidden dark:border-gray-700 dark:bg-gray-900">
       {menuItems.map((item) => {
-        const isActive = pathname.startsWith(item.path);
+        const normalizedPathname = stripBasePath(pathname);
+        const isActive = normalizedPathname.startsWith(item.path);
         return (
           <button
             key={item.path}
-            onClick={() => router.push(item.path)}
+            onClick={() => router.push(withBasePath(item.path))}
             aria-label={`Ir a ${item.label}`}
             className={`flex flex-col items-center justify-center text-xs transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${
               isActive

@@ -11,6 +11,7 @@ import {
   Spinner,
 } from "flowbite-react";
 import { toast } from "react-hot-toast"; // <-- Import toast
+import { withBasePath } from "@/lib/utils";
 
 type Category = {
   CategoryID: number;
@@ -26,7 +27,7 @@ export default function CreateCategoryPage() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const res = await fetch("/api/categories");
+      const res = await fetch(withBasePath("/api/categories"));
       const data = await res.json();
       setCategories(data);
     };
@@ -38,7 +39,7 @@ export default function CreateCategoryPage() {
     setIsSubmitting(true); // ✨ Start loading
 
     try {
-      const res = await fetch("/api/categories/create", {
+      const res = await fetch(withBasePath("/api/categories/create"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ categoryName, description, parentCategoryID }),
@@ -54,7 +55,7 @@ export default function CreateCategoryPage() {
 
         // Optionally refresh categories
         const refreshCategories = async () => {
-          const res = await fetch("/api/categories");
+          const res = await fetch(withBasePath("/api/categories"));
           const data = await res.json();
           setCategories(data);
         };

@@ -134,7 +134,8 @@ describe("Inventory Management APIs", () => {
       if (response.data?.recordset) {
         expect(Array.isArray(response.data.recordset)).toBe(true);
       } else if (Array.isArray(response.data)) {
-        expect(response.data).toEqual(expect.any(Array));
+        // Data is a valid array
+        expect(Array.isArray(response.data)).toBe(true);
       } else {
         // Response structure may vary, just verify it's an object
         expect(typeof response.data).toBe("object");

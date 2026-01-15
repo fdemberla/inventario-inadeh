@@ -5,6 +5,7 @@ import { HiRefresh } from "react-icons/hi";
 import { Button } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import WarehouseCard from "../components/WarehouseCard";
+import { withBasePath } from "@/lib/utils";
 
 interface Warehouse {
   WarehouseID: number;
@@ -51,7 +52,7 @@ export default function Dashboard() {
   // Fetch warehouses accessible to user
   const fetchWarehouses = useCallback(async () => {
     try {
-      const res = await fetch("/api/warehouses/user");
+      const res = await fetch(withBasePath("/api/warehouses/user"));
       if (!res.ok) throw new Error("Failed to fetch warehouses");
       const data = await res.json();
       setWarehouses(data.recordset || data);
@@ -67,7 +68,7 @@ export default function Dashboard() {
   const fetchWarehouseInventory = useCallback(
     async (warehouseId: number, isCached: boolean = false) => {
       try {
-        const res = await fetch(`/api/inventory/${warehouseId}`);
+        const res = await fetch(withBasePath(`/api/inventory/${warehouseId}`));
         if (!res.ok) throw new Error("Failed to fetch inventory");
         const data: InventoryItem[] = await res.json();
 

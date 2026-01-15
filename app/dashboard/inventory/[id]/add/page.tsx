@@ -192,6 +192,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Spinner } from "flowbite-react";
+import { withBasePath } from "@/lib/utils";
 
 // Componente de búsqueda de productos optimizado para móvil
 const ProductSearchSelect = ({
@@ -449,7 +450,7 @@ function AddProductToWarehouse() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("/api/products");
+        const res = await fetch(withBasePath("/api/products"));
         const data = await res.json();
         setProducts(data.products);
       } catch (error) {
@@ -469,7 +470,9 @@ function AddProductToWarehouse() {
       setLoading(true);
       const toastId = toast.loading("Cargando almacén...");
       try {
-        const res = await fetch(`/api/warehouses/${params.id}`);
+        const res = await fetch(
+          withBasePath(`/api/warehouses/${params.id}`),
+        );
         if (!res.ok) throw new Error("Error al cargar el almacén.");
         const data = await res.json();
         setWarehouse(data.warehouse); // Asumimos que el API devuelve el objeto del almacén
@@ -498,7 +501,7 @@ function AddProductToWarehouse() {
     setSubmitting(true);
 
     try {
-      const response = await fetch("/api/inventory/update", {
+      const response = await fetch(withBasePath("/api/inventory/update"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -515,7 +518,7 @@ function AddProductToWarehouse() {
       }
 
       toast.success("Inventario Actualizado Satisfactoriamente!");
-      router.push(`/dashboard/inventory/update`);
+      router.push(withBasePath(`/dashboard/inventory/update`));
     } catch (error) {
       console.error("Error:", error);
       toast.error("Error al actualizar inventario");
@@ -651,7 +654,9 @@ function AddProductToWarehouse() {
 
               <button
                 type="button"
-                onClick={() => router.push(`/dashboard/inventory`)}
+                onClick={() =>
+                  router.push(withBasePath(`/dashboard/inventory`))
+                }
                 className="w-full rounded-md bg-gray-200 px-4 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-300"
               >
                 Cancelar

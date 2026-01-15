@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { withBasePath } from "@/lib/utils";
+
+const sanitizeFilename = (name: string): string => {
+  const cleaned = name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120);
+  return cleaned.length > 0 ? cleaned : "reporte.xlsx";
+};
 
 interface BotonExportarProps {
   warehouseId: number;
@@ -21,7 +27,9 @@ export default function BotonExportar({
     setIsExporting(true);
 
     try {
-      const response = await fetch(`/api/reports/${warehouseId}/exportar`);
+      const response = await fetch(
+        withBasePath(`/api/reports/${warehouseId}/exportar`),
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -39,22 +47,14 @@ export default function BotonExportar({
       link.href = url;
 
       // Obtener el nombre del archivo de los headers (si está disponible)
-      const contentDisposition = response.headers.get("content-disposition");
-      let filename = `inventario_deposito_${warehouseId}_${new Date().toISOString().split("T")[0]}.xlsx`;
-
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (filenameMatch) {
-          filename = filenameMatch[1];
-        }
-      }
+      const filename = sanitizeFilename(
+        `inventario_deposito_${warehouseId}_${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
 
       link.download = filename;
 
-      // Agregar al DOM, hacer click y remover
-      document.body.appendChild(link);
+      // Iniciar descarga sin insertar el elemento en el DOM
       link.click();
-      document.body.removeChild(link);
 
       // Limpiar la URL del blob
       window.URL.revokeObjectURL(url);

@@ -17,6 +17,8 @@ interface ApiResponse<T = unknown> {
 }
 
 // Use global fetch (available in Node 18+) or require node-fetch
+import { withBasePath } from "@/lib/utils";
+
 const fetchFn = typeof fetch !== "undefined" ? fetch : require("node-fetch");
 
 export class TestClient {
@@ -41,6 +43,23 @@ export class TestClient {
    */
   getToken(): string | null {
     return this.token;
+  }
+
+  /**
+   * Get base URL
+   */
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
+  /**
+   * Get cookies as header string
+   */
+  getCookieHeader(): string {
+    if (this.cookies.size === 0) return "";
+    return Array.from(this.cookies.entries())
+      .map(([key, value]) => `${key}=${value}`)
+      .join("; ");
   }
 
   /**
@@ -85,7 +104,12 @@ export class TestClient {
     endpoint: string,
     body?: unknown,
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint}`;
+    // Auto-prepend basePath if endpoint doesn't already have it
+    const basePath = "/inventario";
+    const normalizedEndpoint = endpoint.startsWith(basePath)
+      ? endpoint
+      : `${basePath}${endpoint}`;
+    const url = `${this.baseUrl}${normalizedEndpoint}`;
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -150,12 +174,20 @@ export class TestClient {
   }
 
   /**
-   * Parse cookie from Set-Cookie header
+   * Parse cookies from Set-Cookie header (handles multiple cookies)
    */
   private parseCookie(setCookieHeader: string): void {
-    const cookieParts = setCookieHeader.split(";")[0].split("=");
-    if (cookieParts.length === 2) {
-      this.cookies.set(cookieParts[0].trim(), cookieParts[1].trim());
+    // Set-Cookie can have multiple cookies separated by commas
+    // But cookie values can also contain commas, so we split carefully
+    // NextAuth format: name=value; Path=/; HttpOnly, name2=value2; Path=/; HttpOnly
+    const cookies = setCookieHeader.split(/,(?=\s*[^;=]+=)/);
+    for (const cookie of cookies) {
+      const cookieParts = cookie.trim().split(";")[0].split("=");
+      if (cookieParts.length >= 2) {
+        const name = cookieParts[0].trim();
+        const value = cookieParts.slice(1).join("=").trim();
+        this.cookies.set(name, value);
+      }
     }
   }
 
@@ -191,9 +223,9 @@ export async function loginWithNextAuth(
   credentials: { username: string; password: string },
 ): Promise<boolean> {
   try {
-    // Step 1: Get CSRF token
+    // Step 1: Get CSRF token (use raw paths; basePath is already in Next.js config)
     const csrfResponse = await client.get<{ csrfToken: string }>(
-      "/api/auth/csrf",
+      "/inventario/api/auth/csrf",
     );
     const csrfToken = csrfResponse.data?.csrfToken;
 
@@ -205,21 +237,29 @@ export async function loginWithNextAuth(
     // Step 2: Authenticate with NextAuth credentials endpoint
     // NextAuth expects form data, but our client sends JSON
     // We need to make a direct fetch call for this
-    const baseUrl = "http://localhost:3000";
+    const baseUrl = client.getBaseUrl();
     const formData = new URLSearchParams();
     formData.append("csrfToken", csrfToken);
     formData.append("username", credentials.username);
     formData.append("password", credentials.password);
+    formData.append("callbackUrl", "/inventario/dashboard");
     formData.append("json", "true");
 
-    const response = await fetchFn(`${baseUrl}/api/auth/callback/credentials`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+    // Must include the CSRF cookie from the previous request
+    const cookieHeader = client.getCookieHeader();
+
+    const response = await fetchFn(
+      `${baseUrl}/inventario/api/auth/callback/credentials`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+        },
+        body: formData.toString(),
+        redirect: "manual", // Don't follow redirects automatically
       },
-      body: formData.toString(),
-      redirect: "manual", // Don't follow redirects automatically
-    });
+    );
 
     // NextAuth sets session cookie on successful auth
     const setCookie = response.headers.get("set-cookie");
@@ -231,15 +271,18 @@ export async function loginWithNextAuth(
         if (cookieParts.length >= 2) {
           const name = cookieParts[0].trim();
           const value = cookieParts.slice(1).join("=").trim();
-          // Store cookie in client (need to add method for this)
+          // Store cookie in client
           client.setCookie(name, value);
         }
       }
     }
 
-    // Check if authentication was successful
-    // NextAuth redirects on success, or returns error on failure
-    return response.status === 200 || response.status === 302;
+    // Check if authentication was successful by verifying session
+    // NextAuth v5 may return various status codes, so we verify via session
+    const sessionResponse = await client.get<{ user?: unknown }>(
+      "/inventario/api/auth/session",
+    );
+    return !!sessionResponse.data?.user;
   } catch (error) {
     console.error("NextAuth login error:", error);
     return false;

@@ -12,6 +12,7 @@ import {
   Card,
 } from "flowbite-react";
 import { toast } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 type Category = {
   CategoryID: number;
@@ -32,13 +33,15 @@ export default function EditCategoryPage() {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const categoryRes = await fetch(`/api/categories/${id}`);
+        const categoryRes = await fetch(
+          withBasePath(`/api/categories/${id}`),
+        );
         const categoryData = await categoryRes.json();
         setCategoryName(categoryData.category.CategoryName || "");
         setDescription(categoryData.category.Description || "");
         setParentCategoryID(categoryData.category.ParentCategoryID || null);
 
-        const categoriesRes = await fetch("/api/categories");
+        const categoriesRes = await fetch(withBasePath("/api/categories"));
         const categoriesData = await categoriesRes.json();
         setCategories(categoriesData);
       } catch (err) {
@@ -57,7 +60,7 @@ export default function EditCategoryPage() {
     setIsSubmitting(true); // Start loading
 
     try {
-      const res = await fetch(`/api/categories/${id}/update`, {
+      const res = await fetch(withBasePath(`/api/categories/${id}/update`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -71,7 +74,7 @@ export default function EditCategoryPage() {
         toast.success("Categoría actualizada correctamente.");
 
         // Optionally refresh categories or navigate away
-        router.push("/dashboard/categories");
+        router.push(withBasePath("/dashboard/categories"));
       } else {
         const data = await res.json();
         toast.error(data.message || "Error al actualizar.");

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { DollarSign, Package, AlertTriangle } from "lucide-react";
 import TarjetaEstadistica from "./TarjetaEstadistica";
+import { withBasePath } from "@/lib/utils";
 
 function TarjetaGroup({ id, category }) {
   const [data, setData] = useState({
@@ -18,7 +19,7 @@ function TarjetaGroup({ id, category }) {
       try {
         setLoading(true);
         const response = await fetch(
-          `/api/reports/${id}/tarjetas?category=${category}`,
+          withBasePath(`/api/reports/${id}/tarjetas?category=${category}`),
         );
 
         if (!response.ok) {

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button, Label, TextInput } from "flowbite-react";
 import toast from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 interface UnitFormProps {
   onSuccess?: (unit: { UnitName: string; Abbreviation: string | null }) => void;
@@ -51,7 +52,7 @@ export default function UnitForm({
         Abbreviation: abbreviation.trim() || null,
       };
 
-      const res = await fetch(apiEndpoint, {
+      const res = await fetch(withBasePath(apiEndpoint), {
         method: httpMethod,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(unitData),

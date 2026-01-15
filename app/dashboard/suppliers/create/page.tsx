@@ -4,6 +4,7 @@ import { useState } from "react";
 import { TextInput, Button, Label, Textarea } from "flowbite-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 export default function CreateSupplier() {
   const [supplierName, setSupplierName] = useState("");
@@ -39,7 +40,7 @@ export default function CreateSupplier() {
     }
 
     try {
-      const res = await fetch("/api/suppliers/create", {
+      const res = await fetch(withBasePath("/api/suppliers/create"), {
         method: "POST",
         body: JSON.stringify({
           supplierName,
@@ -59,7 +60,7 @@ export default function CreateSupplier() {
       }
 
       toast.success("Proveedor creado exitosamente.");
-      router.push("/dashboard/suppliers");
+      router.push(withBasePath("/dashboard/suppliers"));
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Hubo un error al crear el proveedor.");

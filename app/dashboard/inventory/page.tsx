@@ -73,6 +73,7 @@ import { useRouter } from "next/navigation";
 import { BiBarcodeReader } from "react-icons/bi";
 import { PageLayout } from "@/app/components/PageLayout";
 import { Button } from "@/app/components/ui";
+import { withBasePath } from "@/lib/utils";
 
 type Warehouse = {
   WarehouseID: number;
@@ -93,7 +94,7 @@ export default function InventoryPage() {
 
   const fetchWarehouses = async () => {
     try {
-      const res = await fetch("/api/warehouses/user");
+      const res = await fetch(withBasePath("/api/warehouses/user"));
       if (!res.ok) throw new Error("Error al cargar almacenes.");
       const data = await res.json();
       setWarehouses(data.recordset);
@@ -129,7 +130,7 @@ export default function InventoryPage() {
       title="Gestión de Inventario"
       subtitle="Selecciona un depósito para continuar"
       breadcrumbs={[
-        { label: "Dashboard", href: "/dashboard" },
+        { label: "Dashboard", href: withBasePath("/dashboard") },
         { label: "Inventario" },
       ]}
     >
@@ -255,7 +256,11 @@ export default function InventoryPage() {
             size="md"
             className="w-full"
             onClick={() =>
-              router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)
+              router.push(
+                withBasePath(
+                  `/dashboard/inventory/${selectedWarehouseId}/add`,
+                ),
+              )
             }
             leftIcon={
               <svg
@@ -282,7 +287,11 @@ export default function InventoryPage() {
               variant="outline"
               size="md"
               onClick={() =>
-                router.push(`/dashboard/inventory/${selectedWarehouseId}/view`)
+                router.push(
+                  withBasePath(
+                    `/dashboard/inventory/${selectedWarehouseId}/view`,
+                  ),
+                )
               }
               leftIcon={
                 <svg
@@ -313,7 +322,9 @@ export default function InventoryPage() {
               variant="outline"
               size="md"
               onClick={() =>
-                router.push(`/dashboard/reports/${selectedWarehouseId}`)
+                router.push(
+                  withBasePath(`/dashboard/reports/${selectedWarehouseId}`),
+                )
               }
               leftIcon={
                 <svg
@@ -341,7 +352,9 @@ export default function InventoryPage() {
             className="w-full"
             onClick={() =>
               router.push(
-                `/dashboard/inventory/update/scanner/${selectedWarehouseId}`,
+                withBasePath(
+                  `/dashboard/inventory/update/scanner/${selectedWarehouseId}`,
+                ),
               )
             }
             leftIcon={<BiBarcodeReader className="h-5 w-5" />}

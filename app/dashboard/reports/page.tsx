@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { withBasePath } from "@/lib/utils";
 
 interface Warehouse {
   WarehouseID: number;
@@ -42,7 +43,7 @@ export default function ReportsPage() {
 
   const fetchWarehouses = async () => {
     try {
-      const response = await fetch("/api/warehouses/user");
+      const response = await fetch(withBasePath("/api/warehouses/user"));
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -63,7 +64,7 @@ export default function ReportsPage() {
   const handleWarehouseSelect = (warehouseId: number) => {
     setSelectedWarehouse(warehouseId);
     // Navigate to warehouse-specific reports
-    router.push(`/dashboard/reports/${selectedWarehouse}`);
+    router.push(withBasePath(`/dashboard/reports/${warehouseId}`));
   };
 
   const getStatusColor = (status: string = "active") => {

@@ -7,6 +7,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../../../components/DataTable"; // adjust path as needed
 import { useRouter } from "next/navigation";
 import InventoryUpdateModal from "../../../components/InventoryUpdateModal";
+import { withBasePath } from "@/lib/utils";
 
 type Warehouse = {
   WarehouseID: number;
@@ -42,7 +43,7 @@ export default function InventoryPage() {
 
   const fetchWarehouses = async () => {
     try {
-      const res = await fetch("/api/warehouses/user");
+      const res = await fetch(withBasePath("/api/warehouses/user"));
       if (!res.ok) throw new Error("Error al cargar almacenes.");
       const data = await res.json();
       setWarehouses(data.recordset);
@@ -88,7 +89,7 @@ export default function InventoryPage() {
   }, [selectedWarehouseId]);
 
   const fetchInventory = async (warehouseId: number) => {
-    const res = await fetch(`/api/inventory/${warehouseId}`);
+    const res = await fetch(withBasePath(`/api/inventory/${warehouseId}`));
     const data = await res.json();
     setInventory(data);
     setLastUpdated(new Date());
@@ -154,7 +155,9 @@ export default function InventoryPage() {
       {selectedWarehouseId && (
         <Button
           onClick={() =>
-            router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)
+            router.push(
+              withBasePath(`/dashboard/inventory/${selectedWarehouseId}/add`),
+            )
           }
         >
           Agregar Producto a Deposito

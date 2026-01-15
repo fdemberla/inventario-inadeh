@@ -17,6 +17,7 @@ import {
   getBlockingStatus,
   BlockingStatus,
 } from "./offline-db";
+import { withBasePath } from "@/lib/utils";
 
 // ============ Types ============
 
@@ -146,7 +147,7 @@ export async function processScan(
 async function sendScanToServer(
   input: ScanInput,
 ): Promise<ScanOperationResult> {
-  const response = await fetch("/api/inventory/scanner", {
+  const response = await fetch(withBasePath("/api/inventory/scanner"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -277,7 +278,7 @@ export async function syncPendingScans(): Promise<SyncResult> {
       deviceId: unsyncedScans[0]?.deviceId || "unknown",
     };
 
-    const response = await fetch("/api/inventory/scanner/sync", {
+    const response = await fetch(withBasePath("/api/inventory/scanner/sync"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -441,7 +442,7 @@ export async function refreshProductCache(
   try {
     // Fetch products for this warehouse
     const response = await fetch(
-      `/api/inventory/scanner/products?warehouseId=${warehouseId}`,
+      withBasePath(`/api/inventory/scanner/products?warehouseId=${warehouseId}`),
       {
         credentials: "include",
       },
