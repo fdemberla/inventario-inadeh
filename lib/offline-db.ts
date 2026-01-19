@@ -135,11 +135,12 @@ export async function getOfflineDB(): Promise<
     return dbInstance;
   }
 
-  dbInstance = await openDB<OfflineInventoryDBSchema>(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion) {
-      // Handle upgrade from version 1 (which only had 'users' store)
+  try {
+    dbInstance = await openDB<OfflineInventoryDBSchema>(DB_NAME, DB_VERSION, {
+      upgrade(db, oldVersion) {
+        // Handle upgrade from version 1 (which only had 'users' store)
 
-      if (oldVersion < 2) {
+        if (oldVersion < 2) {
         // Create pendingScans store
         if (!db.objectStoreNames.contains("pendingScans")) {
           const pendingStore = db.createObjectStore("pendingScans", {
@@ -188,9 +189,94 @@ export async function getOfflineDB(): Promise<
         }
       }
     },
-  });
+    });
 
-  return dbInstance;
+    return dbInstance;
+  } catch (error) {
+    // Handle version mismatch or corruption
+    if (error.name === "VersionError" || error.name === "InvalidStateError") {
+      console.warn("Offline database version mismatch detected. Recreating database...");
+      
+      try {
+        // Reset the instance
+        dbInstance = null;
+        
+        // Delete the old database
+        const { deleteDB } = await import("idb");
+        await deleteDB(DB_NAME);
+        
+        // Show user notification if available
+        if (typeof window !== "undefined") {
+          const { toast } = await import("react-hot-toast");
+          toast.warning("Se detectó una actualización. Los datos sin sincronizar se han limpiado.", {
+            duration: 6000,
+          });
+        }
+        
+        // Recreate the database
+        dbInstance = await openDB<OfflineInventoryDBSchema>(DB_NAME, DB_VERSION, {
+          upgrade(db, oldVersion) {
+            if (oldVersion < 2) {
+              // Create pendingScans store
+              if (!db.objectStoreNames.contains("pendingScans")) {
+                const pendingStore = db.createObjectStore("pendingScans", {
+                  keyPath: "id",
+                  autoIncrement: true,
+                });
+                pendingStore.createIndex("by-synced", "synced");
+                pendingStore.createIndex("by-timestamp", "timestamp");
+                pendingStore.createIndex("by-warehouse", "warehouseId");
+                pendingStore.createIndex("by-barcode", "barcode");
+                pendingStore.createIndex("by-device", "deviceId");
+              }
+
+              // Create cachedProducts store
+              if (!db.objectStoreNames.contains("cachedProducts")) {
+                const productsStore = db.createObjectStore("cachedProducts", {
+                  keyPath: ["warehouseId", "barcode"],
+                });
+                productsStore.createIndex("by-warehouse", "warehouseId");
+                productsStore.createIndex("by-barcode", "barcode");
+                productsStore.createIndex("by-cachedAt", "cachedAt");
+              }
+
+              // Create cachedWarehouses store
+              if (!db.objectStoreNames.contains("cachedWarehouses")) {
+                const warehouseStore = db.createObjectStore("cachedWarehouses", {
+                  keyPath: "warehouseId",
+                });
+                warehouseStore.createIndex("by-cachedAt", "cachedAt");
+              }
+
+              // Create syncConflicts store
+              if (!db.objectStoreNames.contains("syncConflicts")) {
+                const conflictsStore = db.createObjectStore("syncConflicts", {
+                  keyPath: "id",
+                  autoIncrement: true,
+                });
+                conflictsStore.createIndex("by-resolved", "resolved");
+                conflictsStore.createIndex("by-warehouse", "warehouseId");
+                conflictsStore.createIndex("by-timestamp", "localTimestamp");
+              }
+
+              // Create syncMetadata store
+              if (!db.objectStoreNames.contains("syncMetadata")) {
+                db.createObjectStore("syncMetadata", { keyPath: "key" });
+              }
+            }
+          },
+        });
+        
+        return dbInstance;
+      } catch (deleteError) {
+        console.error("Failed to recreate offline database:", deleteError);
+        throw deleteError;
+      }
+    }
+    
+    // Re-throw other errors
+    throw error;
+  }
 }
 
 // ============ Device ID ============

@@ -16,13 +16,43 @@ const bufferToHex = (buffer: ArrayBuffer): string =>
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-const generateSalt = (): string =>
-  bufferToHex(crypto.getRandomValues(new Uint8Array(16)));
+const generateSalt = (): string => {
+  // Ensure we're in a browser environment
+  if (typeof window === "undefined") {
+    throw new Error("Crypto API not available - not in browser");
+  }
+  
+  if (!crypto.getRandomValues) {
+    // Fallback: simple random for development only
+    return Math.random().toString(36).substring(2, 18);
+  }
+  
+  return bufferToHex(crypto.getRandomValues(new Uint8Array(16)));
+};
 
 const hashPassword = async (
   password: string,
   salt: string,
 ): Promise<string> => {
+  // Ensure we're in a browser environment with crypto.subtle available
+  if (typeof window === "undefined") {
+    throw new Error("Crypto API not available - not in browser");
+  }
+  
+  // crypto.subtle is only available in secure contexts (HTTPS or localhost)
+  if (!crypto.subtle) {
+    // Fallback: simple non-crypto hash for development only
+    // WARNING: This is NOT secure and should only be used for development
+    const combined = `${salt}:${password}`;
+    let hash = 0;
+    for (let i = 0; i < combined.length; i++) {
+      const char = combined.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16);
+  }
+  
   const data = textEncoder.encode(`${salt}:${password}`);
   const hash = await crypto.subtle.digest("SHA-256", data);
   return bufferToHex(hash);
@@ -65,6 +95,12 @@ export default function LoginPage() {
     }
     if (!password) {
       setErrors({ passwordField: "La contraseña es requerida" });
+      setIsLoading(false);
+      return;
+    }
+
+    // Ensure we're in the browser
+    if (typeof window === "undefined") {
       setIsLoading(false);
       return;
     }

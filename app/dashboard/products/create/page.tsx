@@ -32,7 +32,7 @@ export default function NewProductPage() {
   const handleSubmit = async (data: ProductFormData) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      if (key !== "image" && value !== undefined) {
+      if (key !== "image" && key !== "suppliers" && value !== undefined) {
         formData.append(key, String(value));
       }
     });

@@ -117,7 +117,8 @@ export default function UserForm({
           setFormData({
             ...userData.user,
             WarehouseIDs:
-              userData.user.Warehouses?.map((w: Warehouse) => w.WarehouseID) || [],
+              userData.user.Warehouses?.map((w: Warehouse) => w.WarehouseID) ||
+              [],
           });
         }
 

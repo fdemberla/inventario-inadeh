@@ -83,9 +83,20 @@ export async function rawSql(query: string, params: unknown[]) {
     const pool = await getPool();
     const request = pool.request();
 
-    // Add parameters to the request
+    // Add parameters to the request with explicit type inference
     params.forEach((param, index) => {
-      request.input(`param${index}`, param);
+      if (param === null || param === undefined) {
+        request.input(`param${index}`, null);
+      } else if (typeof param === "string") {
+        // Let MSSQL infer the type for strings (NVarChar)
+        request.input(`param${index}`, param);
+      } else if (typeof param === "number") {
+        request.input(`param${index}`, param);
+      } else if (typeof param === "boolean") {
+        request.input(`param${index}`, param);
+      } else {
+        request.input(`param${index}`, param);
+      }
     });
 
     // Debug logging in development

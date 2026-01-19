@@ -27,11 +27,11 @@ export async function POST(req: Request) {
       ? parseInt(formData.get("unitID")!.toString())
       : null;
 
-    if (!productName || !barcode || !categoryID) {
+    if (!productName || !categoryID) {
       return NextResponse.json(
         {
           message:
-            "Faltan campos obligatorios: nombre del producto, codigo de barras o categoría.",
+            "Faltan campos obligatorios: nombre del producto o categoría.",
         },
         { status: 400 },
       );
@@ -63,19 +63,22 @@ export async function POST(req: Request) {
     }
 
     // --- Check for duplicate SKU or Barcode ---
-    const checkUniqueQuery = `
-      SELECT 
-        (SELECT COUNT(*) FROM Products WHERE Barcode = @param0) AS BarcodeExists;
-    `;
-    const [uniqueCheck] = await rawSql(checkUniqueQuery, [barcode]);
+    if (barcode) {
+      const checkUniqueQuery = `
+        SELECT Barcode, ProductID, ProductName 
+        FROM Products 
+        WHERE Barcode = @param0
+      `;
+      const existingProducts = await rawSql(checkUniqueQuery, [barcode]);
 
-    if (barcode && uniqueCheck.BarcodeExists > 0) {
-      return NextResponse.json(
-        {
-          message: `Ya existe un producto con el código de barras "${barcode}".`,
-        },
-        { status: 400 },
-      );
+      if (existingProducts && existingProducts.length > 0) {
+        return NextResponse.json(
+          {
+            message: `Ya existe un producto con el código de barras "${barcode}".`,
+          },
+          { status: 400 },
+        );
+      }
     }
 
     // --- Insert Product and get new ID ---
@@ -107,7 +110,9 @@ export async function POST(req: Request) {
     }
 
     // --- Parse and insert suppliers ---
-    const suppliersJson = formData.get("suppliers")?.toString();
+    const suppliersData = formData.getAll("suppliers");
+    const suppliersJson = suppliersData[suppliersData.length - 1]?.toString();
+
     if (!suppliersJson) {
       return NextResponse.json(
         { message: "No se proporcionó la información de proveedores." },
@@ -118,10 +123,11 @@ export async function POST(req: Request) {
     let suppliers;
     try {
       suppliers = JSON.parse(suppliersJson);
-    } catch {
+    } catch (err) {
       return NextResponse.json(
         {
           message: "Formato de proveedores inválido. Debe ser un JSON válido.",
+          err: err,
         },
         { status: 400 },
       );

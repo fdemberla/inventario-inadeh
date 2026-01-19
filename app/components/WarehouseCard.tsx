@@ -3,7 +3,6 @@
 import { Card, Button, Badge, Spinner } from "flowbite-react";
 import { useState } from "react";
 import Link from "next/link";
-import { withBasePath } from "@/lib/utils";
 
 interface CategoryInventory {
   categoryName: string;
@@ -144,7 +143,7 @@ export default function WarehouseCard({
       {/* Actions */}
       <div className="flex gap-2">
         <Link
-          href={withBasePath(`/dashboard/inventory?warehouseId=${warehouseId}`)}
+          href={`/dashboard/inventory?warehouseId=${warehouseId}`}
           className="flex-1"
         >
           <Button size="sm" color="blue" className="w-full">

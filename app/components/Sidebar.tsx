@@ -199,11 +199,11 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
   const handleLogout = useCallback(async () => {
     try {
       // signOut with callbackUrl - don't use withBasePath here as signOut handles it
-      await signOut({ callbackUrl: "/login" });
+      await signOut({ callbackUrl: withBasePath("/login") });
     } catch (error) {
       console.error("Error during logout:", error);
       // Still redirect even if logout fails
-      router.push("/login");
+      router.push(withBasePath("/login"));
     }
   }, [router]);
 
