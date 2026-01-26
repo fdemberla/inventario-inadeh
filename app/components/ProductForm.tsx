@@ -85,11 +85,6 @@ export default function ProductForm({
     unitSystem: initialData.UnitSystem || "",
   });
 
-  useEffect(() => {
-    console.log(form);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialData]);
-
   const [supplierList, setSupplierList] = useState<SupplierEntry[]>(
     initialData.suppliers || [],
   );
