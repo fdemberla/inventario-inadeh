@@ -1,7 +1,7 @@
 // middleware.ts - NextAuth.js v5 middleware (Edge-compatible)
 import NextAuth from "next-auth";
 import { authConfig } from "@/lib/auth.config";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const { auth: nextAuthMiddleware } = NextAuth(authConfig);
 
@@ -15,7 +15,7 @@ export default async function middleware(request: NextRequest) {
 
   // If it's a mobile API route with Bearer token, skip NextAuth middleware
   if (hasBearerToken && pathname.startsWith("/api/") && pathname.includes("/mobile/")) {
-    return undefined; // Allow request to proceed to route handler
+    return NextResponse.next(); // Allow request to proceed to route handler
   }
 
   // Use standard NextAuth middleware for everything else
