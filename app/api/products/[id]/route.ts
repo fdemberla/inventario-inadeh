@@ -1,13 +1,14 @@
 // // /app/api/products/[id]/route.ts
 import { NextResponse } from "next/server";
-import { rawSql } from "@/lib/db";
+import { rawSql, sql } from "@/lib/db";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idParam } = await context.params;
+    const id = parseInt(idParam);
     if (isNaN(id)) {
       return NextResponse.json(
         { message: "Invalid product ID" },
@@ -62,6 +63,55 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error fetching product:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id: idParam } = await context.params;
+    const productId = parseInt(idParam);
+
+    if (isNaN(productId)) {
+      return NextResponse.json(
+        { message: "Invalid product ID" },
+        { status: 400 },
+      );
+    }
+
+    // Block deletion if product has active stock in any warehouse
+    const stockResult = await rawSql(
+      `SELECT COALESCE(SUM(QuantityOnHand), 0) AS TotalStock
+       FROM Inventory
+       WHERE ProductID = @param0`,
+      [productId],
+    );
+
+    const totalStock = Number(stockResult[0]?.TotalStock ?? 0);
+    if (totalStock > 0) {
+      return NextResponse.json(
+        {
+          message:
+            "No se puede eliminar: el producto tiene inventario activo en uno o más almacenes",
+        },
+        { status: 409 },
+      );
+    }
+
+    await sql(
+      `UPDATE Products SET IsActive = 0, ModifiedDate = SYSUTCDATETIME() WHERE ProductID = @param0`,
+      [productId],
+    );
+
+    return NextResponse.json({ message: "Producto eliminado exitosamente" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 },

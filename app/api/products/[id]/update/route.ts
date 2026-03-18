@@ -3,9 +3,13 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> },
+) {
   try {
-    const productId = parseInt(context.params.id);
+    const { id } = await context.params;
+    const productId = parseInt(id);
 
     if (isNaN(productId)) {
       return NextResponse.json(

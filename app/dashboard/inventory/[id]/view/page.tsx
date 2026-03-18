@@ -22,6 +22,7 @@ export default function InventoryPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [modalItem, setModalItem] = useState<InventoryItem | null>(null);
+  const [showZero, setShowZero] = useState(false);
 
   const selectedWarehouseId = params?.id as string;
 
@@ -144,12 +145,21 @@ export default function InventoryPage() {
           Agregar Producto a Deposito
         </Button>
       )}
-      <div>
+      <div className="flex items-center justify-between">
         {lastUpdated && (
           <p className="text-sm text-gray-500">
             Última actualización: {lastUpdated.toLocaleTimeString()}
           </p>
         )}
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+          <input
+            type="checkbox"
+            checked={showZero}
+            onChange={(e) => setShowZero(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300"
+          />
+          Ver productos sin unidades en inventario
+        </label>
       </div>
 
       <InventoryUpdateModal
@@ -159,7 +169,10 @@ export default function InventoryPage() {
         onSuccess={() => fetchInventory(selectedWarehouseId)}
       />
 
-      <DataTable data={inventory} columns={columns} />
+      <DataTable
+        data={showZero ? inventory : inventory.filter((item) => item.QuantityOnHand > 0)}
+        columns={columns}
+      />
     </div>
   );
 }

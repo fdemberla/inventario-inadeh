@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import { Button } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "../../components/DataTable";
@@ -19,6 +20,55 @@ export default function ViewAllProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const handleDelete = (productId: number, productName: string) => {
+    toast.custom(
+      (t) => (
+        <div className="max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
+          <p className="mb-1 text-sm font-medium text-gray-800">
+            ¿Eliminar <span className="font-semibold">{productName}</span>?
+          </p>
+          <p className="mb-3 text-xs text-gray-500">
+            Esta acción no se puede deshacer.
+          </p>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={async () => {
+                toast.dismiss(t.id);
+                const res = await fetch(
+                  withBasePath(`/api/products/${productId}`),
+                  {
+                    method: "DELETE",
+                  },
+                );
+                const result = await res.json();
+                if (res.ok) {
+                  setProducts((prev) =>
+                    prev.filter((p) => p.ProductID !== productId),
+                  );
+                  toast.success("Producto eliminado exitosamente.");
+                } else {
+                  toast.error(
+                    result.message || "Error al eliminar el producto.",
+                  );
+                }
+              }}
+              className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity },
+    );
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -58,15 +108,26 @@ export default function ViewAllProducts() {
       header: "Acciones",
       id: "actions",
       cell: ({ row }: unknown) => (
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() =>
-            router.push(`/dashboard/products/edit/${row.original.ProductID}`)
-          }
-        >
-          Editar
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() =>
+              router.push(`/dashboard/products/edit/${row.original.ProductID}`)
+            }
+          >
+            Editar
+          </Button>
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={() =>
+              handleDelete(row.original.ProductID, row.original.ProductName)
+            }
+          >
+            Eliminar
+          </Button>
+        </div>
       ),
     },
   ];

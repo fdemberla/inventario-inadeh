@@ -92,7 +92,7 @@ export default function EditProduct() {
       onSubmit={handleSubmit}
       formTitle="Editar Producto"
       submitButtonText="Guardar cambios"
-      showIstmoSearch={false}
+      showIstmoSearch={true}
       isSubmitting={isSubmitting}
     />
   );
