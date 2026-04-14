@@ -53,6 +53,11 @@ export default function ViewAllProducts() {
                     prev.filter((p) => p.ProductID !== productId),
                   );
                   toast.success("Producto eliminado exitosamente.");
+                } else if (res.status === 409) {
+                  toast.error(
+                    "No se puede eliminar el producto porque tiene inventario registrado. El inventario debe ser 0 para poder eliminarlo.",
+                    { duration: 6000 },
+                  );
                 } else {
                   toast.error(
                     result.message || "Error al eliminar el producto.",
