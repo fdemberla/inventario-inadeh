@@ -1,54 +1,48 @@
-// // app/dashboard/layout.tsx
+// app/dashboard/layout.tsx
 
 import SidebarComponent from "../components/Sidebar";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
 import { redirect } from "next/navigation";
 import BottomMenu from "../components/BottomMenu";
-
-const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
+import { auth } from "@/auth";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const session = await auth();
 
-  let user = null;
-  if (token) {
-    try {
-      user = jwt.verify(token, JWT_SECRET) as {
-        id: number;
-        username: string;
-        role: number;
-      };
-    } catch (err) {
-      console.error("Invalid token");
-      console.error(err);
-      redirect("/login");
-    }
-  } else {
+  if (!session?.user) {
+    // redirect() adds the basePath itself; wrapping it would double it
     redirect("/login");
   }
 
+  const user = session.user;
+
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      {/* Sidebar for Desktop */}
-      <aside className="bg-brand-azul hidden w-64 md:block">
+      <a
+        href="#main-content"
+        className="sr-only z-[70] rounded-lg bg-surface px-4 py-2 font-medium text-brand-azul focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+      >
+        Saltar al contenido
+      </a>
+
+      {/* Desktop navigation (md+) */}
+      <aside className="bg-brand-azul hidden w-72 shrink-0 md:block">
         <SidebarComponent user={user} />
       </aside>
 
-      {/* Main Content */}
-      <main className="bg-brand-gris flex-1 p-4 pb-20 md:pb-0 dark:bg-gray-900">
+      {/* Bottom padding clears the mobile bar + iOS home indicator */}
+      <main
+        id="main-content"
+        className="bg-canvas min-w-0 flex-1 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-6"
+      >
         {children}
       </main>
 
-      {/* Bottom Menu for Mobile */}
-      <div className="md:hidden">
-        <BottomMenu user={user} />
-      </div>
+      {/* Mobile navigation (< md) */}
+      <BottomMenu user={user} />
     </div>
   );
 }

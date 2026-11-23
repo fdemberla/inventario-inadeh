@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Button } from "flowbite-react";
+import { Button } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/app/components/DataTable"; // adjust path as needed
+import { DataTable } from "@/app/components/DataTable";
 import InventoryUpdateModal from "@/app/components/InventoryUpdateModal";
 import { useParams, useRouter } from "next/navigation";
+import { withBasePath } from "@/lib/utils";
 
 type InventoryItem = {
   InventoryID: number;
@@ -21,6 +23,7 @@ export default function InventoryPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [modalItem, setModalItem] = useState<InventoryItem | null>(null);
+  const [showZero, setShowZero] = useState(false);
 
   const selectedWarehouseId = params?.id as string;
 
@@ -37,20 +40,17 @@ export default function InventoryPage() {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        // Si la pestaña está activa, iniciamos o reiniciamos el polling
         fetchInventory(selectedWarehouseId);
         interval = setInterval(() => {
           fetchInventory(selectedWarehouseId);
         }, 5000);
       } else {
-        // Si la pestaña está en segundo plano, detenemos el polling
         clearInterval(interval);
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Inicializamos el polling si la pestaña está activa al montar
     if (document.visibilityState === "visible") {
       fetchInventory(selectedWarehouseId);
       interval = setInterval(() => {
@@ -58,7 +58,6 @@ export default function InventoryPage() {
       }, 5000);
     }
 
-    // Cleanup al desmontar
     return () => {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -66,10 +65,16 @@ export default function InventoryPage() {
   }, [selectedWarehouseId]);
 
   const fetchInventory = async (warehouseId: string) => {
-    const res = await fetch(`/api/inventory/${warehouseId}`);
-    const data = await res.json();
-    setInventory(data);
-    setLastUpdated(new Date());
+    try {
+      const res = await fetch(withBasePath(`/api/inventory/${warehouseId}`));
+      if(res.ok) {
+        const data = await res.json();
+        setInventory(data);
+        setLastUpdated(new Date());
+      }
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   const columns: ColumnDef<InventoryItem>[] = useMemo(
@@ -96,7 +101,8 @@ export default function InventoryPage() {
           const item = row.original;
           return (
             <Button
-              size="xs"
+              variant="outline"
+              size="sm"
               onClick={() => {
                 setModalItem(item);
               }}
@@ -111,54 +117,58 @@ export default function InventoryPage() {
   );
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="mb-6">
-        <button
-          type="button"
-          onClick={() => router.push(`/dashboard/inventory`)}
-          className="mb-4 flex items-center text-blue-600 hover:text-blue-700"
-        >
-          <svg
-            className="mr-1 h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Volver
-        </button>
-      </div>
-      {selectedWarehouseId && (
+    <PageLayout
+      title="Inventario de Bodega"
+      subtitle="Consulta y actualiza los niveles de existencia actuales."
+      backButton={{ href: "/dashboard/inventory", label: "Volver al listado" }}
+      breadcrumbs={[
+        { label: "Dashboard", href: withBasePath("/dashboard") },
+        { label: "Inventario", href: withBasePath("/dashboard/inventory") },
+        { label: "Vista" },
+      ]}
+      actions={
         <Button
-          onClick={() =>
-            router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)
-          }
+          variant="primary"
+          onClick={() => router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)}
         >
-          Agregar Producto a Deposito
+          Agregar Producto
         </Button>
-      )}
-      <div>
+      }
+    >
+      <div className="space-y-6">
         {lastUpdated && (
-          <p className="text-sm text-gray-500">
+          <p className="text-fg-muted text-sm">
             Última actualización: {lastUpdated.toLocaleTimeString()}
           </p>
         )}
+
+        <InventoryUpdateModal
+          item={modalItem}
+          warehouseId={selectedWarehouseId}
+          onClose={() => setModalItem(null)}
+          onSuccess={() => fetchInventory(selectedWarehouseId)}
+        />
+
+        <DataTable
+          caption="Inventario de la bodega"
+          data={showZero ? inventory : inventory.filter((item) => item.QuantityOnHand > 0)}
+          columns={columns}
+          emptyMessage={
+            showZero ? "No hay productos en esta bodega." : "No hay productos con stock."
+          }
+          toolbar={
+            <label className="text-fg flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={showZero}
+                onChange={(e) => setShowZero(e.target.checked)}
+                className="accent-brand-azul h-5 w-5 cursor-pointer"
+              />
+              Ver productos sin stock
+            </label>
+          }
+        />
       </div>
-
-      <InventoryUpdateModal
-        item={modalItem}
-        warehouseId={selectedWarehouseId}
-        onClose={() => setModalItem(null)}
-        onSuccess={() => fetchInventory(selectedWarehouseId)}
-      />
-
-      <DataTable data={inventory} columns={columns} />
-    </div>
+    </PageLayout>
   );
 }

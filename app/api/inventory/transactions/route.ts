@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/authz";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+  const guard = await requireAdmin(req);
+  if (guard.error) return guard.error;
+
   try {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "100", 10);

@@ -3,6 +3,8 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { toast } from "react-hot-toast";
 import UnitForm from "@/app/components/UnitForm";
+import { withBasePath } from "@/lib/utils";
+import { Button, FormField, Modal, Card, Input, Select, Textarea } from "@/app/components/ui";
 
 interface Category {
   CategoryID: number;
@@ -74,44 +76,39 @@ export default function ProductForm({
   const [showUnitForm, setShowUnitForm] = useState(false);
 
   const [form, setForm] = useState({
-    productName: initialData.ProductName || "",
-    sku: initialData.InternalSKU || "",
-    description: initialData.Description || "",
-    barcode: initialData.Barcode || "",
-    categoryID: initialData.CategoryID || "",
-    cost: initialData.Cost || "0.00",
-    unitID: initialData.UnitID || "",
-    unitSystem: initialData.UnitSystem || "",
+    productName: initialData.productName || "",
+    sku: initialData.sku || "",
+    description: initialData.description || "",
+    barcode: initialData.barcode || "",
+    categoryID: initialData.categoryID || "",
+    cost: initialData.cost || "0.00",
+    unitID: initialData.unitID || "",
+    unitSystem: initialData.unitSystem || "",
   });
-
-  useEffect(() => {
-    console.log(form);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialData]);
 
   const [supplierList, setSupplierList] = useState<SupplierEntry[]>(
     initialData.suppliers || [],
   );
 
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<{codigo: string, nombre: string, descripcion: string}[]>([]);
   const [showResults, setShowResults] = useState(false);
 
   const systemOptions = [...new Set(units.map((u) => u.System))];
   const filteredUnits = units.filter((u) => u.System === form.unitSystem);
 
   const fetchUnits = () => {
-    fetch("/api/units")
+    fetch(withBasePath("/api/units"))
       .then((res) => res.json())
       .then((response) => setUnits(response));
   };
 
   useEffect(() => {
-    fetch("/api/categories")
+    fetch(withBasePath("/api/categories"))
       .then((res) => res.json())
       .then((response) => setCategories(response));
     fetchUnits();
-    fetch("/api/suppliers")
+    fetch(withBasePath("/api/suppliers"))
       .then((res) => res.json())
       .then((response) => setSuppliers(response));
   }, []);
@@ -182,7 +179,7 @@ export default function ProductForm({
   const searchIstmoProducts = async (q: string) => {
     try {
       const res = await fetch(
-        `/api/products/search-istmo?q=${encodeURIComponent(q)}`,
+        withBasePath(`/api/products/search-istmo?q=${encodeURIComponent(q)}`),
       );
       const data = await res.json();
       const empty = {
@@ -222,321 +219,286 @@ export default function ProductForm({
 
   return (
     <>
-      <form
-        onSubmit={handleSubmit}
-        className="mx-auto max-w-3xl space-y-6 rounded-lg bg-white p-8 shadow-md dark:bg-gray-900"
-      >
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          {formTitle}
-        </h1>
+      <Card className="w-full">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <h1 className="text-fg mb-2 text-2xl font-bold">
+            {formTitle}
+          </h1>
 
-        {/* Imagen */}
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Imagen del producto
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="w-full rounded-2xl p-3 text-sm file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-blue-700 hover:file:bg-blue-100 dark:bg-gray-500 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
-          />
-        </div>
-
-        {/* Nombre, SKU */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Nombre del producto
-            </label>
+          {/* Imagen */}
+          <FormField label="Imagen del producto" id="product-image">
             <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="text-fg file:bg-accent/10 file:text-accent hover:file:bg-accent/20 w-full cursor-pointer text-sm file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:px-4 file:font-semibold"
+            />
+          </FormField>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FormField
+              label="Nombre del producto"
               name="productName"
               value={form.productName}
               onChange={handleChange}
               required
-              className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+              placeholder="Ej. Clavos de acero"
             />
           </div>
-        </div>
 
-        {/* Buscador ISTMO (condicional) */}
-        {showIstmoSearch && (
-          <div className="relative">
-            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Buscar Producto Istmo
-            </label>
-            <div className="mb-3 flex space-x-2">
-              <input
-                type="text"
-                name="istmosearch"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                required
-                className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
-              />
-              <button
-                type="button"
-                onClick={handleSearchClick}
-                className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-              >
-                Buscar
-              </button>
-            </div>
+          {/* Buscador ISTMO */}
+          {showIstmoSearch && (
+            <div className="relative">
+              <label htmlFor="istmosearch" className="text-fg mb-2 block text-sm font-semibold">
+                Buscar Producto Istmo
+              </label>
+              <div className="mb-3 flex items-end gap-3">
+                <div className="flex-1">
+                  <Input
+                    type="text"
+                    id="istmosearch"
+                    name="istmosearch"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Ingrese nombre..."
+                  />
+                </div>
+                <Button type="button" variant="primary" onClick={handleSearchClick}>
+                  Buscar
+                </Button>
+              </div>
 
-            {showResults && results.length > 0 && (
-              <div>
-                <ul className="mb-2 max-h-60 w-full overflow-y-auto rounded-md border border-gray-300 bg-white shadow-md dark:border-gray-600 dark:bg-gray-800">
+              {showResults && results.length > 0 && (
+                <ul
+                  aria-label="Resultados de búsqueda Istmo"
+                  className="border-line bg-surface mb-4 max-h-60 w-full overflow-y-auto rounded-xl border shadow-md"
+                >
                   {results.map((product) => (
-                    <li
-                      key={product.codigo}
-                      onClick={() => handleSelectResult(product.codigo)}
-                      className="cursor-pointer px-4 py-2 hover:bg-blue-100 dark:text-white dark:hover:bg-blue-900"
-                    >
-                      {product.nombre} ({product.codigo})
+                    <li key={product.codigo}>
+                      {/* Real button: reachable and selectable with the keyboard */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectResult(product.codigo)}
+                        className="text-fg hover:bg-accent/10 focus-visible:outline-focus min-h-11 w-full px-4 py-2 text-left text-sm focus-visible:outline-2 focus-visible:-outline-offset-2"
+                      >
+                        {product.nombre} <span className="text-fg-muted text-xs">({product.codigo})</span>
+                      </button>
                     </li>
                   ))}
                 </ul>
-              </div>
-            )}
+              )}
 
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Código ISTMO
-            </label>
-            <input
-              name="sku"
-              value={form.sku}
-              readOnly
-              className="w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              <FormField
+                label="Código ISTMO"
+                name="sku"
+                value={form.sku}
+                readOnly
+                disabled
+              />
+            </div>
+          )}
+
+          {/* Descripción */}
+          <FormField label="Descripción" id="description">
+            <Textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              rows={3}
             />
-          </div>
-        )}
+          </FormField>
 
-        {/* Descripción */}
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Descripción
-          </label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
-            rows={3}
-          />
-        </div>
-
-        {/* Código de barras */}
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Código de barras (Fabricante)
-          </label>
-          <input
+          {/* Código de barras */}
+          <FormField
+            label="Código de barras (Fabricante)"
             name="barcode"
             value={form.barcode}
             onChange={handleChange}
-            className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
           />
-        </div>
 
-        {/* Categoría y Costo */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Categoría
-            </label>
-            <select
-              name="categoryID"
-              value={form.categoryID}
-              onChange={handleChange}
-              required
-              className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-            >
-              <option value="">Seleccione una categoría</option>
-              {categories.map((cat) => (
-                <option key={cat.CategoryID} value={cat.CategoryID}>
-                  {cat.CategoryName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Costo
-            </label>
-            <input
+          {/* Categoría y Costo */}
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <FormField label="Categoría" id="categoryID" required>
+              <Select name="categoryID" value={form.categoryID} onChange={handleChange}>
+                <option value="">Seleccione...</option>
+                {categories.map((cat) => (
+                  <option key={cat.CategoryID} value={cat.CategoryID}>
+                    {cat.CategoryName}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+            <FormField
+              label="Costo"
               name="cost"
               type="number"
               step="0.01"
               value={form.cost}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
             />
           </div>
-        </div>
 
-        {/* Sistema y Unidad */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Sistema de unidades
-            </label>
-            <select
-              name="unitSystem"
-              value={form.unitSystem}
-              onChange={(e) => {
-                setForm((prev) => ({
-                  ...prev,
-                  unitSystem: e.target.value,
-                  unitID: "",
-                }));
-              }}
-              required
-              className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-            >
-              <option value="">Seleccione un sistema</option>
-              {systemOptions.map((system) => (
-                <option key={system} value={system}>
-                  {system}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between">
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Unidad
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowUnitForm(true)}
-                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          {/* Sistema y Unidad */}
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-2">
+            <FormField label="Sistema de unidades" id="unitSystem" required>
+              <Select
+                name="unitSystem"
+                value={form.unitSystem}
+                onChange={(e) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    unitSystem: e.target.value,
+                    unitID: "",
+                  }));
+                }}
               >
-                + Nueva unidad
-              </button>
-            </div>
-            <select
-              name="unitID"
-              value={form.unitID}
-              onChange={handleChange}
-              disabled={!form.unitSystem}
-              required
-              className="w-full rounded-md border border-gray-300 bg-white p-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
-            >
-              <option value="">Seleccione una unidad</option>
-              {filteredUnits.map((unit) => (
-                <option key={unit.UnitID} value={unit.UnitID}>
-                  {unit.UnitName} ({unit.Abbreviation})
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+                <option value="">Seleccione...</option>
+                {systemOptions.map((sys) => (
+                  <option key={sys} value={sys}>
+                    {sys}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
 
-        {/* Proveedores */}
-        <div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
-            Proveedores
-          </h2>
-          <div className="space-y-4">
-            {supplierList.map((sup, i) => (
-              <div
-                key={i}
-                className="space-y-3 rounded border border-gray-200 bg-gray-50 p-4 shadow-sm dark:border-gray-600 dark:bg-gray-800"
-              >
-                <select
-                  value={sup.supplierID}
-                  onChange={(e) => handleSupplierChange(i, "supplierID", e)}
-                  className="w-full rounded-md border border-gray-300 bg-white p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            <div>
+              <FormField label="Unidad" id="unitID" required>
+                <Select
+                  name="unitID"
+                  value={form.unitID}
+                  onChange={handleChange}
+                  disabled={!form.unitSystem}
                 >
-                  {suppliers.map((s) => (
-                    <option key={s.SupplierID} value={s.SupplierID}>
-                      {s.SupplierName}
+                  <option value="">Seleccione...</option>
+                  {filteredUnits.map((u) => (
+                    <option key={u.UnitID} value={u.UnitID}>
+                      {u.UnitName} ({u.Abbreviation})
                     </option>
                   ))}
-                </select>
-                <input
-                  type="text"
-                  placeholder="SKU del proveedor"
-                  value={sup.supplierSKU}
-                  onChange={(e) => handleSupplierChange(i, "supplierSKU", e)}
-                  className="w-full rounded-md border border-gray-300 bg-white p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
-                <input
-                  type="number"
-                  placeholder="Días de entrega"
-                  value={sup.leadTimeDays}
-                  onChange={(e) => handleSupplierChange(i, "leadTimeDays", e)}
-                  className="w-full rounded-md border border-gray-300 bg-white p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
-                <input
-                  type="number"
-                  placeholder="Costo"
-                  value={sup.cost}
-                  step="0.01"
-                  onChange={(e) => handleSupplierChange(i, "cost", e)}
-                  className="w-full rounded-md border border-gray-300 bg-white p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={sup.isPrimarySupplier}
-                    onChange={(e) =>
-                      handleSupplierChange(i, "isPrimarySupplier", e)
-                    }
-                    className="h-4 w-4"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Proveedor principal
-                  </span>
-                </label>
-                {supplierList.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSupplier(i)}
-                    className="text-sm text-red-600 hover:underline"
-                  >
-                    Eliminar proveedor
-                  </button>
-                )}
-              </div>
-            ))}
+                </Select>
+              </FormField>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => setShowUnitForm(true)}
+              >
+                + Nueva unidad
+              </Button>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleAddSupplier}
-            className="mt-4 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
-          >
-            + Agregar proveedor
-          </button>
-        </div>
+          {/* Proveedores */}
+          <div>
+            <h2 className="mb-4 text-lg font-semibold text-fg">
+              Proveedores
+            </h2>
+            <div className="space-y-4">
+              {supplierList.map((sup, i) => (
+                <div
+                  key={i}
+                  className="border-line bg-surface-muted space-y-4 rounded-2xl border p-4"
+                >
+                  <FormField label="Proveedor">
+                    <Select
+                      value={sup.supplierID}
+                      onChange={(e) => handleSupplierChange(i, "supplierID", e)}
+                    >
+                      {suppliers.map((s) => (
+                        <option key={s.SupplierID} value={s.SupplierID}>
+                          {s.SupplierName}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormField>
+                  <FormField
+                    label="SKU del proveedor"
+                    type="text"
+                    value={sup.supplierSKU}
+                    onChange={(e) => handleSupplierChange(i, "supplierSKU", e)}
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField
+                      label="Días de entrega"
+                      type="number"
+                      value={sup.leadTimeDays.toString()}
+                      onChange={(e) => handleSupplierChange(i, "leadTimeDays", e)}
+                    />
+                    <FormField
+                      label="Costo"
+                      type="number"
+                      step="0.01"
+                      value={sup.cost.toString()}
+                      onChange={(e) => handleSupplierChange(i, "cost", e)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-3 pt-2">
+                    <label className="text-fg flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        checked={sup.isPrimarySupplier}
+                        onChange={(e) =>
+                          handleSupplierChange(i, "isPrimarySupplier", e)
+                        }
+                        className="accent-brand-azul h-5 w-5 cursor-pointer"
+                      />
+                      Proveedor principal
+                    </label>
+                    {supplierList.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleRemoveSupplier(i)}
+                      >
+                        Eliminar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
 
-        <div className="pt-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full rounded-md bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-70 dark:hover:bg-blue-500"
-          >
-            {isSubmitting ? "Procesando..." : submitButtonText}
-          </button>
-        </div>
-      </form>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-4"
+              onClick={handleAddSupplier}
+            >
+              + Agregar proveedor
+            </Button>
+          </div>
+
+          <div className="border-line mt-4 border-t pt-6">
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {submitButtonText}
+            </Button>
+          </div>
+        </form>
+      </Card>
 
       {/* Modal para nueva unidad */}
-      {showUnitForm && (
-        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-          <div className="rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-            <UnitForm
-              onSuccess={handleNewUnitSuccess}
-              onCancel={() => setShowUnitForm(false)}
-              title="Crear Nueva Unidad"
-              className="w-full max-w-md"
-            />
-          </div>
+      <Modal
+        isOpen={showUnitForm}
+        onClose={() => setShowUnitForm(false)}
+        title="Crear Nueva Unidad"
+        size="md"
+      >
+        <div className="p-1">
+          <UnitForm
+            onSuccess={handleNewUnitSuccess}
+            onCancel={() => setShowUnitForm(false)}
+            title=""
+          />
         </div>
-      )}
+      </Modal>
     </>
   );
 }

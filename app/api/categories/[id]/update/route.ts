@@ -1,13 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/authz";
 import { sql } from "@/lib/db";
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } },
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
+  const guard = await requireAdmin(req);
+  if (guard.error) return guard.error;
   try {
-    // Accessing id directly from params
-    const categoryId = parseInt(params.id);
+    const { id } = await context.params;
+    const categoryId = parseInt(id);
     if (isNaN(categoryId)) {
       return NextResponse.json(
         { message: "Invalid category ID" },

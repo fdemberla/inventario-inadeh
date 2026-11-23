@@ -2,9 +2,145 @@
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
 
+/*
+ * Design tokens — single source of truth (Tailwind v4 reads them from CSS;
+ * there is no tailwind.config.ts). See DESIGN_SYSTEM.md.
+ *
+ * 1. Brand palette: the logo colours, plus darker shades that pass WCAG 2.1
+ *    AA (≥ 4.5:1) behind white text. Use the logo colours for icons, borders
+ *    and decoration; use the -700 shades for filled buttons and badges.
+ */
 @theme {
-  --color-brand-naranja: #ed7625;
-  --color-brand-azul: #004a98;
-  --color-brand-verde: #44a147;
+  --color-brand-azul: #004a98; /* white text 8.63:1 */
+  --color-brand-azul-300: #80a5cc; /* azul for dark backgrounds, 6.90:1 on gray-900 */
+  --color-brand-naranja: #ed7625; /* logo only: white text 2.91:1 ✗ */
+  --color-brand-naranja-700: #b2591c; /* white text 4.84:1 */
+  --color-brand-naranja-800: #9a4d18; /* hover, 6.09:1 */
+  --color-brand-verde: #44a147; /* logo only: white text 3.26:1 ✗ */
+  --color-brand-verde-700: #337935; /* white text 5.35:1 */
+  --color-brand-verde-800: #2c692e; /* hover, 6.63:1 */
   --color-brand-gris: #d1d3d4;
+  --color-brand-gris-50: #f1f2f3; /* app canvas */
+
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-zoom-in: zoom-in 0.2s ease-out;
+  --animate-slide-up: slide-up 0.25s ease-out;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes zoom-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+/*
+ * 2. Semantic tokens: what a colour is *for*. They switch automatically in
+ *    dark mode (same media query as Tailwind's `dark:` variant), so
+ *    components using them need no `dark:` duplicates.
+ *
+ *    bg-canvas / bg-surface / bg-surface-muted      page, cards, subtle fills
+ *    text-fg / text-fg-muted                        body text, secondary text
+ *    border-line                                    dividers and decorative borders
+ *    border-line-strong                             form-control borders (≥ 3:1)
+ *    bg-primary / hover:bg-primary-hover            main action (verde)
+ *    bg-secondary / hover:bg-secondary-hover        alternative action (naranja)
+ *    bg-danger / hover:bg-danger-hover              destructive action
+ *    text-on-primary                                text on any filled colour
+ *    text-accent                                    links, active nav (azul)
+ *    text-success / text-warning / text-danger-fg   status text
+ *    ring-focus / outline-focus                     keyboard focus
+ *
+ *    Every text/background pair below is ≥ 4.5:1 (WCAG 2.1 AA).
+ */
+:root {
+  --canvas: #f1f2f3;
+  --surface: #ffffff;
+  --surface-muted: #f9fafb;
+  --fg: #111827;
+  --fg-muted: #4b5563; /* 6.74:1 on canvas — gray-500 (4.31:1) is too light */
+  --line: #e5e7eb;
+  --line-strong: #6b7280; /* form-control borders: 4.83:1 on surface (WCAG 1.4.11 ≥ 3:1) */
+  --primary: #337935;
+  --primary-hover: #2c692e;
+  --secondary: #b2591c;
+  --secondary-hover: #9a4d18;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --on-primary: #ffffff;
+  --accent: #004a98;
+  --success: #2c692e;
+  --warning: #92400e;
+  --danger-fg: #b91c1c;
+  --focus: #004a98;
+  /* Chart series (validated with the dataviz validator: lightness band,
+     chroma, CVD ΔE ≥ 22, contrast ≥ 3:1 vs surface). Brand hues. */
+  --chart-receipts: #0a56a8;
+  --chart-shipments: #b2591c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #111827;
+    --surface: #1f2937;
+    --surface-muted: #2a3443; /* every text token ≥ 4.5:1 on it (was #374151: accent 4.01) */
+    --fg: #f3f4f6;
+    --fg-muted: #9ca3af; /* 5.78:1 on surface */
+    --line: #374151;
+    --line-strong: #9ca3af; /* 5.78:1 on surface */
+    --accent: #80a5cc;
+    --success: #6fbf72;
+    --warning: #fbbf24;
+    --danger-fg: #f87171;
+    --focus: #80a5cc;
+    --chart-receipts: #4f86c6;
+    --chart-shipments: #d9691d;
+  }
+}
+
+@theme inline {
+  /* Geist is loaded in app/layout.tsx via next/font, which defines
+     --font-geist-* on <body>; `inline` makes font-sans resolve there. */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code", monospace;
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger-fg: var(--danger-fg);
+  --color-focus: var(--focus);
+  --color-chart-receipts: var(--chart-receipts);
+  --color-chart-shipments: var(--chart-shipments);
+}
+
+/* Respect users who ask for less motion (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

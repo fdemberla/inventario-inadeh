@@ -17,7 +17,9 @@ interface ApiResponse<T = unknown> {
 }
 
 // Use global fetch (available in Node 18+) or require node-fetch
-const fetchFn = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
+import { withBasePath } from "@/lib/utils";
+
+const fetchFn = typeof fetch !== "undefined" ? fetch : require("node-fetch");
 
 export class TestClient {
   private baseUrl: string;
@@ -25,7 +27,7 @@ export class TestClient {
   private cookies: Map<string, string> = new Map();
 
   constructor(options: TestClientOptions = {}) {
-    this.baseUrl = options.baseUrl || 'http://localhost:3000';
+    this.baseUrl = options.baseUrl || "http://localhost:3000";
     this.token = options.token || null;
   }
 
@@ -44,10 +46,27 @@ export class TestClient {
   }
 
   /**
+   * Get base URL
+   */
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
+  /**
+   * Get cookies as header string
+   */
+  getCookieHeader(): string {
+    if (this.cookies.size === 0) return "";
+    return Array.from(this.cookies.entries())
+      .map(([key, value]) => `${key}=${value}`)
+      .join("; ");
+  }
+
+  /**
    * Perform GET request
    */
   async get<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>('GET', endpoint);
+    return this.request<T>("GET", endpoint);
   }
 
   /**
@@ -57,7 +76,7 @@ export class TestClient {
     endpoint: string,
     body?: unknown,
   ): Promise<ApiResponse<T>> {
-    return this.request<T>('POST', endpoint, body);
+    return this.request<T>("POST", endpoint, body);
   }
 
   /**
@@ -67,14 +86,14 @@ export class TestClient {
     endpoint: string,
     body?: unknown,
   ): Promise<ApiResponse<T>> {
-    return this.request<T>('PUT', endpoint, body);
+    return this.request<T>("PUT", endpoint, body);
   }
 
   /**
    * Perform DELETE request
    */
   async delete<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>('DELETE', endpoint);
+    return this.request<T>("DELETE", endpoint);
   }
 
   /**
@@ -85,21 +104,26 @@ export class TestClient {
     endpoint: string,
     body?: unknown,
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint}`;
+    // Auto-prepend basePath if endpoint doesn't already have it
+    const basePath = "/inventario";
+    const normalizedEndpoint = endpoint.startsWith(basePath)
+      ? endpoint
+      : `${basePath}${endpoint}`;
+    const url = `${this.baseUrl}${normalizedEndpoint}`;
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
     // Add token to Authorization header if available
     if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+      headers["Authorization"] = `Bearer ${this.token}`;
     }
 
     // Add stored cookies
     if (this.cookies.size > 0) {
-      headers['Cookie'] = Array.from(this.cookies.entries())
+      headers["Cookie"] = Array.from(this.cookies.entries())
         .map(([key, value]) => `${key}=${value}`)
-        .join('; ');
+        .join("; ");
     }
 
     const options: RequestInit = {
@@ -107,17 +131,17 @@ export class TestClient {
       headers,
     };
 
-    if (body && (method === 'POST' || method === 'PUT')) {
+    if (body && (method === "POST" || method === "PUT")) {
       options.body = JSON.stringify(body);
     }
 
     try {
       const response = await fetchFn(url, options);
       let data: T = {} as T;
-      
+
       try {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
           data = await response.json();
         }
       } catch (e) {
@@ -125,7 +149,7 @@ export class TestClient {
       }
 
       // Extract and store cookies from Set-Cookie header
-      const setCookie = response.headers.get('set-cookie');
+      const setCookie = response.headers.get("set-cookie");
       if (setCookie) {
         this.parseCookie(setCookie);
       }
@@ -138,22 +162,32 @@ export class TestClient {
       };
     } catch (error) {
       // If fetch itself fails (network error, etc), return error response
-      console.error('Test client error:', error);
+      console.error("Test client error:", error);
       return {
         status: 0,
-        data: { error: error instanceof Error ? error.message : 'Network error' } as T,
+        data: {
+          error: error instanceof Error ? error.message : "Network error",
+        } as T,
         headers: {},
       };
     }
   }
 
   /**
-   * Parse cookie from Set-Cookie header
+   * Parse cookies from Set-Cookie header (handles multiple cookies)
    */
   private parseCookie(setCookieHeader: string): void {
-    const cookieParts = setCookieHeader.split(';')[0].split('=');
-    if (cookieParts.length === 2) {
-      this.cookies.set(cookieParts[0].trim(), cookieParts[1].trim());
+    // Set-Cookie can have multiple cookies separated by commas
+    // But cookie values can also contain commas, so we split carefully
+    // NextAuth format: name=value; Path=/; HttpOnly, name2=value2; Path=/; HttpOnly
+    const cookies = setCookieHeader.split(/,(?=\s*[^;=]+=)/);
+    for (const cookie of cookies) {
+      const cookieParts = cookie.trim().split(";")[0].split("=");
+      if (cookieParts.length >= 2) {
+        const name = cookieParts[0].trim();
+        const value = cookieParts.slice(1).join("=").trim();
+        this.cookies.set(name, value);
+      }
     }
   }
 
@@ -164,6 +198,13 @@ export class TestClient {
     this.token = null;
     this.cookies.clear();
   }
+
+  /**
+   * Set a cookie for subsequent requests
+   */
+  setCookie(name: string, value: string): void {
+    this.cookies.set(name, value);
+  }
 }
 
 /**
@@ -171,4 +212,79 @@ export class TestClient {
  */
 export function createTestClient(options?: TestClientOptions): TestClient {
   return new TestClient(options);
+}
+
+/**
+ * Authenticate using NextAuth credentials provider
+ * This is used for integration tests that need authenticated sessions
+ */
+export async function loginWithNextAuth(
+  client: TestClient,
+  credentials: { username: string; password: string },
+): Promise<boolean> {
+  try {
+    // Step 1: Get CSRF token (use raw paths; basePath is already in Next.js config)
+    const csrfResponse = await client.get<{ csrfToken: string }>(
+      "/inventario/api/auth/csrf",
+    );
+    const csrfToken = csrfResponse.data?.csrfToken;
+
+    if (!csrfToken) {
+      console.error("Failed to get CSRF token");
+      return false;
+    }
+
+    // Step 2: Authenticate with NextAuth credentials endpoint
+    // NextAuth expects form data, but our client sends JSON
+    // We need to make a direct fetch call for this
+    const baseUrl = client.getBaseUrl();
+    const formData = new URLSearchParams();
+    formData.append("csrfToken", csrfToken);
+    formData.append("username", credentials.username);
+    formData.append("password", credentials.password);
+    formData.append("callbackUrl", "/inventario/dashboard");
+    formData.append("json", "true");
+
+    // Must include the CSRF cookie from the previous request
+    const cookieHeader = client.getCookieHeader();
+
+    const response = await fetchFn(
+      `${baseUrl}/inventario/api/auth/callback/credentials`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+        },
+        body: formData.toString(),
+        redirect: "manual", // Don't follow redirects automatically
+      },
+    );
+
+    // NextAuth sets session cookie on successful auth
+    const setCookie = response.headers.get("set-cookie");
+    if (setCookie) {
+      // Parse and store all cookies
+      const cookies = setCookie.split(",").map((c) => c.trim());
+      for (const cookie of cookies) {
+        const cookieParts = cookie.split(";")[0].split("=");
+        if (cookieParts.length >= 2) {
+          const name = cookieParts[0].trim();
+          const value = cookieParts.slice(1).join("=").trim();
+          // Store cookie in client
+          client.setCookie(name, value);
+        }
+      }
+    }
+
+    // Check if authentication was successful by verifying session
+    // NextAuth v5 may return various status codes, so we verify via session
+    const sessionResponse = await client.get<{ user?: unknown }>(
+      "/inventario/api/auth/session",
+    );
+    return !!sessionResponse.data?.user;
+  } catch (error) {
+    console.error("NextAuth login error:", error);
+    return false;
+  }
 }

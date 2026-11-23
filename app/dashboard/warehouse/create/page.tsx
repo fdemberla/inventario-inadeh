@@ -2,15 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  TextInput,
-  Label,
-  Button,
-  Checkbox,
-  Select,
-  Spinner,
-} from "flowbite-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
+import { Card, Button, FormField, Select, Spinner } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 
 type RegionalLocation = {
   MainLocationID: number;
@@ -22,6 +17,7 @@ type RegionalLocation = {
 export default function CreateWarehousePage() {
   const [locations, setLocations] = useState<RegionalLocation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     WarehouseName: "",
     Location: "",
@@ -35,7 +31,7 @@ export default function CreateWarehousePage() {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const res = await fetch("/api/locations");
+        const res = await fetch(withBasePath("/api/locations"));
         const data = await res.json();
         setLocations(data.locations.recordset);
       } catch (err) {
@@ -53,12 +49,9 @@ export default function CreateWarehousePage() {
     const selectedID = parseInt(e.target.value);
     const selected = locations.find((loc) => loc.MainLocationID === selectedID);
     if (selected) {
-      // const timestamp = Date.now().toString().slice(-5); // unique suffix
-      // const code = `${selected.ShortName}-${timestamp}`;
       setForm((prev) => ({
         ...prev,
         MainLocationID: selectedID,
-        // WarehouseCode: code,
       }));
     }
   };
@@ -67,8 +60,10 @@ export default function CreateWarehousePage() {
     e.preventDefault();
 
     const toastId = toast.loading("Guardando Deposito...");
+    setIsSubmitting(true);
+
     try {
-      const res = await fetch("/api/warehouses/create", {
+      const res = await fetch(withBasePath("/api/warehouses/create"), {
         method: "POST",
         body: JSON.stringify(form),
       });
@@ -84,91 +79,98 @@ export default function CreateWarehousePage() {
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("Error inesperado", { id: toastId });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center p-6">
+      <div className="flex justify-center p-12">
         <Spinner size="xl" />
       </div>
     );
   }
 
   return (
-    <>
-      <Toaster position="top-right" />
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-md space-y-4 p-6 text-white"
-      >
-        <h1 className="text-2xl font-bold">Crear Deposito</h1>
+    <PageLayout
+      title="Crear Depósito"
+      subtitle="Complete los datos para registrar un nuevo depósito."
+      backButton={{ href: "/dashboard/warehouse", label: "Volver a depósitos" }}
+      breadcrumbs={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: "Depósitos", href: "/dashboard/warehouse" },
+        { label: "Crear" },
+      ]}
+    >
+      <Card className="w-full">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField
+              label="Código de Depósito"
+              id="warehouseCode"
+              value={form.WarehouseCode}
+              placeholder="Código Interno del Deposito"
+              onChange={(e) => setForm({ ...form, WarehouseCode: e.target.value })}
+              disabled={isSubmitting}
+            />
 
-        <div>
-          <Label>Código de Deposito</Label>
-          <TextInput
-            value={form.WarehouseCode}
-            placeholder="Código Interno del Deposito"
-            onChange={(e) =>
-              setForm({ ...form, WarehouseCode: e.target.value })
-            }
-          />
-        </div>
+            <FormField label="Centro Regional" id="location-selector" required>
+              <Select
+                onChange={handleLocationChange}
+                value={form.MainLocationID || ""}
+                disabled={isSubmitting}
+              >
+                <option value="">Seleccione un centro...</option>
+                {locations.map((loc) => (
+                  <option key={loc.MainLocationID} value={loc.MainLocationID}>
+                    {loc.Name} ({loc.ShortName})
+                  </option>
+                ))}
+              </Select>
+            </FormField>
 
-        <div>
-          <Label htmlFor="location-selector">
-            ¿En qué centro está el Deposito?
-          </Label>
-          <Select
-            id="location-selector"
-            required
-            onChange={handleLocationChange}
-            value={form.MainLocationID || ""}
-          >
-            <option value="">Seleccione un centro...</option>
-            {locations.map((loc) => (
-              <option key={loc.MainLocationID} value={loc.MainLocationID}>
-                {loc.Name} ({loc.ShortName})
-              </option>
-            ))}
-          </Select>
-        </div>
+            <FormField
+              label="Nombre"
+              id="name"
+              required
+              value={form.WarehouseName}
+              placeholder="Nombre del Almacén"
+              onChange={(e) => setForm({ ...form, WarehouseName: e.target.value })}
+              disabled={isSubmitting}
+            />
 
-        <div>
-          <Label htmlFor="name">Nombre</Label>
-          <TextInput
-            id="name"
-            required
-            value={form.WarehouseName}
-            onChange={(e) =>
-              setForm({ ...form, WarehouseName: e.target.value })
-            }
-            placeholder="Nombre del Almacén"
-          />
-        </div>
+            <FormField
+              label="Ubicación"
+              id="location"
+              value={form.Location}
+              placeholder="Dirección del Almacén"
+              onChange={(e) => setForm({ ...form, Location: e.target.value })}
+              disabled={isSubmitting}
+            />
+          </div>
 
-        <div>
-          <Label htmlFor="location">Ubicación</Label>
-          <TextInput
-            id="location"
-            value={form.Location}
-            onChange={(e) => setForm({ ...form, Location: e.target.value })}
-            placeholder="Dirección del Almacén"
-          />
-        </div>
+          <div className="flex min-h-11 items-center gap-2 pt-2">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={form.IsActive}
+              onChange={(e) => setForm({ ...form, IsActive: e.target.checked })}
+              disabled={isSubmitting}
+              className="accent-brand-azul h-5 w-5 cursor-pointer"
+            />
+            <label htmlFor="isActive" className="text-fg cursor-pointer text-sm font-semibold">
+              Activo
+            </label>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Checkbox
-            checked={form.IsActive}
-            onChange={(e) => setForm({ ...form, IsActive: e.target.checked })}
-          />
-          <Label>Activo</Label>
-        </div>
-
-        <Button type="submit" disabled={!form.WarehouseCode}>
-          Guardar
-        </Button>
-      </form>
-    </>
+          <div className="border-line border-t pt-4 text-center">
+            <Button type="submit" variant="primary" className="w-full sm:w-auto" isLoading={isSubmitting} disabled={!form.WarehouseCode || isSubmitting}>
+              Guardar Depósito
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </PageLayout>
   );
 }

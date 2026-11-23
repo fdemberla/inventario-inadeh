@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Spinner } from "flowbite-react";
+import { Button } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "../../components/DataTable";
+import { withBasePath } from "@/lib/utils";
 
 type User = {
   UserID: number;
@@ -20,18 +22,20 @@ export default function UserListPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/users")
+    fetch(withBasePath("/api/users"))
       .then((res) => res.json())
-      .then((data) => setUsers(data.users || data)) // adjust based on your API format
+      .then((data) => setUsers(data.users || data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   const columns = [
     {
-      accessorKey: "FullName",
+      // The API has no FullName field: build it so sorting and search work
+      id: "FullName",
+      accessorFn: (u: { FirstName?: string; LastName?: string }) =>
+        `${u.FirstName ?? ""} ${u.LastName ?? ""}`.trim(),
       header: "Nombre",
-      cell: ({ row }) => `${row.original.FirstName} ${row.original.LastName}`,
     },
     { accessorKey: "RoleName", header: "Rol" },
     { accessorKey: "Email", header: "Correo" },
@@ -44,11 +48,11 @@ export default function UserListPage() {
       header: "Acciones",
       cell: ({ row }) => (
         <Button
-          size="xs"
+          size="sm"
+          variant="secondary"
           onClick={() =>
             router.push(`/dashboard/users/${row.original.UserID}/update`)
           }
-          className="bg-brand-naranja"
         >
           Editar
         </Button>
@@ -58,23 +62,34 @@ export default function UserListPage() {
 
   if (loading)
     return (
-      <div className="flex justify-center p-6">
-        <Spinner size="xl" />
-      </div>
+      <PageLayout title="Usuarios">
+        <div className="flex justify-center p-6">
+          <div role="status" aria-label="Cargando...">
+            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-line"></div>
+            <span className="sr-only">Cargando...</span>
+          </div>
+        </div>
+      </PageLayout>
     );
 
   return (
-    <div className="p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold dark:text-white">Usuarios</h1>
+    <PageLayout
+      title="Gestión de Usuarios"
+      subtitle="Administra los usuarios del sistema"
+      breadcrumbs={[
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Usuarios" },
+      ]}
+      actions={
         <Button
+          variant="primary"
           onClick={() => router.push("/dashboard/users/create")}
-          className="bg-brand-verde"
         >
           Crear Usuario
         </Button>
-      </div>
-      <DataTable data={users} columns={columns} />
-    </div>
+      }
+    >
+      <DataTable caption="Usuarios" data={users} columns={columns} />
+    </PageLayout>
   );
 }

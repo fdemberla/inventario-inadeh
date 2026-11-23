@@ -1,6 +1,20 @@
 //next.config.ts
 import type { NextConfig } from "next";
 import withFlowbiteReact from "flowbite-react/plugin/nextjs";
+
+const normalizeBasePath = (basePath: string): string => {
+  const trimmed = basePath.trim();
+  if (!trimmed || trimmed === "/") return "";
+  const withLeadingSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return withLeadingSlash.replace(/\/+$/, "");
+};
+
+const escapeRegex = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const basePath = normalizeBasePath(process.env.NEXT_PUBLIC_BASE_PATH ?? "");
+const basePathRegexPrefix = basePath ? escapeRegex(basePath) : "";
+
 const withPWA = require("next-pwa")({
   dest: "public",
   register: true,
@@ -38,7 +52,7 @@ const withPWA = require("next-pwa")({
     },
     {
       // Cachea llamadas a la API
-      urlPattern: /^\/api\/.*$/i,
+      urlPattern: new RegExp(`^${basePathRegexPrefix}/api/.*$`, "i"),
       handler: "NetworkFirst",
       method: "GET",
       options: {
@@ -52,7 +66,7 @@ const withPWA = require("next-pwa")({
     },
     {
       // Cachea páginas dentro de /dashboard
-      urlPattern: /^\/dashboard\/?.*/i,
+      urlPattern: new RegExp(`^${basePathRegexPrefix}/dashboard/?.*`, "i"),
       handler: "NetworkFirst",
       options: {
         cacheName: "dashboard-pages",
@@ -68,16 +82,41 @@ const withPWA = require("next-pwa")({
 
 // Step 1: Define your base config
 const baseConfig: NextConfig = {
-  basePath: "",
+  basePath,
+  assetPrefix: basePath || undefined,
   reactStrictMode: true,
-  env: {
-    JWT_SECRET: process.env.JWT_SECRET,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV !== "development", // Remove console.log in production
+    // Strip console.log in production but keep error/warn: they are the
+    // server's only error and security log (failed logins, auth errors).
+    removeConsole:
+      process.env.NODE_ENV !== "development"
+        ? { exclude: ["error", "warn"] }
+        : false,
+  },
+  poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            // camera: barcode scanning from the phone browser
+            key: "Permissions-Policy",
+            value: "camera=(self), microphone=(), geolocation=()",
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains",
+          },
+        ],
+      },
+    ];
   },
 };
 

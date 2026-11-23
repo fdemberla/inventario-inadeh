@@ -1,12 +1,24 @@
 import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { requireAdmin } from "@/lib/authz";
+import { invalidateUserState } from "@/lib/user-state";
 
 // Extract `id` from route params using the new Next.js route handlers style
 export async function PUT(req: NextRequest) {
+  const guard = await requireAdmin(req);
+  if (guard.error) return guard.error;
+
   try {
     const url = new URL(req.url);
-    const id = url.pathname.split("/").at(-2);
+    const idParam = url.pathname.split("/").at(-2) ?? "";
+    if (!/^\d+$/.test(idParam)) {
+      return NextResponse.json(
+        { message: "ID de usuario inválido." },
+        { status: 400 },
+      );
+    }
+    const id = parseInt(idParam, 10);
     const body = await req.json();
 
     const {
@@ -77,6 +89,7 @@ export async function PUT(req: NextRequest) {
 
     // Execute user update
     await sql(updateUserQuery, params);
+    invalidateUserState(id); // role / active changes apply immediately
 
     // Clear and insert new warehouse associations
     await sql(`DELETE FROM dbo.WarehouseUsers WHERE UserID = @param0`, [id]);

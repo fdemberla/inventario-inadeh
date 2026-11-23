@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Spinner } from "flowbite-react";
+import { Button } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "../../components/DataTable"; // Adjust import path if needed
+import { DataTable } from "../../components/DataTable";
+import { withBasePath } from "@/lib/utils";
 
 type Supplier = {
   SupplierID: number;
@@ -23,7 +25,7 @@ export default function SuppliersPage() {
   useEffect(() => {
     const fetchSuppliers = async () => {
       try {
-        const res = await fetch("/api/suppliers");
+        const res = await fetch(withBasePath("/api/suppliers"));
         const data = await res.json();
         setSuppliers(data);
       } catch (error) {
@@ -67,7 +69,8 @@ export default function SuppliersPage() {
       header: "",
       cell: ({ row }) => (
         <Button
-          size="xs"
+          size="sm"
+          variant="secondary"
           onClick={() =>
             router.push(`/dashboard/suppliers/${row.original.SupplierID}/edit`)
           }
@@ -80,26 +83,45 @@ export default function SuppliersPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center p-6">
-        <Spinner size="xl" />
-      </div>
+      <PageLayout title="Proveedores">
+        <div className="flex justify-center p-6">
+          <div role="status" aria-label="Cargando...">
+            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-line"></div>
+            <span className="sr-only">Cargando...</span>
+          </div>
+        </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Proveedores</h1>
-        <Button onClick={() => router.push("/dashboard/suppliers/create")}>
+    <PageLayout
+      title="Gestión de Proveedores"
+      subtitle="Administra tus proveedores"
+      breadcrumbs={[
+        { label: "Dashboard", href: withBasePath("/dashboard") },
+        { label: "Proveedores" },
+      ]}
+      actions={
+        <Button
+          variant="primary"
+          onClick={() => router.push("/dashboard/suppliers/create")}
+        >
           Crear Proveedor
         </Button>
-      </div>
-
+      }
+    >
       {suppliers.length === 0 ? (
-        <p className="text-white">No hay proveedores registrados.</p>
+        <div className="flex flex-col items-center justify-center rounded-lg border border-line bg-surface py-14 text-center">
+          <svg className="mb-3 h-12 w-12 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 18L4 14m0 0l4-4M4 14h13a4 4 0 000-8H5" />
+          </svg>
+          <p className="text-sm font-medium text-fg-muted">No hay proveedores registrados</p>
+          <p className="mt-1 text-xs text-fg-muted">Crea un proveedor para comenzar</p>
+        </div>
       ) : (
-        <DataTable data={suppliers} columns={columns} />
+        <DataTable caption="Proveedores" data={suppliers} columns={columns} />
       )}
-    </div>
+    </PageLayout>
   );
 }

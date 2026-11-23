@@ -1,12 +1,14 @@
-import { Modal, Button, TextInput } from "flowbite-react";
+import { Modal, ModalFooter, Button, FormField } from "@/app/components/ui";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
 
 export type InventoryItem = {
   InventoryID: number;
   ProductID: number;
   ProductName: string;
   QuantityOnHand: number;
+  UnitName?: string;
 };
 
 type Props = {
@@ -23,6 +25,7 @@ export default function InventoryUpdateModal({
   onSuccess,
 }: Props) {
   const [modalQty, setModalQty] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (item) {
@@ -35,13 +38,21 @@ export default function InventoryUpdateModal({
 
     const newQty = Number(modalQty);
 
-    if (modalQty === "" || isNaN(newQty) || newQty === item.QuantityOnHand) {
-      toast("Sin cambios válidos para este producto.");
+    if (modalQty === "" || !Number.isInteger(newQty) || newQty < 0) {
+      toast.error("La cantidad debe ser un número entero mayor o igual a 0.");
       return;
     }
 
+    if (newQty === item.QuantityOnHand) {
+      toast("Sin cambios para este producto.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const toastId = toast.loading("Actualizando cantidad...");
+
     try {
-      const res = await fetch("/api/inventory/update", {
+      const res = await fetch(withBasePath("/api/inventory/update"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -57,46 +68,63 @@ export default function InventoryUpdateModal({
       const result = await res.json();
 
       if (res.ok) {
-        toast.success(`Producto ${item.ProductName} actualizado.`);
+        toast.success(`Producto ${item.ProductName} actualizado.`, { id: toastId });
         onClose();
         onSuccess?.();
       } else {
-        toast.error(result.message || "Error al actualizar.");
+        toast.error(result.message || "Error al actualizar.", { id: toastId });
       }
     } catch (err) {
-      toast.error("Error de red al actualizar.");
-      console.error(err)
+      toast.error("Error de red al actualizar.", { id: toastId });
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Modal show={!!item} size="md" onClose={onClose} popup>
-      <div className="space-y-4 p-6">
-        <h3 className="text-xl font-medium text-gray-900 dark:text-white">
-          Actualizar cantidad
-        </h3>
+    <Modal 
+      isOpen={!!item} 
+      onClose={onClose} 
+      title="Actualizar cantidad"
+      size="md"
+      footer={
+        <ModalFooter>
+          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={handleUpdate} isLoading={isSubmitting} disabled={isSubmitting}>
+            Guardar
+          </Button>
+        </ModalFooter>
+      }
+    >
+      <div className="space-y-5 pt-2 pb-2">
         {item && (
           <>
-            <p className="dark:text-white">
-              <strong>Producto:</strong> {item.ProductName}
-            </p>
-            <p className="dark:text-white">
-              <strong>Unidad:</strong> {item.UnitName}
-            </p>
-            <p className="dark:text-white">
-              <strong>Cantidad actual:</strong> {item.QuantityOnHand}
-            </p>
-            <TextInput
+            <div className="space-y-2 text-sm text-fg bg-surface-muted p-4 rounded-lg border border-line">
+              <p>
+                <span className="font-semibold text-fg">Producto:</span> {item.ProductName}
+              </p>
+              {item.UnitName && (
+                <p>
+                  <span className="font-semibold text-fg">Unidad:</span> {item.UnitName}
+                </p>
+              )}
+              <p>
+                <span className="font-semibold text-fg">Cantidad actual:</span> {item.QuantityOnHand}
+              </p>
+            </div>
+            <FormField
+              label="Nueva cantidad"
               type="number"
+              inputMode="numeric"
+              min={0}
+              step={1}
               value={modalQty}
               onChange={(e) => setModalQty(e.target.value)}
+              disabled={isSubmitting}
             />
-            <div className="flex justify-end gap-2 pt-4">
-              <Button onClick={handleUpdate}>Guardar</Button>
-              <Button color="red" onClick={onClose}>
-                Cancelar
-              </Button>
-            </div>
           </>
         )}
       </div>

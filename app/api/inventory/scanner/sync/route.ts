@@ -1,7 +1,8 @@
 // app/api/inventory/scanner/sync/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql, withTransaction } from "@/lib/db";
-import jwt from "jsonwebtoken";
+import { requireUser, userCanAccessWarehouse } from "@/lib/authz";
+import type { ApiUser } from "@/lib/api-auth";
 
 interface ScanItem {
   id: number;
@@ -30,17 +31,10 @@ interface SyncResultItem {
 }
 
 export async function POST(req: NextRequest) {
-  // Validate user from token
-  let currentUser: string = "sync-api";
-  try {
-    const token = req.cookies.get("token")?.value;
-    if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as Record<string, unknown>;
-      currentUser = (decoded?.username as string) || (decoded?.id as string) || currentUser;
-    }
-  } catch (err: unknown) {
-    console.warn("Token decode warning in sync:", err);
-  }
+  const guard = await requireUser(req);
+  if (guard.error) return guard.error;
+  const { user } = guard;
+  const currentUser = user.username || `user_${user.id}`;
 
   try {
     const body: BulkSyncPayload = await req.json();
@@ -52,7 +46,7 @@ export async function POST(req: NextRequest) {
           success: false,
           message: "No hay escaneos para sincronizar",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -62,7 +56,7 @@ export async function POST(req: NextRequest) {
           success: false,
           message: "Máximo 50 escaneos por sincronización",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -71,14 +65,14 @@ export async function POST(req: NextRequest) {
     // Process each scan in a transaction
     for (const scan of scans) {
       try {
-        const result = await processSingleScan(scan, currentUser, deviceId);
+        const result = await processSingleScan(scan, user, currentUser, deviceId);
         results.push(result);
       } catch (error) {
         console.error(`Error processing scan ${scan.id}:`, error);
         results.push({
           id: scan.id,
           success: false,
-          error: error instanceof Error ? error.message : "Error desconocido",
+          error: "Error interno al procesar el escaneo",
           conflictType: "server_error",
         });
       }
@@ -104,22 +98,38 @@ export async function POST(req: NextRequest) {
         success: false,
         message: "Error interno del servidor",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 async function processSingleScan(
   scan: ScanItem,
+  user: ApiUser,
   currentUser: string,
-  deviceId: string
+  deviceId: string,
 ): Promise<SyncResultItem> {
   const { id, barcode, warehouseId, operation, quantity, timestamp } = scan;
+
+  if (operation !== "entrada" && operation !== "salida") {
+    return { id, success: false, error: "Operación inválida", conflictType: "invalid" };
+  }
+  if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 10000) {
+    return { id, success: false, error: "Cantidad inválida", conflictType: "invalid" };
+  }
+  if (!(await userCanAccessWarehouse(user, warehouseId))) {
+    return {
+      id,
+      success: false,
+      error: "No tienes permiso para acceder a este almacén",
+      conflictType: "forbidden",
+    };
+  }
 
   // Find product by barcode
   const productResult = await rawSql(
     `SELECT ProductID, ProductName FROM Products WHERE Barcode = @param0`,
-    [barcode]
+    [barcode],
   );
 
   if (productResult.length === 0) {
@@ -136,7 +146,7 @@ async function processSingleScan(
   // Find or create inventory record
   const inventoryResult = await rawSql(
     `SELECT InventoryID, QuantityOnHand FROM Inventory WHERE ProductID = @param0 AND WarehouseID = @param1`,
-    [product.ProductID, warehouseId]
+    [product.ProductID, warehouseId],
   );
 
   const inventoryExists = inventoryResult.length > 0;
@@ -157,7 +167,7 @@ async function processSingleScan(
           .input("qty", newQuantity)
           .input("invId", inventoryId)
           .query(
-            `UPDATE Inventory SET QuantityOnHand = @qty, ModifiedDate = SYSDATETIME() WHERE InventoryID = @invId`
+            `UPDATE Inventory SET QuantityOnHand = @qty, ModifiedDate = SYSDATETIME() WHERE InventoryID = @invId`,
           );
       } else {
         newQuantity = quantity;
@@ -170,7 +180,7 @@ async function processSingleScan(
           .query(
             `INSERT INTO Inventory (ProductID, WarehouseID, QuantityOnHand, CreatedDate) 
              OUTPUT INSERTED.InventoryID
-             VALUES (@productId, @warehouseId, @qty, SYSDATETIME())`
+             VALUES (@productId, @warehouseId, @qty, SYSDATETIME())`,
           );
         inventoryId = insertResult.recordset[0].InventoryID;
       }
@@ -180,13 +190,16 @@ async function processSingleScan(
         .request()
         .input("invId", inventoryId)
         .input("qtyChange", quantity)
-        .input("notes", `Sincronizado desde dispositivo ${deviceId} - ${timestamp}`)
+        .input(
+          "notes",
+          `Sincronizado desde dispositivo ${deviceId} - ${timestamp}`,
+        )
         .input("createdBy", currentUser)
         .input("productId", product.ProductID)
         .query(
           `INSERT INTO dbo.InventoryTransactions 
            (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy, ProductID) 
-           VALUES (@invId, 'RECEIPT', @qtyChange, NULL, @notes, @createdBy, @productId)`
+           VALUES (@invId, 'RECEIPT', @qtyChange, NULL, @notes, @createdBy, @productId)`,
         );
     } else if (operation === "salida") {
       if (!inventoryExists) {
@@ -218,7 +231,7 @@ async function processSingleScan(
         .input("qty", newQuantity)
         .input("invId", inventoryId)
         .query(
-          `UPDATE Inventory SET QuantityOnHand = @qty, ModifiedDate = SYSDATETIME() WHERE InventoryID = @invId`
+          `UPDATE Inventory SET QuantityOnHand = @qty, ModifiedDate = SYSDATETIME() WHERE InventoryID = @invId`,
         );
 
       // Log transaction
@@ -226,13 +239,16 @@ async function processSingleScan(
         .request()
         .input("invId", inventoryId)
         .input("qtyChange", -quantity)
-        .input("notes", `Sincronizado desde dispositivo ${deviceId} - ${timestamp}`)
+        .input(
+          "notes",
+          `Sincronizado desde dispositivo ${deviceId} - ${timestamp}`,
+        )
         .input("createdBy", currentUser)
         .input("productId", product.ProductID)
         .query(
           `INSERT INTO dbo.InventoryTransactions 
            (InventoryID, TransactionType, QuantityChange, ReferenceNumber, Notes, CreatedBy, ProductID) 
-           VALUES (@invId, 'SHIPMENT', @qtyChange, NULL, @notes, @createdBy, @productId)`
+           VALUES (@invId, 'SHIPMENT', @qtyChange, NULL, @notes, @createdBy, @productId)`,
         );
     }
 

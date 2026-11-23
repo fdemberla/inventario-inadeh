@@ -1,8 +1,16 @@
-import { NextResponse } from "next/server";
-import { rawSql } from "@/lib/db"; // Ensure this is correctly pointing to your SQL helper
+import { NextResponse, NextRequest } from "next/server";
+import { rawSql } from "@/lib/db";
+import { getApiAuth, isAdmin } from "@/lib/api-auth";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { user } = await getApiAuth(req);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+    if (!isAdmin(user)) {
+      return NextResponse.json({ error: "Acceso denegado. Se requieren permisos de administrador." }, { status: 403 });
+    }
     const body = await req.json();
     const { UnitName, Abbreviation } = body;
 

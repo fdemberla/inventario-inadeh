@@ -1,42 +1,38 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-// import { jwtVerify } from "jose"; // Use jose library for Edge compatibility
+// middleware.ts - NextAuth.js v5 middleware (Edge-compatible)
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
+import { NextRequest, NextResponse } from "next/server";
+import { verifyMobileToken } from "@/lib/mobile-auth";
 
-export async function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value;
-  const { pathname } = request.nextUrl;
+const { auth: nextAuthMiddleware } = NextAuth(authConfig);
 
-  const isApiRoute = pathname.startsWith("/api/");
-  const publicRoutes = ["/api/login", "/api/register"];
-  const isPublicRoute = publicRoutes.includes(pathname);
+// Custom middleware that allows Bearer token authentication
+export default async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
 
-  if (isApiRoute && !isPublicRoute) {
-    if (!token) {
-      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+  // Mobile API routes authenticate with a Bearer JWT instead of the NextAuth
+  // cookie. Only skip NextAuth when that token actually verifies; route
+  // handlers still re-check it (plus role / warehouse) via lib/authz.
+  const authHeader = request.headers.get("authorization");
+  const isMobileApi =
+    pathname.includes("/api/") && pathname.includes("/mobile/");
+
+  if (isMobileApi && authHeader?.startsWith("Bearer ")) {
+    const valid = await verifyMobileToken(authHeader.slice(7));
+    if (!valid) {
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired token" },
+        { status: 401 },
+      );
     }
-
-    try {
-      // console.log("Verifying token:", token); // Log the token for debugging
-      // const decoded = await jwtVerify(
-      //   token,
-      //   new TextEncoder().encode(process.env.JWT_SECRET!),
-      // ); // Use jose for Edge
-      // console.log("Decoded token:", decoded); // Log decoded token for further insight
-    } catch (error) {
-      console.error("Token verification failed:", error);
-      return new NextResponse(JSON.stringify({ error: "Invalid token" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  // Use standard NextAuth middleware for everything else
+  return nextAuthMiddleware(request);
 }
 
 export const config = {
-  matcher: ["/api/:path*"], // apply only to API routes
+  // Match all routes except static files, images, and public assets
+  matcher: ["/:path*"],
 };

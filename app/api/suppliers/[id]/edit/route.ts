@@ -1,5 +1,6 @@
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
+import { getApiAuth, isAdmin } from "@/lib/api-auth";
 
 // PUT /api/suppliers/:id/edit - update supplier
 export async function PUT(
@@ -7,6 +8,13 @@ export async function PUT(
   { params }: { params: { id: string } },
 ) {
   try {
+    const { user } = await getApiAuth(req);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+    if (!isAdmin(user)) {
+      return NextResponse.json({ error: "Acceso denegado. Se requieren permisos de administrador." }, { status: 403 });
+    }
     const data = await req.json();
 
     const result = await sql(

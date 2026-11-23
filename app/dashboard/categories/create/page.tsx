@@ -1,16 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Label,
-  TextInput,
-  Textarea,
-  Select,
-  Button,
-  Card,
-  Spinner,
-} from "flowbite-react";
-import { toast } from "react-hot-toast"; // <-- Import toast
+import { toast } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
+import { PageLayout } from "@/app/components/PageLayout";
+import { Card, Button, FormField, Select, Textarea } from "@/app/components/ui";
 
 type Category = {
   CategoryID: number;
@@ -22,11 +16,11 @@ export default function CreateCategoryPage() {
   const [description, setDescription] = useState("");
   const [parentCategoryID, setParentCategoryID] = useState<number | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false); // ✨ New state for loading
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const res = await fetch("/api/categories");
+      const res = await fetch(withBasePath("/api/categories"));
       const data = await res.json();
       setCategories(data);
     };
@@ -35,110 +29,103 @@ export default function CreateCategoryPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true); // ✨ Start loading
+    setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/categories/create", {
+      const res = await fetch(withBasePath("/api/categories/create"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ categoryName, description, parentCategoryID }),
       });
 
       if (res.ok) {
-        toast.success("Category created successfully!");
+        toast.success("Categoría creada exitosamente.");
 
         // Reset form
         setCategoryName("");
         setDescription("");
         setParentCategoryID(null);
 
-        // Optionally refresh categories
-        const refreshCategories = async () => {
-          const res = await fetch("/api/categories");
-          const data = await res.json();
-          setCategories(data);
-        };
-        await refreshCategories();
+        // Refresh categories
+        const refreshRes = await fetch(withBasePath("/api/categories"));
+        const refreshData = await refreshRes.json();
+        setCategories(refreshData);
       } else {
         const data = await res.json();
-        toast.error(data.message || "Error creating category.");
+        toast.error(data.message || "Error al crear la categoría.");
       }
     } catch (error) {
       console.error(error);
-      toast.error("Something went wrong.");
+      toast.error("Ocurrió un error.");
     } finally {
-      setIsSubmitting(false); // ✨ Stop loading
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
-        <h1 className="mb-6 text-center text-2xl font-bold dark:text-white">
-          Crear Nueva Categoria
-        </h1>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <Label htmlFor="categoryName" defaultValue="Category Name" />
-            <TextInput
+    <PageLayout
+      title="Crear Categoría"
+      subtitle="Complete los datos para registrar una nueva categoría."
+      backButton={{ href: "/dashboard/categories", label: "Volver a categorías" }}
+      breadcrumbs={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: "Categorías", href: "/dashboard/categories" },
+        { label: "Crear" },
+      ]}
+    >
+      <Card className="w-full">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+              label="Nombre de Categoría"
               id="categoryName"
-              required
+              name="categoryName"
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
-              placeholder="Nombre de Categoria"
+              placeholder="Ej. Herramientas"
+              required
             />
+
+            <FormField label="Categoría Principal (Opcional)" id="parentCategory">
+              <Select
+                value={parentCategoryID ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setParentCategoryID(value ? parseInt(value) : null);
+                }}
+              >
+                <option value="">Ninguna (Nivel Superior)</option>
+                {categories.map((cat) => (
+                  <option key={cat.CategoryID} value={cat.CategoryID}>
+                    {cat.CategoryName}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
           </div>
 
-          <div>
-            <Label
-              htmlFor="parentCategory"
-              defaultValue="Categoria Principal (Opcional)"
-            />
-            <Select
-              id="parentCategory"
-              value={parentCategoryID ?? ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setParentCategoryID(value ? parseInt(value) : null);
-              }}
-            >
-              <option value="">Categoria Principal (Opcional)</option>
-              {categories.map((cat) => (
-                <option key={cat.CategoryID} value={cat.CategoryID}>
-                  {cat.CategoryName}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          <div>
-            <Label
-              htmlFor="description"
-              defaultValue="Descripcion (Opcional)"
-            />
+          <FormField label="Descripción (Opcional)" id="description">
             <Textarea
-              id="description"
+              rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Escriba una Descripcion"
+              placeholder="Escriba una descripción detallada"
             />
-          </div>
+          </FormField>
 
-          <Button
-            type="submit"
-            className="flex w-full items-center justify-center"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <Spinner size="sm" className="mr-2" /> Creando Producto...
-              </>
-            ) : (
-              "Crear Categoria"
-            )}
-          </Button>
+          <div className="border-line border-t pt-4 text-center">
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              Crear Categoría
+            </Button>
+          </div>
         </form>
       </Card>
-    </div>
+    </PageLayout>
   );
 }

@@ -1,11 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/authz";
 
 export async function GET(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } },
 ) {
+  const guard = await requireAdmin(req);
+  if (guard.error) return guard.error;
+
   const id = parseInt(params.id);
+
+  // Validate ID format
+  if (isNaN(id) || id <= 0) {
+    return NextResponse.json(
+      { message: "ID de usuario inválido." },
+      { status: 400 },
+    );
+  }
 
   try {
     // Get user info

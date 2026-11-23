@@ -1,12 +1,15 @@
 import { NextResponse, NextRequest } from "next/server";
 import { rawSql } from "@/lib/db";
+import { requireWarehouse } from "@/lib/authz";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
+    const guard = await requireWarehouse(req, String(id));
+    if (guard.error) return guard.error;
     const category = req.nextUrl.searchParams.get("category");
 
     if (isNaN(id)) {

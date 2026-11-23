@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
-import { Button, Label, TextInput } from "flowbite-react";
 import toast from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
+import { Button, FormField } from "@/app/components/ui";
 
 interface UnitFormProps {
   onSuccess?: (unit: { UnitName: string; Abbreviation: string | null }) => void;
@@ -29,7 +30,7 @@ export default function UnitForm({
   httpMethod = "POST",
   loadingMessage = "Creando unidad...",
   successMessage = "Unidad creada exitosamente",
-  className = "mx-auto max-w-md p-6",
+  className = "w-full p-6",
 }: UnitFormProps) {
   const [unitName, setUnitName] = useState(initialValues.unitName || "");
   const [abbreviation, setAbbreviation] = useState(
@@ -51,7 +52,7 @@ export default function UnitForm({
         Abbreviation: abbreviation.trim() || null,
       };
 
-      const res = await fetch(apiEndpoint, {
+      const res = await fetch(withBasePath(apiEndpoint), {
         method: httpMethod,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(unitData),
@@ -91,41 +92,44 @@ export default function UnitForm({
 
   return (
     <div className={className}>
-      <h1 className="mb-4 text-2xl font-bold dark:text-white">{title}</h1>
+      {title && <h1 className="text-fg mb-4 text-xl font-bold">{title}</h1>}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="unitName">Nombre de la unidad</Label>
-          <TextInput
-            id="unitName"
-            required
-            value={unitName}
-            onChange={(e) => setUnitName(e.target.value)}
-            disabled={isSubmitting}
-          />
-        </div>
-        <div>
-          <Label htmlFor="abbreviation">Abreviatura (opcional)</Label>
-          <TextInput
-            id="abbreviation"
-            value={abbreviation}
-            onChange={(e) => setAbbreviation(e.target.value)}
-            disabled={isSubmitting}
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button type="submit" className="flex-1" disabled={isSubmitting}>
-            {isSubmitting ? "Procesando..." : submitButtonText}
-          </Button>
+        <FormField
+          label="Nombre de la unidad"
+          id="unitName"
+          required
+          value={unitName}
+          onChange={(e) => setUnitName(e.target.value)}
+          disabled={isSubmitting}
+        />
+        <FormField
+          label="Abreviatura (opcional)"
+          id="abbreviation"
+          value={abbreviation}
+          onChange={(e) => setAbbreviation(e.target.value)}
+          disabled={isSubmitting}
+        />
+        <div className="flex gap-3 pt-2">
           {onCancel && (
             <Button
               type="button"
-              color="gray"
+              variant="ghost"
               onClick={handleCancel}
               disabled={isSubmitting}
+              className="flex-1"
             >
               Cancelar
             </Button>
           )}
+          <Button 
+            type="submit" 
+            variant="primary" 
+            className="flex-1" 
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
+          >
+            {submitButtonText}
+          </Button>
         </div>
       </form>
     </div>

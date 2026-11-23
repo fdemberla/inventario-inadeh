@@ -1,7 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/authz";
 import { sql } from "@/lib/db"; // make sure this helper uses mssql
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const guard = await requireAdmin(req);
+  if (guard.error) return guard.error;
   try {
     const body = await req.json();
     const { WarehouseName, Location, IsActive, MainLocationID, WarehouseCode } =

@@ -1,5 +1,6 @@
 // app/api/inventory/[id]/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireWarehouse } from "@/lib/authz";
 import { rawSql } from "@/lib/db";
 
 // Define the expected response type
@@ -18,13 +19,15 @@ interface InventoryItem {
 }
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   try {
     // Fix for Next.js dynamic route params warning
     const { id } = await context.params; // Await here
     const warehouseId = id;
+    const guard = await requireWarehouse(request, warehouseId);
+    if (guard.error) return guard.error;
 
     // Validate the warehouse ID
     if (!warehouseId || !/^\d+$/.test(warehouseId)) {
@@ -71,7 +74,6 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Failed to fetch inventory",
-        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },
     );

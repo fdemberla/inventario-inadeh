@@ -17,6 +17,7 @@ import {
   getBlockingStatus,
   BlockingStatus,
 } from "./offline-db";
+import { withBasePath } from "@/lib/utils";
 
 // ============ Types ============
 
@@ -77,7 +78,9 @@ export function isOnline(): boolean {
   return onlineStatus;
 }
 
-export function subscribeToOnlineStatus(callback: (online: boolean) => void): () => void {
+export function subscribeToOnlineStatus(
+  callback: (online: boolean) => void,
+): () => void {
   onlineListeners.add(callback);
   return () => onlineListeners.delete(callback);
 }
@@ -107,13 +110,17 @@ export interface ScanOperationResult {
 /**
  * Process a scan - either send to server (online) or queue locally (offline)
  */
-export async function processScan(input: ScanInput): Promise<ScanOperationResult> {
+export async function processScan(
+  input: ScanInput,
+): Promise<ScanOperationResult> {
   // Check blocking status first
   const blockingStatus = await getBlockingStatus();
   if (blockingStatus.shouldBlock) {
     return {
       success: false,
-      message: blockingStatus.reason || "Operación bloqueada. Sincronice los datos pendientes.",
+      message:
+        blockingStatus.reason ||
+        "Operación bloqueada. Sincronice los datos pendientes.",
       queued: false,
       verified: false,
     };
@@ -137,8 +144,10 @@ export async function processScan(input: ScanInput): Promise<ScanOperationResult
 /**
  * Send a single scan to the server
  */
-async function sendScanToServer(input: ScanInput): Promise<ScanOperationResult> {
-  const response = await fetch("/api/inventory/scanner", {
+async function sendScanToServer(
+  input: ScanInput,
+): Promise<ScanOperationResult> {
+  const response = await fetch(withBasePath("/api/inventory/scanner"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -151,9 +160,21 @@ async function sendScanToServer(input: ScanInput): Promise<ScanOperationResult> 
     }),
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    // 4xx = the server processed and rejected the scan (no stock, unknown
+    // barcode, expired session...). Report it; do NOT queue it as offline,
+    // or it will fail again on sync and block the scanner.
+    if (response.status >= 400 && response.status < 500) {
+      return {
+        success: false,
+        message: data.message || "El servidor rechazó el escaneo",
+        queued: false,
+        verified: false,
+      };
+    }
+    // 5xx: server unavailable -> let processScan queue it locally
     throw new Error(data.message || "Error al procesar el escaneo");
   }
 
@@ -171,9 +192,14 @@ async function sendScanToServer(input: ScanInput): Promise<ScanOperationResult> 
 /**
  * Queue a scan locally when offline
  */
-async function queueScanLocally(input: ScanInput): Promise<ScanOperationResult> {
+async function queueScanLocally(
+  input: ScanInput,
+): Promise<ScanOperationResult> {
   // Try to verify against cache
-  const cachedProduct = await getCachedProduct(input.warehouseId, input.barcode);
+  const cachedProduct = await getCachedProduct(
+    input.warehouseId,
+    input.barcode,
+  );
   const verified = !!cachedProduct;
 
   const pendingId = await queueScan({
@@ -264,7 +290,7 @@ export async function syncPendingScans(): Promise<SyncResult> {
       deviceId: unsyncedScans[0]?.deviceId || "unknown",
     };
 
-    const response = await fetch("/api/inventory/scanner/sync", {
+    const response = await fetch(withBasePath("/api/inventory/scanner/sync"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -275,7 +301,9 @@ export async function syncPendingScans(): Promise<SyncResult> {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Error de sincronización: ${response.status}`);
+      throw new Error(
+        errorData.message || `Error de sincronización: ${response.status}`,
+      );
     }
 
     const data: BulkSyncResponse = await response.json();
@@ -303,7 +331,11 @@ export async function syncPendingScans(): Promise<SyncResult> {
             quantity: originalScan.quantity,
             localTimestamp: originalScan.timestamp,
             serverTimestamp: data.serverTime,
-            conflictType: result.conflictType as "quantity_mismatch" | "product_not_found" | "negative_inventory" | "server_error",
+            conflictType: result.conflictType as
+              | "quantity_mismatch"
+              | "product_not_found"
+              | "negative_inventory"
+              | "server_error",
             serverMessage: result.error || "Conflicto detectado",
           });
         }
@@ -334,7 +366,8 @@ export async function syncPendingScans(): Promise<SyncResult> {
       errors,
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+    const errorMessage =
+      error instanceof Error ? error.message : "Error desconocido";
     return {
       success: false,
       synced: 0,
@@ -407,7 +440,9 @@ export interface ProductCacheRefreshResult {
 /**
  * Refresh product cache for a warehouse
  */
-export async function refreshProductCache(warehouseId: number): Promise<ProductCacheRefreshResult> {
+export async function refreshProductCache(
+  warehouseId: number,
+): Promise<ProductCacheRefreshResult> {
   if (!isOnline()) {
     return {
       success: false,
@@ -418,9 +453,14 @@ export async function refreshProductCache(warehouseId: number): Promise<ProductC
 
   try {
     // Fetch products for this warehouse
-    const response = await fetch(`/api/inventory/scanner/products?warehouseId=${warehouseId}`, {
-      credentials: "include",
-    });
+    const response = await fetch(
+      withBasePath(
+        `/api/inventory/scanner/products?warehouseId=${warehouseId}`,
+      ),
+      {
+        credentials: "include",
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`Error al cargar productos: ${response.status}`);
@@ -450,7 +490,8 @@ export async function refreshProductCache(warehouseId: number): Promise<ProductC
       productCount: data.products.length,
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+    const errorMessage =
+      error instanceof Error ? error.message : "Error desconocido";
     return {
       success: false,
       productCount: 0,

@@ -1,8 +1,13 @@
 // app/api/inventory/update/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
+import { requireUser, userCanAccessWarehouse } from "@/lib/authz";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const guard = await requireUser(request);
+  if (guard.error) return guard.error;
+  const { user } = guard;
+
   try {
     const {
       productId,
@@ -14,8 +19,10 @@ export async function POST(request: Request) {
       quantityReserved = 0,
       reorderLevel = null,
       lastStockedDate = null,
-      createdBy = "WEB_USER",
     } = await request.json();
+
+    // Audit trail must come from the session, never from the client
+    const createdBy = user.username || `user_${user.id}`;
 
     // Validate required fields
     if (!productId || !warehouseId || newQuantity === undefined) {
@@ -24,6 +31,20 @@ export async function POST(request: Request) {
           error:
             "Missing required fields (productId, warehouseId, newQuantity)",
         },
+        { status: 400 },
+      );
+    }
+
+    if (!(await userCanAccessWarehouse(user, warehouseId))) {
+      return NextResponse.json(
+        { message: "No tienes permiso para acceder a este almacén" },
+        { status: 403 },
+      );
+    }
+
+    if (!Number.isInteger(newQuantity) || newQuantity < 0) {
+      return NextResponse.json(
+        { message: "newQuantity debe ser un entero mayor o igual a 0" },
         { status: 400 },
       );
     }
@@ -98,6 +119,23 @@ export async function POST(request: Request) {
         { status: 200 },
       );
     } else {
+      // Prevent duplicate Inventory rows for the same product + warehouse.
+      // A duplicate keeps showing stock after the other row is set to 0.
+      const existing = await rawSql(
+        `SELECT TOP 1 InventoryID FROM dbo.Inventory
+         WHERE ProductID = @param0 AND WarehouseID = @param1`,
+        [productId, warehouseId],
+      );
+      if (existing.length > 0) {
+        return NextResponse.json(
+          {
+            message:
+              "El producto ya existe en este almacén. Use 'Actualizar cantidad' para modificar su stock.",
+          },
+          { status: 409 },
+        );
+      }
+
       // Insert new inventory record as a single transaction batch
       const insertTransactionQuery = `
         BEGIN TRY
@@ -174,7 +212,6 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: "Failed to process inventory update",
-        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },
     );

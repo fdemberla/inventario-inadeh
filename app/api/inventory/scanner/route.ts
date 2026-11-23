@@ -1,7 +1,7 @@
 // api/inventory/scanner/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
-import jwt from "jsonwebtoken";
+import { requireWarehouse } from "@/lib/authz";
 
 export async function POST(req: NextRequest) {
   if (req.method !== "POST") {
@@ -21,19 +21,17 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  let createdBy: string | number = "scanner";
-  try {
-    const token = req.cookies.get("token")?.value;
-    if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as unknown;
-      createdBy = decoded?.username || decoded?.id || createdBy;
-    }
-  } catch (err: unknown) {
-    console.warn(
-      "No se pudo decodificar el token, usando 'scanner' como usuario",
-      err,
+  if (operation !== "entrada" && operation !== "salida") {
+    return NextResponse.json(
+      { success: false, message: "Operación inválida" },
+      { status: 400 },
     );
   }
+
+  // Authenticated user assigned to this warehouse (admins: any)
+  const guard = await requireWarehouse(req, warehouseId);
+  if (guard.error) return guard.error;
+  const createdBy = guard.user.username || `user_${guard.user.id}`;
 
   try {
     const productResult = await rawSql(

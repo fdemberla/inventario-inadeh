@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button, Spinner, Alert } from "flowbite-react";
-import { HiRefresh } from "react-icons/hi";
+import { RefreshCw } from "lucide-react";
+import { Button, Spinner } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 import WarehouseCard from "../components/WarehouseCard";
+import { withBasePath } from "@/lib/utils";
 
 interface Warehouse {
   WarehouseID: number;
@@ -50,14 +52,14 @@ export default function Dashboard() {
   // Fetch warehouses accessible to user
   const fetchWarehouses = useCallback(async () => {
     try {
-      const res = await fetch("/api/warehouses/user");
+      const res = await fetch(withBasePath("/api/warehouses/user"));
       if (!res.ok) throw new Error("Failed to fetch warehouses");
       const data = await res.json();
       setWarehouses(data.recordset || data);
       setError(null);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error al cargar almacenes"
+        err instanceof Error ? err.message : "Error al cargar almacenes",
       );
     }
   }, []);
@@ -66,7 +68,7 @@ export default function Dashboard() {
   const fetchWarehouseInventory = useCallback(
     async (warehouseId: number, isCached: boolean = false) => {
       try {
-        const res = await fetch(`/api/inventory/${warehouseId}`);
+        const res = await fetch(withBasePath(`/api/inventory/${warehouseId}`));
         if (!res.ok) throw new Error("Failed to fetch inventory");
         const data: InventoryItem[] = await res.json();
 
@@ -78,13 +80,13 @@ export default function Dashboard() {
           const quantity = item.QuantityOnHand || 0;
           categoryMap.set(
             categoryName,
-            (categoryMap.get(categoryName) || 0) + quantity
+            (categoryMap.get(categoryName) || 0) + quantity,
           );
         });
 
         // Convert to sorted array (descending by quantity)
         const categories: CategoryInventory[] = Array.from(
-          categoryMap.entries()
+          categoryMap.entries(),
         )
           .map(([name, quantity]) => ({
             categoryName: name,
@@ -102,10 +104,13 @@ export default function Dashboard() {
           return newMap;
         });
       } catch (err) {
-        console.error(`Error fetching inventory for warehouse ${warehouseId}:`, err);
+        console.error(
+          `Error fetching inventory for warehouse ${warehouseId}:`,
+          err,
+        );
       }
     },
-    []
+    [],
   );
 
   // Load all data
@@ -115,9 +120,7 @@ export default function Dashboard() {
     try {
       await fetchWarehouses();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Error al cargar datos"
-      );
+      setError(err instanceof Error ? err.message : "Error al cargar datos");
     } finally {
       setLoading(false);
     }
@@ -138,7 +141,7 @@ export default function Dashboard() {
     loadAllData();
   }, [loadAllData]);
 
-  // Fetch inventory once warehouses are loaded
+  // Fetch inventory once warehouses are loadedb
   useEffect(() => {
     if (warehouses.length > 0 && warehouseInventory.size === 0) {
       fetchAllInventories();
@@ -149,10 +152,13 @@ export default function Dashboard() {
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const interval = setInterval(() => {
-      setLastUpdate(new Date());
-      fetchAllInventories();
-    }, 5 * 60 * 1000); // 5 minutes
+    const interval = setInterval(
+      () => {
+        setLastUpdate(new Date());
+        fetchAllInventories();
+      },
+      5 * 60 * 1000,
+    ); // 5 minutes
 
     return () => clearInterval(interval);
   }, [autoRefresh, fetchAllInventories]);
@@ -174,91 +180,81 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Spinner size="xl" />
-          <p className="text-gray-600 dark:text-gray-400">
-            Cargando dashboard...
-          </p>
+      <PageLayout title="Resumen de Almacenes">
+        <div className="flex min-h-96 items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Spinner size="lg" color="primary" />
+            <p className="text-fg-muted">
+              Cargando dashboard...
+            </p>
+          </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="flex-1 p-6">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-            Resumen de Almacenes
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Última actualización: {formatLastUpdate()}
-          </p>
+    <PageLayout
+      title="Resumen de Almacenes"
+      subtitle={`Última actualización: ${formatLastUpdate()}`}
+      actions={
+        <Button
+          onClick={handleRefresh}
+          variant="primary"
+          leftIcon={<RefreshCw className="h-4 w-4" aria-hidden="true" />}
+        >
+          Actualizar Ahora
+        </Button>
+      }
+    >
+      {/* Controls */}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={autoRefresh}
+            onChange={(e) => setAutoRefresh(e.target.checked)}
+            className="accent-brand-azul h-5 w-5 cursor-pointer"
+          />
+          <span className="text-sm text-fg">
+            Auto-actualizar cada 5 minutos
+          </span>
+        </label>
+      </div>
+
+      {/* Error Alert */}
+      {error && (
+        <div className="mb-6 rounded-lg bg-danger/10 p-4 text-danger-fg">
+          <span className="font-medium">{error}</span>
         </div>
+      )}
 
-        {/* Controls */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-          <Button
-            onClick={handleRefresh}
-            color="blue"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <HiRefresh className="h-4 w-4" />
-            Actualizar Ahora
-          </Button>
+      {/* Empty State */}
+      {warehouses.length === 0 && !error && (
+        <div className="mb-6 rounded-lg bg-accent/10 p-4 text-accent">
+          <span>No tienes almacenes asignados. Contacta al administrador.</span>
+        </div>
+      )}
 
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+      {/* Warehouses Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {warehouses.map((warehouse) => {
+          const inventoryData = warehouseInventory.get(warehouse.WarehouseID);
+          return (
+            <WarehouseCard
+              key={warehouse.WarehouseID}
+              warehouseId={warehouse.WarehouseID}
+              warehouseCode={warehouse.WarehouseCode}
+              warehouseName={warehouse.WarehouseName}
+              location={warehouse.Name}
+              isActive={true}
+              categories={inventoryData?.categories || []}
+              isLoading={!inventoryData}
+              isCached={inventoryData?.isCached || false}
             />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              Auto-actualizar cada 5 minutos
-            </span>
-          </label>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <Alert color="failure" className="mb-6">
-            <span className="font-medium">{error}</span>
-          </Alert>
-        )}
-
-        {/* Empty State */}
-        {warehouses.length === 0 && !error && (
-          <Alert color="info" className="mb-6">
-            <span>
-              No tienes almacenes asignados. Contacta al administrador.
-            </span>
-          </Alert>
-        )}
-
-        {/* Warehouses Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {warehouses.map((warehouse) => {
-            const inventoryData = warehouseInventory.get(warehouse.WarehouseID);
-            return (
-              <WarehouseCard
-                key={warehouse.WarehouseID}
-                warehouseId={warehouse.WarehouseID}
-                warehouseCode={warehouse.WarehouseCode}
-                warehouseName={warehouse.WarehouseName}
-                location={warehouse.Name}
-                isActive={true}
-                categories={inventoryData?.categories || []}
-                isLoading={!inventoryData}
-                isCached={inventoryData?.isCached || false}
-              />
-            );
-          })}
-        </div>
-      </main>
-    </div>
+          );
+        })}
+      </div>
+    </PageLayout>
   );
 }

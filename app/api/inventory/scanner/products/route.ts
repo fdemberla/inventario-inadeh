@@ -1,26 +1,9 @@
 // app/api/inventory/scanner/products/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
-import jwt from "jsonwebtoken";
+import { requireWarehouse } from "@/lib/authz";
 
 export async function GET(req: NextRequest) {
-  // Validate user from token
-  try {
-    const token = req.cookies.get("token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "No autorizado" },
-        { status: 401 },
-      );
-    }
-    jwt.verify(token, process.env.JWT_SECRET!);
-  } catch {
-    return NextResponse.json(
-      { success: false, message: "Token inválido" },
-      { status: 401 },
-    );
-  }
-
   const { searchParams } = new URL(req.url);
   const warehouseId = searchParams.get("warehouseId");
 
@@ -30,6 +13,9 @@ export async function GET(req: NextRequest) {
       { status: 400 },
     );
   }
+
+  const guard = await requireWarehouse(req, warehouseId);
+  if (guard.error) return guard.error;
 
   try {
     // Get warehouse info

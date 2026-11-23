@@ -1,18 +1,33 @@
 import { NextResponse, NextRequest } from "next/server";
 import { rawSql } from "@/lib/db";
+import { getApiAuth } from "@/lib/api-auth";
+import { canAccessWarehouse } from "@/lib/permissions";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
   try {
-    const id = parseInt(params.id);
+    const { user } = await getApiAuth(req);
+    if (!user) {
+      return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    }
+
+    const id = parseInt((await params).id);
     const category = req.nextUrl.searchParams.get("category");
 
     if (isNaN(id)) {
       return NextResponse.json(
         { message: "Invalid Warehouse ID" },
         { status: 400 },
+      );
+    }
+
+    const hasAccess = await canAccessWarehouse(user, id);
+    if (!hasAccess) {
+      return NextResponse.json(
+        { message: "No tienes permiso para ver esta bodega" },
+        { status: 403 }
       );
     }
 

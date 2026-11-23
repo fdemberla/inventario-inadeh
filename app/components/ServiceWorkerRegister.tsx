@@ -2,26 +2,32 @@
 "use client";
 
 import { useEffect } from "react";
+import { withBasePath } from "@/lib/utils";
 
 export default function ServiceWorkerRegister() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       // Use sw.js which is the Workbox-generated service worker with precaching
       navigator.serviceWorker
-        .register("/sw.js")
+        .register(withBasePath("/sw.js"))
         .then((registration) => {
           console.log(
             "Service Worker registered with scope:",
             registration.scope,
           );
-          
+
           // Handle updates
           registration.addEventListener("updatefound", () => {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener("statechange", () => {
-                if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                  console.log("New service worker available, refresh to update");
+                if (
+                  newWorker.state === "installed" &&
+                  navigator.serviceWorker.controller
+                ) {
+                  console.log(
+                    "New service worker available, refresh to update",
+                  );
                 }
               });
             }

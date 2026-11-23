@@ -1,11 +1,19 @@
-import { NextResponse } from "next/server";
-import { sql } from "@/lib/db"; // Adjust based on your db helper
+import { NextResponse, NextRequest } from "next/server";
+import { sql } from "@/lib/db";
+import { getApiAuth } from "@/lib/api-auth";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    // Correctly pass query as string, not template literal
-    const query =
-      "SELECT CategoryID, CategoryName FROM Categories ORDER BY CategoryName";
+    const { user } = await getApiAuth(req);
+    if (!user) {
+      return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    }
+
+    const query = `
+      SELECT CategoryID, CategoryName, Description 
+      FROM dbo.Categories 
+      ORDER BY CategoryName
+    `;
     const result = await sql(query);
 
     return NextResponse.json(result.recordset);

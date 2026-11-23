@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { TextInput, Button, Label, Textarea } from "flowbite-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { withBasePath } from "@/lib/utils";
+import { Card, Button, FormField, Textarea } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 
 export default function CreateSupplier() {
   const [supplierName, setSupplierName] = useState("");
@@ -12,6 +14,7 @@ export default function CreateSupplier() {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const validateEmail = (email: string) =>
@@ -38,8 +41,10 @@ export default function CreateSupplier() {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      const res = await fetch("/api/suppliers/create", {
+      const res = await fetch(withBasePath("/api/suppliers/create"), {
         method: "POST",
         body: JSON.stringify({
           supplierName,
@@ -63,34 +68,43 @@ export default function CreateSupplier() {
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Hubo un error al crear el proveedor.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-2xl dark:text-white">Crear Nuevo Proveedor</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="supplier-name">Nombre del Proveedor</Label>
-          <TextInput
+    <PageLayout
+      title="Crear Proveedor"
+      subtitle="Complete los datos para registrar un nuevo proveedor."
+      backButton={{ href: "/dashboard/suppliers", label: "Volver a proveedores" }}
+      breadcrumbs={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: "Proveedores", href: "/dashboard/suppliers" },
+        { label: "Crear" },
+      ]}
+    >
+    <Card className="w-full">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <FormField
+            label="Nombre del Proveedor"
             id="supplier-name"
             value={supplierName}
             onChange={(e) => setSupplierName(e.target.value)}
             required
+            disabled={isSubmitting}
           />
-        </div>
-        <div>
-          <Label htmlFor="contact-person">Persona de Contacto</Label>
-          <TextInput
+          <FormField
+            label="Persona de Contacto"
             id="contact-person"
             value={contactPerson}
             onChange={(e) => setContactPerson(e.target.value)}
             required
+            disabled={isSubmitting}
           />
-        </div>
-        <div>
-          <Label htmlFor="phone">Teléfono</Label>
-          <TextInput
+          <FormField
+            label="Teléfono"
             id="phone"
             type="text"
             value={phone}
@@ -102,14 +116,11 @@ export default function CreateSupplier() {
               }
             }}
             required
+            error={errors.phone}
+            disabled={isSubmitting}
           />
-          {errors.phone && (
-            <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
-          )}
-        </div>
-        <div>
-          <Label htmlFor="email">Correo Electrónico</Label>
-          <TextInput
+          <FormField
+            label="Correo Electrónico"
             id="email"
             type="email"
             value={email}
@@ -118,22 +129,27 @@ export default function CreateSupplier() {
               setErrors((prev) => ({ ...prev, email: undefined }));
             }}
             required
+            error={errors.email}
+            disabled={isSubmitting}
           />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-          )}
         </div>
-        <div>
-          <Label htmlFor="address">Dirección</Label>
+
+        <FormField label="Dirección" id="address" required>
           <Textarea
-            id="address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            required
+            disabled={isSubmitting}
+            rows={3}
           />
+        </FormField>
+
+        <div className="border-line border-t pt-4 text-center">
+          <Button type="submit" variant="primary" className="w-full sm:w-auto" isLoading={isSubmitting} disabled={isSubmitting}>
+            Crear Proveedor
+          </Button>
         </div>
-        <Button type="submit">Crear Proveedor</Button>
       </form>
-    </div>
+    </Card>
+    </PageLayout>
   );
 }
