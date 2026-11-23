@@ -2,10 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { Spinner } from "flowbite-react";
 import { withBasePath } from "@/lib/utils";
+import { PageLayout } from "@/app/components/PageLayout";
+import { Button, Input, Card, FormField } from "@/app/components/ui";
 
-// Componente de búsqueda de productos optimizado para móvil
+// Componente de búsqueda de productos con Glassmorphism
 const ProductSearchSelect = ({
   products,
   value,
@@ -16,27 +17,25 @@ const ProductSearchSelect = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(products);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
-  // Filtrar productos basado en el término de búsqueda
   useEffect(() => {
     if (!searchTerm.trim()) {
-      setFilteredProducts(products.slice(0, 50)); // Limitar a 50 inicialmente
+      setFilteredProducts(products.slice(0, 50));
     } else {
       const filtered = products
-        .filter((product) =>
+        .filter((product: any) =>
           product.ProductName.toLowerCase().includes(searchTerm.toLowerCase()),
         )
-        .slice(0, 20); // Limitar resultados de búsqueda
+        .slice(0, 20);
       setFilteredProducts(filtered);
     }
   }, [searchTerm, products]);
 
-  // Encontrar producto seleccionado
   useEffect(() => {
     if (value) {
       const product = products.find(
-        (p) => p.ProductID.toString() === value.toString(),
+        (p: any) => p.ProductID.toString() === value.toString(),
       );
       setSelectedProduct(product);
     } else {
@@ -44,7 +43,7 @@ const ProductSearchSelect = ({
     }
   }, [value, products]);
 
-  const handleSelect = (product) => {
+  const handleSelect = (product: any) => {
     setSelectedProduct(product);
     onChange({
       target: {
@@ -67,134 +66,105 @@ const ProductSearchSelect = ({
     setSearchTerm("");
   };
 
-  const handleToggle = () => {
-    setIsOpen(!isOpen);
-  };
-
-  // Componente de modal para móvil
   if (isOpen) {
     return (
-      <div className="fixed inset-0 z-50 bg-white">
-        {/* Header del modal */}
-        <div className="sticky top-0 border-b border-gray-200 bg-white px-4 py-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Seleccionar Producto
-            </h3>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="p-2 text-gray-400 hover:text-gray-600"
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4 bg-gray-900/40 backdrop-blur-md transition-opacity">
+        <div className="w-full max-w-lg bg-white/70 dark:bg-gray-900/70 backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden border border-white/50 dark:border-gray-700/50 flex flex-col h-[80vh] sm:h-[60vh] transform transition-all">
+          {/* Header del modal */}
+          <div className="sticky top-0 z-10 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/40 dark:bg-gray-800/40 px-6 py-4 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                Seleccionar Producto
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="rounded-full p-2 text-gray-500 hover:bg-black/5 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-200 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Campo de búsqueda */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={placeholder}
+                className="w-full rounded-2xl border border-white/60 dark:border-gray-600/60 bg-white/50 dark:bg-gray-800/50 py-3 pr-4 pl-12 text-base focus:border-brand-azul focus:ring-2 focus:ring-brand-azul/30 dark:focus:ring-brand-verde/30 focus:outline-none shadow-[inset_0_1px_3px_rgba(0,0,0,0.05)] dark:text-white transition-all"
+                autoFocus
+              />
+            </div>
           </div>
 
-          {/* Campo de búsqueda */}
-          <div className="relative mt-3">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={placeholder}
-              className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              autoFocus
-            />
+          {/* Lista de productos */}
+          <div className="flex-1 overflow-y-auto p-2">
+            {searchTerm && filteredProducts.length === 0 ? (
+              <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                No se encontraron productos
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {filteredProducts.map((product: any) => (
+                  <button
+                    key={product.ProductID}
+                    type="button"
+                    onClick={() => handleSelect(product)}
+                    className="w-full rounded-xl px-4 py-3 text-left transition-all duration-200 hover:bg-black/5 active:bg-black/10 dark:hover:bg-white/10 dark:active:bg-white/15"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {product.ProductName} <span className="text-gray-400 font-normal text-sm ml-2">({product.Barcode})</span>
+                      </span>
+                      {selectedProduct?.ProductID === product.ProductID && (
+                        <div className="rounded-full bg-brand-azul/20 dark:bg-brand-verde/20 p-1">
+                          <svg className="h-5 w-5 text-brand-azul dark:text-brand-verde" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Lista de productos */}
-        <div className="flex-1 overflow-y-auto">
-          {searchTerm && filteredProducts.length === 0 ? (
-            <div className="px-4 py-6 text-center text-gray-500">
-              No se encontraron productos
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {filteredProducts.map((product) => (
-                <button
-                  key={product.ProductID}
-                  type="button"
-                  onClick={() => handleSelect(product)}
-                  className="w-full px-4 py-4 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-900">
-                      {product.ProductName} - {product.Barcode}
-                    </span>
-                    {selectedProduct?.ProductID === product.ProductID && (
-                      <svg
-                        className="h-5 w-5 text-blue-600"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                </button>
-              ))}
+          {/* Footer */}
+          {selectedProduct && (
+            <div className="border-t border-gray-200/50 dark:border-gray-700/50 bg-white/40 dark:bg-gray-800/40 p-4 backdrop-blur-md">
+              <Button
+                variant="primary"
+                size="md"
+                className="w-full"
+                onClick={() => setIsOpen(false)}
+              >
+                Confirmar: {selectedProduct.ProductName}
+              </Button>
             </div>
           )}
         </div>
-
-        {/* Footer con botón de confirmar si hay selección */}
-        {selectedProduct && (
-          <div className="sticky bottom-0 border-t border-gray-200 bg-white px-4 py-3">
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              Confirmar: {selectedProduct.ProductName}
-            </button>
-          </div>
-        )}
       </div>
     );
   }
 
-  // Vista colapsada (campo de selección)
   return (
     <div
-      onClick={handleToggle}
-      className="flex min-h-[48px] w-full cursor-pointer items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-3 active:bg-gray-50"
+      onClick={() => setIsOpen(true)}
+      className="flex min-h-[52px] w-full cursor-pointer items-center justify-between rounded-xl border border-gray-200 bg-white/60 px-4 py-3 shadow-[inset_0_1px_2px_rgba(255,255,255,0.8)] backdrop-blur-sm transition-all hover:border-brand-azul/50 hover:bg-white/80 active:scale-[0.99] dark:border-gray-700/60 dark:bg-gray-800/60 dark:shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)] dark:hover:border-brand-verde/50"
     >
       <div className="flex min-w-0 flex-1 items-center">
         {selectedProduct ? (
           <div className="flex w-full items-center justify-between">
-            <span className="truncate pr-2 text-gray-900">
+            <span className="truncate pr-2 font-medium text-gray-900 dark:text-white">
               {selectedProduct.ProductName}
             </span>
             <button
@@ -203,50 +173,32 @@ const ProductSearchSelect = ({
                 e.stopPropagation();
                 handleClear();
               }}
-              className="flex-shrink-0 rounded p-1 hover:bg-gray-100"
+              className="flex-shrink-0 rounded-full p-1.5 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             >
-              <svg
-                className="h-4 w-4 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
+              <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         ) : (
-          <span className="text-gray-500">Seleccione un Producto</span>
+          <span className="text-gray-500 dark:text-gray-400">Seleccione un Producto...</span>
         )}
       </div>
-      <svg
-        className="h-5 w-5 text-gray-400"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 9l-7 7-7-7"
-        />
-      </svg>
+      {!selectedProduct && (
+        <svg className="h-5 w-5 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      )}
     </div>
   );
 };
 
-function AddProductToWarehouse() {
+export default function AddProductToWarehouse() {
   const params = useParams();
   const router = useRouter();
   const warehouseId = params?.id as string;
 
-  const [warehouse, setWarehouse] = useState({});
+  const [warehouse, setWarehouse] = useState<any>(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -254,7 +206,7 @@ function AddProductToWarehouse() {
     productId: "",
     newQuantity: 0,
     quantityReserved: 0,
-    reorderLevel: null,
+    reorderLevel: "",
     lastStockedDate: new Date().toISOString().slice(0, 16),
   });
 
@@ -271,7 +223,6 @@ function AddProductToWarehouse() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -279,24 +230,21 @@ function AddProductToWarehouse() {
     const fetchWarehouse = async () => {
       if (!params?.id) return;
       setLoading(true);
-      const toastId = toast.loading("Cargando almacén...");
       try {
         const res = await fetch(withBasePath(`/api/warehouses/${params.id}`));
         if (!res.ok) throw new Error("Error al cargar el almacén.");
         const data = await res.json();
-        setWarehouse(data.warehouse); // Asumimos que el API devuelve el objeto del almacén
-        toast.success("Almacén cargado correctamente", { id: toastId });
+        setWarehouse(data.warehouse);
       } catch (err) {
-        toast.error((err as Error).message, { id: toastId });
+        toast.error((err as Error).message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchWarehouse();
   }, [params?.id]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -305,7 +253,7 @@ function AddProductToWarehouse() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
@@ -323,157 +271,99 @@ function AddProductToWarehouse() {
       });
 
       if (!response.ok) {
-        throw new Error("Error al actualizar inventario");
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.message || "Error al actualizar inventario");
       }
 
       toast.success("Inventario Actualizado Satisfactoriamente!");
-      router.push(`/dashboard/inventory/update`);
+      router.push(`/dashboard/inventory`);
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Error al actualizar inventario");
+      toast.error((error as Error).message || "Error al actualizar inventario");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Cargando productos...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-6">
-      <div className="mx-auto max-w-md">
-        {/* Header */}
-        <div className="mb-6">
-          {loading && (
-            <div className="mb-4 flex items-center gap-2 text-blue-600 dark:text-blue-400">
-              <Spinner color="info" size="sm" />
-              <span>Cargando almacén...</span>
-            </div>
-          )}
-
-          {warehouse && (
-            <div className="mt-4 mb-4">
-              <h2 className="text-xl font-semibold">
-                {warehouse.WarehouseName}
-              </h2>
-            </div>
-          )}
-        </div>
-
-        {/* Formulario */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="space-y-6">
-            {/* Selector de producto */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Producto *
-              </label>
+    <PageLayout
+      title="Agregar a Inventario"
+      subtitle={warehouse ? `Agregando stock en ${warehouse.WarehouseName}` : "Cargando..."}
+      breadcrumbs={[
+        { label: "Dashboard", href: withBasePath("/dashboard") },
+        { label: "Inventario", href: withBasePath("/dashboard/inventory") },
+        { label: "Agregar" },
+      ]}
+      backButton={{ href: `/dashboard/inventory`, label: "Volver al listado" }}
+    >
+      <div className="mx-auto max-w-xl">
+        <Card>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <FormField label="Producto" required>
               <ProductSearchSelect
                 products={products}
                 value={formData.productId}
-                onChange={handleChange}
+                onChange={handleChange as any}
                 name="productId"
                 placeholder="Buscar producto..."
               />
-            </div>
+            </FormField>
 
-            {/* Cantidad */}
-            <div>
-              <label
-                htmlFor="newQuantity"
-                className="mb-2 block text-sm font-medium text-gray-700"
-              >
-                Cantidad *
-              </label>
-              <input
+            <FormField label="Cantidad Inicial" required>
+              <Input
                 type="number"
-                id="newQuantity"
                 name="newQuantity"
                 min="0"
-                value={formData.newQuantity}
+                value={formData.newQuantity.toString()}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Ej. 100"
                 required
               />
-            </div>
+            </FormField>
 
-            {/* Nivel de reorden */}
-            <div>
-              <label
-                htmlFor="reorderLevel"
-                className="mb-2 block text-sm font-medium text-gray-700"
-              >
-                Cantidad mínima para ordenar (opcional)
-              </label>
-              <input
+            <FormField label="Cantidad mínima para ordenar (Nivel de reorden)">
+              <Input
                 type="number"
-                id="reorderLevel"
                 name="reorderLevel"
                 min="0"
-                value={formData.reorderLevel || ""}
+                value={formData.reorderLevel}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Opcional"
               />
-            </div>
+            </FormField>
 
-            {/* Fecha */}
-            <div>
-              <label
-                htmlFor="lastStockedDate"
-                className="mb-2 block text-sm font-medium text-gray-700"
-              >
-                Fecha
-              </label>
-              <input
+            <FormField label="Fecha de Registro">
+              <Input
                 type="datetime-local"
-                id="lastStockedDate"
                 name="lastStockedDate"
                 value={formData.lastStockedDate}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-3 text-base"
-                disabled={true}
+                disabled
               />
-            </div>
+            </FormField>
 
-            {/* Botones */}
-            <div className="flex flex-col space-y-3 pt-4">
-              <button
+            <div className="flex items-center gap-3 pt-4">
+              <Button
+                variant="primary"
                 type="submit"
+                isLoading={submitting}
                 disabled={submitting || !formData.productId}
-                className="w-full rounded-md bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-                onClick={handleSubmit}
+                className="flex-1"
               >
-                {submitting ? (
-                  <div className="flex items-center justify-center">
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                    Procesando...
-                  </div>
-                ) : (
-                  "Agregar a Inventario"
-                )}
-              </button>
-
-              <button
+                Agregar a Inventario
+              </Button>
+              <Button
+                variant="outline"
                 type="button"
                 onClick={() => router.push(`/dashboard/inventory`)}
-                className="w-full rounded-md bg-gray-200 px-4 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-300"
+                disabled={submitting}
               >
                 Cancelar
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
+          </form>
+        </Card>
       </div>
-    </div>
+    </PageLayout>
   );
 }
-
-export default AddProductToWarehouse;

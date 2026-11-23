@@ -1,6 +1,7 @@
 // // /app/api/products/[id]/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { rawSql, sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/authz";
 
 export async function GET(
   req: Request,
@@ -71,9 +72,11 @@ export async function GET(
 }
 
 export async function DELETE(
-  req: Request,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
+  const guard = await requireAdmin(req);
+  if (guard.error) return guard.error;
   try {
     const { id: idParam } = await context.params;
     const productId = parseInt(idParam);

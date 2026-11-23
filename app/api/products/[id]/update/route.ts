@@ -1,13 +1,25 @@
 // --- BACKEND: /api/products/[id]/update.ts ---
 
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
+import { getApiAuth, isAdmin } from "@/lib/api-auth";
 
 export async function PUT(
-  req: Request,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { user } = await getApiAuth(req);
+    if (!user) {
+      return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    }
+    if (!isAdmin(user)) {
+      return NextResponse.json(
+        { message: "No tienes permisos de administrador" },
+        { status: 403 },
+      );
+    }
+
     const { id } = await context.params;
     const productId = parseInt(id);
 

@@ -1,8 +1,10 @@
 "use client";
 
-import { Card, Button, Badge, Spinner } from "flowbite-react";
+import { Badge } from "flowbite-react";
+import { Spinner } from "@/app/components/ui/Spinner";
 import { useState } from "react";
 import Link from "next/link";
+import { Card, Button } from "@/app/components/ui";
 
 interface CategoryInventory {
   categoryName: string;
@@ -40,8 +42,8 @@ export default function WarehouseCard({
     return (
       <Card className="flex h-full min-h-[250px] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-gray-600 dark:text-gray-400">
+          <Spinner size="lg" color="info" />
+          <p className="text-gray-600 dark:text-gray-400 font-medium">
             Cargando inventario...
           </p>
         </div>
@@ -50,58 +52,56 @@ export default function WarehouseCard({
   }
 
   return (
-    <Card className="h-full transition-shadow hover:shadow-lg">
+    <Card hoverable className="h-full flex flex-col">
       {/* Header */}
-      <div className="mb-4 flex items-start justify-between">
-        <div className="flex-1">
-          <div className="mb-2 flex items-center gap-2">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              {warehouseCode}
-            </h3>
-            <Badge color={isActive ? "success" : "gray"} size="sm">
-              {isActive ? "Activo" : "Inactivo"}
+      <div className="mb-4">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+            {warehouseCode}
+          </h3>
+          <Badge color={isActive ? "success" : "gray"} size="sm" className="rounded-md">
+            {isActive ? "Activo" : "Inactivo"}
+          </Badge>
+          {isCached && (
+            <Badge color="warning" size="sm" className="rounded-md">
+              Cacheado
             </Badge>
-            {isCached && (
-              <Badge color="yellow" size="sm">
-                Cacheado
-              </Badge>
-            )}
-          </div>
-          <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
-            {warehouseName}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-500">{location}</p>
+          )}
         </div>
+        <p className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-300">
+          {warehouseName}
+        </p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{location}</p>
       </div>
 
       {/* Inventory Summary */}
-      <div className="mb-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-        <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <div className="mb-5 flex-1 rounded-xl bg-white/20 p-4 dark:bg-gray-800/30 border border-white/30 dark:border-white/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]">
+        <div className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300 pb-2 border-b border-white/20 dark:border-white/10">
           Inventario Total:{" "}
-          <span className="text-lg text-blue-600 dark:text-blue-400">
+          <span className="text-lg text-brand-azul dark:text-blue-400 ml-1">
             {totalInventory}
           </span>{" "}
           unidades
         </div>
 
         {/* Top 5 Categories */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {topCategories.length > 0 ? (
             topCategories.map((category, idx) => (
               <div
                 key={idx}
                 className="flex items-center justify-between text-sm"
               >
-                <span className="text-gray-700 dark:text-gray-300">
+                <span className="text-gray-600 dark:text-gray-400">
                   {category.categoryName}
                 </span>
-                <span className="font-semibold text-gray-900 dark:text-white">
+                <span className="font-semibold text-brand-azul dark:text-blue-300 bg-brand-azul/10 dark:bg-brand-azul/20 border border-brand-azul/20 dark:border-brand-azul/30 px-2 py-0.5 rounded-full text-xs">
                   {category.quantity}
                 </span>
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500 italic dark:text-gray-400">
+            <p className="text-sm text-gray-500 italic dark:text-gray-500">
               Sin inventario registrado
             </p>
           )}
@@ -112,7 +112,7 @@ export default function WarehouseCard({
           <div className="mt-3">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+              className="text-xs font-semibold text-brand-azul hover:underline dark:text-blue-400 transition-colors"
             >
               {expanded
                 ? "Ver menos"
@@ -120,16 +120,16 @@ export default function WarehouseCard({
             </button>
 
             {expanded && (
-              <div className="mt-3 space-y-2 border-t border-gray-200 pt-3 dark:border-gray-700">
+              <div className="mt-3 space-y-2.5 border-t border-gray-200 pt-3 dark:border-gray-700">
                 {remainingCategories.map((category, idx) => (
                   <div
                     key={idx + 5}
                     className="flex items-center justify-between text-sm"
                   >
-                    <span className="text-gray-700 dark:text-gray-300">
+                    <span className="text-gray-600 dark:text-gray-400">
                       {category.categoryName}
                     </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
+                    <span className="font-semibold text-brand-azul dark:text-blue-300 bg-brand-azul/10 dark:bg-brand-azul/20 border border-brand-azul/20 dark:border-brand-azul/30 px-2 py-0.5 rounded-full text-xs">
                       {category.quantity}
                     </span>
                   </div>
@@ -141,12 +141,12 @@ export default function WarehouseCard({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2">
+      <div className="mt-auto">
         <Link
           href={`/dashboard/inventory?warehouseId=${warehouseId}`}
-          className="flex-1"
+          className="block w-full"
         >
-          <Button size="sm" color="blue" className="w-full">
+          <Button variant="primary" size="md" className="w-full">
             Ver Detalle
           </Button>
         </Link>

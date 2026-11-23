@@ -7,6 +7,7 @@ import {
   HiRefresh,
   HiExclamation,
 } from "react-icons/hi";
+import { Button } from "@/app/components/ui";
 import {
   isOnline,
   subscribeToOnlineStatus,
@@ -185,18 +186,17 @@ export default function OfflineStatusBanner({
 
         {/* Sync button */}
         {online && stats && stats.pendingCount > 0 && (
-          <button
+          <Button
             onClick={handleManualSync}
             disabled={syncing}
-            className={`flex items-center gap-1 rounded-md px-3 py-1 text-sm font-medium transition-colors ${
-              syncing
-                ? "cursor-not-allowed bg-gray-300 text-gray-500"
-                : "bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-            }`}
+            isLoading={syncing}
+            variant="outline"
+            size="sm"
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-current/20 text-current hover:bg-white dark:hover:bg-gray-700"
           >
-            <HiRefresh className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+            {!syncing && <HiRefresh className="mr-1.5 h-4 w-4" />}
             {syncing ? "Sincronizando..." : "Sincronizar"}
-          </button>
+          </Button>
         )}
       </div>
 

@@ -1,7 +1,8 @@
 // app/api/inventory/scanner/sync/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql, withTransaction } from "@/lib/db";
-import { auth } from "@/auth";
+import { requireUser, userCanAccessWarehouse } from "@/lib/authz";
+import type { ApiUser } from "@/lib/api-auth";
 
 interface ScanItem {
   id: number;
@@ -30,17 +31,10 @@ interface SyncResultItem {
 }
 
 export async function POST(req: NextRequest) {
-  // Authentication check - require valid session
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json(
-      { success: false, message: "No autorizado" },
-      { status: 401 },
-    );
-  }
-
-  const currentUser =
-    session.user.username || String(session.user.id) || "sync-api";
+  const guard = await requireUser(req);
+  if (guard.error) return guard.error;
+  const { user } = guard;
+  const currentUser = user.username || `user_${user.id}`;
 
   try {
     const body: BulkSyncPayload = await req.json();
@@ -71,14 +65,14 @@ export async function POST(req: NextRequest) {
     // Process each scan in a transaction
     for (const scan of scans) {
       try {
-        const result = await processSingleScan(scan, currentUser, deviceId);
+        const result = await processSingleScan(scan, user, currentUser, deviceId);
         results.push(result);
       } catch (error) {
         console.error(`Error processing scan ${scan.id}:`, error);
         results.push({
           id: scan.id,
           success: false,
-          error: error instanceof Error ? error.message : "Error desconocido",
+          error: "Error interno al procesar el escaneo",
           conflictType: "server_error",
         });
       }
@@ -111,10 +105,26 @@ export async function POST(req: NextRequest) {
 
 async function processSingleScan(
   scan: ScanItem,
+  user: ApiUser,
   currentUser: string,
   deviceId: string,
 ): Promise<SyncResultItem> {
   const { id, barcode, warehouseId, operation, quantity, timestamp } = scan;
+
+  if (operation !== "entrada" && operation !== "salida") {
+    return { id, success: false, error: "Operación inválida", conflictType: "invalid" };
+  }
+  if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 10000) {
+    return { id, success: false, error: "Cantidad inválida", conflictType: "invalid" };
+  }
+  if (!(await userCanAccessWarehouse(user, warehouseId))) {
+    return {
+      id,
+      success: false,
+      error: "No tienes permiso para acceder a este almacén",
+      conflictType: "forbidden",
+    };
+  }
 
   // Find product by barcode
   const productResult = await rawSql(

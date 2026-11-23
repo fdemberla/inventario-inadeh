@@ -99,7 +99,8 @@ export async function rawSql(query: string, params: unknown[]) {
       }
     });
 
-    // Debug logging in development
+    // Debug logging in development (muted to prevent console spam)
+    /*
     if (process.env.NODE_ENV === "development") {
       console.log("Executing query:", query);
       console.log("With parameters:", params);
@@ -108,16 +109,19 @@ export async function rawSql(query: string, params: unknown[]) {
         params.map((p) => typeof p),
       );
     }
+    */
 
     const result = await request.query(query);
 
-    // Optional: Log result in development
+    // Optional: Log result in development (muted to prevent console spam)
+    /*
     if (process.env.NODE_ENV === "development") {
       console.log("Query result:", {
         rowsAffected: result.rowsAffected,
         recordset: result.recordset ? result.recordset.slice(0, 3) : null, // Show first 3 rows
       });
     }
+    */
 
     return result.recordset;
   } catch (err) {

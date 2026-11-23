@@ -1,8 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
+import { getApiAuth, isAdmin } from "@/lib/api-auth";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { user } = await getApiAuth(req);
+    if (!user) {
+      return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    }
+    if (!isAdmin(user)) {
+      return NextResponse.json({ message: "No tienes permisos de administrador" }, { status: 403 });
+    }
+
     const { categoryName, description, parentCategoryID } = await req.json();
 
     if (!categoryName) {

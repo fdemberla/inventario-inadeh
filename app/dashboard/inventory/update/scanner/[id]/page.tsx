@@ -1,7 +1,8 @@
 "use client";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
-import { Label, Spinner, TextInput, Badge } from "flowbite-react";
+import { Label, TextInput, Badge } from "flowbite-react";
+import { Spinner } from "@/app/components/ui/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { CiBarcode } from "react-icons/ci";
 import {

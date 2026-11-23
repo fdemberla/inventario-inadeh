@@ -1,31 +1,32 @@
 import React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { Spinner } from "./Spinner";
 
 /**
  * Definición de variantes para el componente Button
  */
 const buttonVariants = cva(
   // Estilos base
-  "inline-flex items-center justify-center font-semibold transition-all duration-200 ease-in-out cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-md",
+  "inline-flex items-center justify-center font-semibold transition-all duration-300 ease-out cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-inherit disabled:hover:scale-100 disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-xl",
   {
     variants: {
       variant: {
         // Primario: Verde (acción principal)
         primary:
-          "bg-[#44A147] text-white hover:bg-opacity-90 active:bg-opacity-100 dark:bg-[#44A147] dark:hover:bg-opacity-80 focus-visible:ring-green-500",
+          "bg-brand-verde text-white hover:bg-[#3ca340] active:scale-95 dark:bg-brand-verde/80 dark:hover:bg-brand-verde focus-visible:ring-brand-verde/50 backdrop-blur-md shadow-lg shadow-brand-verde/20 hover:shadow-xl hover:shadow-brand-verde/30",
         // Secundario: Naranja (acciones alternativas)
         secondary:
-          "bg-[#ED7625] text-white hover:bg-opacity-90 active:bg-opacity-100 dark:bg-[#ED7625] dark:hover:bg-opacity-80 focus-visible:ring-orange-500",
+          "bg-brand-naranja text-white hover:bg-[#de6615] active:scale-95 dark:bg-brand-naranja/80 dark:hover:bg-brand-naranja focus-visible:ring-brand-naranja/50 backdrop-blur-md shadow-lg shadow-brand-naranja/20 hover:shadow-xl hover:shadow-brand-naranja/30",
         // Peligro: Rojo (acciones destructivas)
         danger:
-          "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 dark:bg-red-600 dark:hover:bg-red-700 focus-visible:ring-red-500",
+          "bg-red-500 text-white hover:bg-red-600 active:scale-95 dark:bg-red-500/80 dark:hover:bg-red-500 focus-visible:ring-red-500/50 backdrop-blur-md shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30",
         // Ghost: Transparente (acciones secundarias)
         ghost:
-          "bg-transparent text-[#004A98] hover:bg-gray-100 active:bg-gray-200 dark:text-blue-400 dark:hover:bg-gray-700 dark:active:bg-gray-600 focus-visible:ring-blue-500",
+          "bg-transparent text-gray-700 hover:bg-white/40 active:scale-95 dark:text-gray-300 dark:hover:bg-gray-800/40 focus-visible:ring-brand-azul/50",
         // Outline: Con borde
         outline:
-          "border-2 border-[#004A98] bg-transparent text-[#004A98] hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-gray-800 focus-visible:ring-blue-500",
+          "border-2 border-brand-azul/50 bg-white/10 text-brand-azul hover:bg-brand-azul/10 active:scale-95 dark:border-brand-azul/40 dark:text-blue-400 dark:hover:bg-brand-azul/20 focus-visible:ring-brand-azul/50 backdrop-blur-md",
       },
       size: {
         sm: "px-3 py-1.5 text-sm h-8 gap-1",
@@ -84,26 +85,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {isLoading && (
-          <svg
-            className="h-4 w-4 animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
+          <Spinner color="white" size="sm" className="mr-2" />
         )}
         {!isLoading && leftIcon && (
           <span className="inline-flex items-center">{leftIcon}</span>

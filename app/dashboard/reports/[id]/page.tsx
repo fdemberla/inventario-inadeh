@@ -6,6 +6,8 @@ import { useParams } from "next/navigation";
 import TarjetaGroup from "@/app/components/reports/TarjetaGroup";
 import ExcelExportButton from "@/app/components/reports/BotonExportar";
 import { withBasePath } from "@/lib/utils";
+import { PageLayout } from "@/app/components/PageLayout";
+import { Card } from "@/app/components/ui";
 
 const COLORES = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
@@ -232,144 +234,20 @@ const PanelReportesAlmacen = () => {
     };
   }, []);
 
-  // return (
-  //   <div className="min-h-screen bg-gray-50 p-6">
-  //     <div className="mx-auto max-w-7xl">
-  //       {/* Header */}
-  //       <div className="mb-8">
-  //         <h1 className="mb-2 text-3xl font-bold text-gray-900">
-  //           Reportes de Almacén
-  //         </h1>
-  //         <p className="text-gray-600">
-  //           Análisis integral y perspectivas de gestión de inventario
-  //         </p>
-  //       </div>
-
-  //       {/* Controles */}
-  //       <div className="mb-6 rounded-lg bg-white p-4 shadow-md">
-  //         <div className="flex flex-wrap items-center gap-4">
-  //           <div className="flex items-center gap-2">
-  //             <Filter className="h-5 w-5 text-gray-500" />
-  //             <select
-  //               value={categoriaSeleccionada}
-  //               onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-  //               className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-  //             >
-  //               <option value="todas">Todas las Categorías</option>
-  //               <option value="electronicos">Electrónicos</option>
-  //               <option value="ropa">Ropa</option>
-  //               <option value="hogar">Hogar y Jardín</option>
-  //               <option value="deportes">Deportes</option>
-  //               <option value="libros">Libros</option>
-  //             </select>
-  //           </div>
-  //           <button className="ml-auto flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700">
-  //             <Download className="h-4 w-4" />
-  //             Exportar Datos
-  //           </button>
-  //         </div>
-  //       </div>
-
-  //       <TarjetaGroup id={params.id} />
-
-  //       {/* Grilla de Gráficos */}
-  //       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-  //         {/* Niveles de Stock Actuales */}
-  //         <div className="rounded-lg bg-white p-6 shadow-md">
-  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-  //             Niveles de Stock Actuales
-  //           </h3>
-  //           <div className="h-[300px]">
-  //             <canvas ref={nivelInventarioRef}></canvas>
-  //           </div>
-  //         </div>
-
-  //         {/* Tendencias de Movimiento de Stock */}
-  //         <div className="rounded-lg bg-white p-6 shadow-md">
-  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-  //             Movimiento Diario de Stock
-  //           </h3>
-  //           <div className="h-[300px]">
-  //             <canvas ref={movimientoStockRef}></canvas>
-  //           </div>
-  //         </div>
-  //       </div>
-
-  //       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-  //         {/* Distribución de Valor de Inventario */}
-  //         <div className="rounded-lg bg-white p-6 shadow-md">
-  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-  //             Valor de Inventario por Categoría
-  //           </h3>
-  //           <div className="h-[250px]">
-  //             <canvas ref={valorInventarioRef}></canvas>
-  //           </div>
-  //         </div>
-
-  //         {/* Alertas de Stock Bajo */}
-  //         <div className="rounded-lg bg-white p-6 shadow-md">
-  //           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-  //             Alertas de Stock Bajo
-  //           </h3>
-  //           <div className="space-y-3">
-  //             {alertasStockBajo.map((item, index) => (
-  //               <div
-  //                 key={index}
-  //                 className={`rounded-md border-l-4 p-3 ${
-  //                   item.Status === "critical"
-  //                     ? "border-red-500 bg-red-50"
-  //                     : "border-yellow-500 bg-yellow-50"
-  //                 }`}
-  //               >
-  //                 <div className="flex items-center justify-between">
-  //                   <div>
-  //                     <p className="font-medium text-gray-900">
-  //                       {item.ProductName}
-  //                     </p>
-  //                     <p className="text-sm text-gray-600">
-  //                       Reordenar en: {item.ReorderLevel}
-  //                     </p>
-  //                   </div>
-  //                   <div className="text-right">
-  //                     <p
-  //                       className={`font-bold ${
-  //                         item.Status === "critical"
-  //                           ? "text-red-600"
-  //                           : "text-yellow-600"
-  //                       }`}
-  //                     >
-  //                       {item.QuantityOnHand}
-  //                     </p>
-  //                     <p className="text-xs text-gray-500">en stock</p>
-  //                   </div>
-  //                 </div>
-  //               </div>
-  //             ))}
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
-
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          {almacenActual && (
-            <h1 className="mb-2 text-3xl font-bold text-gray-900">
-              Reportes de {almacenActual.warehouse.WarehouseName}
-            </h1>
-          )}
-
-          <p className="text-gray-600">
-            Análisis integral y perspectivas de gestión de inventario
-          </p>
-        </div>
-
+    <PageLayout
+      title={almacenActual ? `Reportes de ${almacenActual.warehouse.WarehouseName}` : "Reportes de Almacén"}
+      subtitle="Análisis integral y perspectivas de gestión de inventario"
+      backButton={{ href: "/dashboard/reports", label: "Volver a reportes" }}
+      breadcrumbs={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: "Reportes", href: "/dashboard/reports" },
+        { label: almacenActual ? almacenActual.warehouse.WarehouseName : "Detalles" },
+      ]}
+    >
+      <div className="space-y-8">
         {/* Controles */}
-        <div className="mb-6 rounded-lg bg-white p-4 shadow-md">
+        <Card className="p-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <Filter className="h-5 w-5 text-gray-500" />
@@ -379,7 +257,7 @@ const PanelReportesAlmacen = () => {
                 <select
                   value={categoriaSeleccionada}
                   onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-                  className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="rounded-lg px-4 py-2 text-sm font-normal transition-all duration-200 ease-in-out border border-white/40 bg-white/50 dark:border-white/10 dark:bg-gray-800/50 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus-visible:border-transparent focus-visible:bg-white dark:focus-visible:bg-gray-800 focus-visible:ring-2 focus-visible:ring-brand-azul focus-visible:outline-none"
                 >
                   <option value="todas">-- Categorias --</option>
                   {listaCategoria.map((categoria) => (
@@ -403,7 +281,7 @@ const PanelReportesAlmacen = () => {
               }`}
             />
           </div>
-        </div>
+        </Card>
 
         {/* Tarjetas */}
         {loading ? (
@@ -420,10 +298,10 @@ const PanelReportesAlmacen = () => {
         )}
 
         {/* Grilla de Gráficos */}
-        <div className="mb-8 grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {[nivelInventarioRef, movimientoStockRef].map((ref, idx) => (
-            <div key={idx} className="rounded-lg bg-white p-6 shadow-md">
-              <h3 className="mb-4 text-lg font-semibold text-gray-900">
+            <Card key={idx} className="p-6">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                 {idx === 0
                   ? "Niveles de Stock Actuales"
                   : "Movimiento Diario de Stock"}
@@ -435,14 +313,14 @@ const PanelReportesAlmacen = () => {
                   <canvas ref={ref}></canvas>
                 )}
               </div>
-            </div>
+            </Card>
           ))}
         </div>
 
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Valor de Inventario */}
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+          <Card className="p-6">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               Valor de Inventario por Categoría
             </h3>
             <div className="h-[400px]">
@@ -452,11 +330,11 @@ const PanelReportesAlmacen = () => {
                 <canvas ref={valorInventarioRef}></canvas>
               )}
             </div>
-          </div>
+          </Card>
 
           {/* Alertas de Stock Bajo */}
-          <div className="col-span-2 rounded-lg bg-white p-6 shadow-md lg:col-span-1">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+          <Card className="col-span-2 lg:col-span-1 p-6">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               Alertas de Stock Bajo
             </h3>
             <div className="space-y-3">
@@ -472,13 +350,13 @@ const PanelReportesAlmacen = () => {
                       key={index}
                       className={`rounded-md border-l-4 p-3 ${
                         item.Status === "critical"
-                          ? "border-red-500 bg-red-50"
-                          : "border-yellow-500 bg-yellow-50"
+                          ? "border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-400"
+                          : "border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-400"
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-gray-900 dark:text-gray-100">
                             {item.ProductName}
                           </p>
                           <p className="text-sm text-gray-600">
@@ -489,8 +367,8 @@ const PanelReportesAlmacen = () => {
                           <p
                             className={`font-bold ${
                               item.Status === "critical"
-                                ? "text-red-600"
-                                : "text-yellow-600"
+                                ? "text-red-600 dark:text-red-400"
+                                : "text-yellow-600 dark:text-yellow-400"
                             }`}
                           >
                             {item.QuantityOnHand}
@@ -501,10 +379,10 @@ const PanelReportesAlmacen = () => {
                     </div>
                   ))}
             </div>
-          </div>
+          </Card>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

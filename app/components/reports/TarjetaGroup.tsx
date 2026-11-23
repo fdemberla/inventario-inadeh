@@ -60,11 +60,11 @@ function TarjetaGroup({ id, category }) {
 
   if (loading) {
     return (
-      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-32 animate-pulse rounded-lg bg-gray-200"
+            className="h-[136px] animate-pulse rounded-2xl bg-white/40 dark:bg-gray-800/40 backdrop-blur-md shadow-sm border border-white/50 dark:border-white/10"
           ></div>
         ))}
       </div>

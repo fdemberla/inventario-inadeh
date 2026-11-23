@@ -160,9 +160,21 @@ async function sendScanToServer(
     }),
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    // 4xx = the server processed and rejected the scan (no stock, unknown
+    // barcode, expired session...). Report it; do NOT queue it as offline,
+    // or it will fail again on sync and block the scanner.
+    if (response.status >= 400 && response.status < 500) {
+      return {
+        success: false,
+        message: data.message || "El servidor rechazó el escaneo",
+        queued: false,
+        verified: false,
+      };
+    }
+    // 5xx: server unavailable -> let processScan queue it locally
     throw new Error(data.message || "Error al procesar el escaneo");
   }
 

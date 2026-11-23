@@ -1,12 +1,12 @@
 // app/api/warehouses/mobile/user/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
-import { getMobileSession } from "@/lib/mobile-auth";
+import { getApiAuth } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
   try {
     // Get user from mobile Bearer token
-    const session = await getMobileSession(request);
+    const { user: session } = await getApiAuth(request);
 
     if (!session) {
       return NextResponse.json(

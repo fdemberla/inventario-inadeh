@@ -85,7 +85,10 @@ export default function SuppliersPage() {
     return (
       <PageLayout title="Proveedores">
         <div className="flex justify-center p-6">
-          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+          <div role="status" aria-label="Cargando...">
+            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+            <span className="sr-only">Cargando...</span>
+          </div>
         </div>
       </PageLayout>
     );
@@ -109,9 +112,13 @@ export default function SuppliersPage() {
       }
     >
       {suppliers.length === 0 ? (
-        <p className="text-gray-600 dark:text-gray-400">
-          No hay proveedores registrados.
-        </p>
+        <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white py-14 text-center dark:border-gray-700 dark:bg-gray-800">
+          <svg className="mb-3 h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 18L4 14m0 0l4-4M4 14h13a4 4 0 000-8H5" />
+          </svg>
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">No hay proveedores registrados</p>
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Crea un proveedor para comenzar</p>
+        </div>
       ) : (
         <DataTable data={suppliers} columns={columns} />
       )}

@@ -65,7 +65,10 @@ export default function ViewAllCategories() {
     return (
       <PageLayout title="Categorías">
         <div className="flex justify-center p-6">
-          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+          <div role="status" aria-label="Cargando...">
+            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+            <span className="sr-only">Cargando...</span>
+          </div>
         </div>
       </PageLayout>
     );

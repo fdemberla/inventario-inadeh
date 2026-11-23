@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { stripBasePath } from "@/lib/utils";
 
 export interface PageLayoutProps {
   title: string;
@@ -36,22 +38,30 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   breadcrumbs,
 }) => {
   return (
-    <div className="min-h-full space-y-6 py-2">
-      {/* Breadcrumbs */}
-      {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav className="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+    <div className="relative min-h-full space-y-6 py-2">
+      {/* Animated Mesh Gradient Background */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-[10%] -left-[10%] h-[50%] w-[50%] rounded-full bg-brand-azul/15 dark:bg-brand-azul/10 blur-[120px] animate-pulse duration-[8000ms]" />
+        <div className="absolute top-[20%] -right-[10%] h-[50%] w-[50%] rounded-full bg-brand-verde/15 dark:bg-brand-verde/10 blur-[120px] animate-pulse duration-[10000ms] delay-700" />
+        <div className="absolute -bottom-[10%] left-[20%] h-[60%] w-[60%] rounded-full bg-brand-naranja/10 dark:bg-brand-naranja/5 blur-[120px] animate-pulse duration-[12000ms] delay-1000" />
+      </div>
+
+      <div className="relative z-10 space-y-6">
+        {/* Breadcrumbs */}
+        {breadcrumbs && breadcrumbs.length > 0 && (
+          <nav className="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
           {breadcrumbs.map((crumb, index) => (
             <React.Fragment key={index}>
               {index > 0 && (
                 <span className="text-gray-400 dark:text-gray-600">/</span>
               )}
               {crumb.href ? (
-                <a
-                  href={crumb.href}
-                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                <Link
+                  href={stripBasePath(crumb.href)}
+                  className="text-brand-azul hover:text-brand-azul/80 dark:text-blue-400 dark:hover:text-blue-300 transition-colors font-medium"
                 >
                   {crumb.label}
-                </a>
+                </Link>
               ) : (
                 <span className="text-gray-700 dark:text-gray-300">
                   {crumb.label}
@@ -67,8 +77,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <div className="flex-1">
           {/* Botón de atrás */}
           {backButton && (
-            <a
-              href={backButton.href}
+            <Link
+              href={stripBasePath(backButton.href)}
               className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
             >
               <svg
@@ -85,7 +95,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                 />
               </svg>
               {backButton.label || "Atrás"}
-            </a>
+            </Link>
           )}
 
           {/* Título */}
@@ -111,6 +121,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
 
       {/* Contenido */}
       <div className="space-y-4">{children}</div>
+      </div>
     </div>
   );
 };

@@ -3,7 +3,8 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Sidebar, SidebarItem, SidebarItemGroup, Button } from "flowbite-react";
+import { Sidebar, SidebarItem, SidebarItemGroup } from "flowbite-react";
+import { Button } from "@/app/components/ui";
 import {
   HiOutlineCube,
   HiOutlineTag,
@@ -127,10 +128,8 @@ const SIDEBAR_SECTIONS = {
       key: "productos",
       label: "Productos",
       icon: HiOutlineCube,
-      links: [
-        { label: "Ver Todos", path: "/dashboard/products" },
-        { label: "Crear Producto", path: "/dashboard/products/create" },
-      ],
+      // Creating products is admin-only (API + middleware enforce it)
+      links: [{ label: "Ver Todos", path: "/dashboard/products" }],
     },
     {
       key: "inventario",
@@ -175,10 +174,21 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
     (path: string) => {
       if (!pathname) return false;
       const normalizedPathname = stripBasePath(pathname);
-      // Exact match or path is a prefix with a / boundary
+      // Exact match
       if (normalizedPathname === path) return true;
-      // Check if it's a sub-route (e.g., /dashboard/products is active for /dashboard/products/create)
-      if (normalizedPathname.startsWith(path + "/")) return true;
+      
+      // Do not treat all dashboard pages as sub-routes of /dashboard
+      if (path === "/dashboard") return false;
+      
+      // Check if it's a sub-route (e.g., /dashboard/products is active for /dashboard/products/1/edit)
+      if (normalizedPathname.startsWith(path + "/")) {
+        // Since "Crear" routes have their own explicit links in the sidebar,
+        // we shouldn't highlight the parent "Ver Todos" link when creating.
+        if (normalizedPathname.endsWith("/create")) {
+          return false;
+        }
+        return true;
+      }
       return false;
     },
     [pathname],
@@ -227,7 +237,7 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
       <div key={section.key} className="mb-1">
         {/* Section Header */}
         <div
-          className={`hover:bg-brand-naranja focus:ring-brand-naranja/50 flex cursor-pointer items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold text-white transition-all duration-200 ease-in-out focus:ring-2 focus:outline-none ${isOpen ? "bg-brand-naranja/80" : "bg-brand-azul"} `}
+          className={`hover:bg-white/10 focus:ring-white/20 flex cursor-pointer items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold text-white transition-all duration-200 ease-in-out focus:ring-2 focus:outline-none ${isOpen ? "bg-white/10" : "bg-transparent"} `}
           onClick={() => hasLinks && toggleSection(section.key)}
           onKeyDown={(e) => {
             if ((e.key === "Enter" || e.key === " ") && hasLinks) {
@@ -266,10 +276,11 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
                 <SidebarItem
                   key={link.path}
                   onClick={() => handleNavigation(link.path)}
-                  className={`cursor-pointer overflow-hidden rounded-lg px-4 py-2 text-sm text-white transition-colors duration-150 hover:bg-amber-600 focus:ring-2 focus:ring-amber-600/50 focus:outline-none ${
+                  aria-current={isActive(link.path) ? "page" : undefined}
+                  className={`cursor-pointer overflow-hidden rounded-lg px-4 py-2 text-sm text-white transition-colors duration-150 hover:bg-white/10 focus:ring-2 focus:ring-white/20 focus:outline-none ${
                     isActive(link.path)
-                      ? "bg-amber-600 font-medium"
-                      : "bg-brand-azul hover:bg-brand-azul/80"
+                      ? "bg-white/20 font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                      : "bg-transparent hover:bg-white/5"
                   } `}
                 >
                   <span className="block truncate">{link.label}</span>
@@ -283,9 +294,9 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
   };
 
   return (
-    <div className="bg-brand-azul">
+    <div className="z-40 flex flex-col md:h-screen md:w-72">
       {/* Mobile Header */}
-      <div className="bg-brand-azul flex items-center justify-between p-4 text-white md:hidden">
+      <div className="bg-brand-azul/40 dark:bg-gray-900/40 backdrop-blur-xl border-b border-white/20 dark:border-white/10 flex items-center justify-between p-4 text-white md:hidden">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
             <Image
@@ -313,52 +324,53 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
 
       {/* Sidebar Drawer */}
       <aside
-        className={`bg-brand-azul fixed top-0 left-0 z-40 h-full w-72 transform overflow-hidden text-white transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0`}
+        className={`bg-brand-azul/40 dark:bg-gray-900/40 backdrop-blur-2xl border-r border-white/20 dark:border-white/10 fixed top-0 left-0 z-40 h-full w-72 flex flex-col transform overflow-hidden text-white transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0`}
         aria-label="Sidebar de navegación"
       >
-        {/* Desktop Logo */}
-        <div className="hidden items-center justify-center border-b border-white/20 p-6 md:flex">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
-            <Image
-              src={withBasePath("/favicon.png")}
-              alt="Logo de la aplicación"
-              width={48}
-              height={48}
-              className="rounded-full"
-            />
+        <div className="flex-shrink-0">
+          {/* Desktop Logo */}
+          <div className="hidden items-center justify-center border-b border-white/20 p-6 md:flex">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+              <Image
+                src={withBasePath("/favicon.png")}
+                alt="Logo de la aplicación"
+                width={48}
+                height={48}
+                className="rounded-full"
+              />
+            </div>
+          </div>
+
+          {/* Desktop User Greeting */}
+          <div className="hidden p-4 text-center text-lg font-bold md:block">
+            <span className="truncate">Hola, {user.username}!</span>
           </div>
         </div>
 
-        {/* Desktop User Greeting */}
-        <div className="hidden p-4 text-center text-lg font-bold md:block">
-          <span className="truncate">Hola, {user.username}!</span>
-        </div>
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-3 py-2">
+          <Sidebar
+            aria-label="Navegación principal"
+            className="bg-transparent [&>div]:bg-transparent"
+          >
+            <SidebarItemGroup className="bg-transparent [&>div]:bg-transparent space-y-2">
+              {sections.map(renderSection)}
+            </SidebarItemGroup>
+          </Sidebar>
+        </nav>
 
-        <div className="flex h-[calc(100%-180px)] flex-col justify-between md:h-[calc(100%-120px)]">
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto px-3 py-2">
-            <Sidebar
-              aria-label="Navegación principal"
-              className="bg-brand-azul [&>div]:bg-brand-azul"
-            >
-              <SidebarItemGroup className="bg-brand-azul [&>div]:bg-brand-azul space-y-2">
-                {sections.map(renderSection)}
-              </SidebarItemGroup>
-            </Sidebar>
-          </nav>
-
-          {/* Logout Button */}
-          <div className="bg-brand-azul border-t border-white/10 p-4">
-            <Button
-              onClick={handleLogout}
-              className={`w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-red-700 focus:ring-2 focus:ring-red-500/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <HiOutlineLogout className="flex-shrink-0" aria-hidden="true" />
-                <span>Cerrar Sesión</span>
-              </div>
-            </Button>
-          </div>
+        {/* Logout Button */}
+        <div className="flex-shrink-0 border-t border-white/20 dark:border-white/10 p-4">
+          <Button
+            onClick={handleLogout}
+            variant="danger"
+            className="w-full flex items-center justify-center"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <HiOutlineLogout className="flex-shrink-0" aria-hidden="true" />
+              <span>Cerrar Sesión</span>
+            </div>
+          </Button>
         </div>
       </aside>
 

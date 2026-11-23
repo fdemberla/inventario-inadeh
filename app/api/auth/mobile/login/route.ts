@@ -3,6 +3,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loginUser } from "@/lib/login";
 import { signMobileToken, sanitizeForLog } from "@/lib/mobile-auth";
+import {
+  clientIp,
+  loginRetryAfter,
+  recordLoginFailure,
+  recordLoginSuccess,
+} from "@/lib/rate-limit";
 
 // Request body interface
 interface LoginRequestBody {
@@ -50,10 +56,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const ip = clientIp(request.headers);
+    const retryAfter = loginRetryAfter(username, ip);
+    if (retryAfter > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Demasiados intentos fallidos. Intente más tarde.",
+        },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     // Attempt login using existing loginUser function
     const result = await loginUser(username, password);
 
     if (!result.success || !result.user) {
+      recordLoginFailure(username, ip);
       // Log failed attempt (sanitized)
       console.warn(
         `Mobile login failed for user: ${sanitizeForLog(username)}`
@@ -64,6 +83,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    recordLoginSuccess(username, ip);
     const user = result.user;
 
     // Create user payload for token

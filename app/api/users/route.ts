@@ -1,13 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { auth } from "@/auth";
+import { requireAdmin } from "@/lib/authz";
 
-export async function GET() {
-  // Authentication check
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
-  }
+export async function GET(req: NextRequest) {
+  const guard = await requireAdmin(req);
+  if (guard.error) return guard.error;
 
   try {
     const result = await sql(

@@ -1,18 +1,9 @@
 // app/api/inventory/scanner/products/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
-import { auth } from "@/auth";
+import { requireWarehouse } from "@/lib/authz";
 
 export async function GET(req: NextRequest) {
-  // Validate user from session
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json(
-      { success: false, message: "No autorizado" },
-      { status: 401 },
-    );
-  }
-
   const { searchParams } = new URL(req.url);
   const warehouseId = searchParams.get("warehouseId");
 
@@ -22,6 +13,9 @@ export async function GET(req: NextRequest) {
       { status: 400 },
     );
   }
+
+  const guard = await requireWarehouse(req, warehouseId);
+  if (guard.error) return guard.error;
 
   try {
     // Get warehouse info

@@ -4,6 +4,7 @@
 import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { getMobileSession, MobileUserPayload } from "@/lib/mobile-auth";
+import { getCurrentUserState } from "@/lib/user-state";
 
 // Unified user interface for both auth methods
 export interface ApiUser {
@@ -35,6 +36,23 @@ export interface ApiAuthResult {
  * ```
  */
 export async function getApiAuth(request: NextRequest): Promise<ApiAuthResult> {
+  const result = await resolveTokenUser(request);
+  if (!result.user) return result;
+
+  // Tokens last 7 days: re-check that the user still exists, is active, and
+  // use their *current* role rather than the one frozen in the token.
+  try {
+    const state = await getCurrentUserState(result.user.id);
+    if (!state || !state.isActive) return { user: null, authMethod: null };
+    result.user.role = state.role;
+  } catch (error) {
+    console.error("Error revalidating user state:", error);
+    return { user: null, authMethod: null }; // fail closed
+  }
+  return result;
+}
+
+async function resolveTokenUser(request: NextRequest): Promise<ApiAuthResult> {
   // Check for mobile Bearer token first
   const mobileSession = await getMobileSession(request);
   if (mobileSession) {

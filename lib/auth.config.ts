@@ -6,6 +6,19 @@ import type { Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { stripBasePath, withBasePath } from "@/lib/utils";
 
+// Pages only administrators may open (USER_ROLES.ADMIN = 1).
+// Kept literal here because this file runs on the Edge runtime.
+const ADMIN_ROLE = 1;
+const ADMIN_PAGE_PREFIXES = [
+  "/dashboard/users",
+  "/dashboard/warehouse",
+  "/dashboard/categories",
+  "/dashboard/units",
+  "/dashboard/suppliers",
+  "/dashboard/products/create",
+  "/dashboard/products/edit",
+];
+
 // Extended session user type
 interface ExtendedUser {
   id: number;
@@ -84,6 +97,14 @@ export const authConfig: NextAuthConfig = {
       if (isOnDashboard || isOnUserDashboard) {
         if (!isLoggedIn) {
           return Response.redirect(new URL(withBasePath("/login"), nextUrl));
+        }
+        // Admin-only sections (the APIs behind them also enforce this)
+        const role = (auth?.user as { role?: number } | undefined)?.role;
+        const isAdminPage = ADMIN_PAGE_PREFIXES.some(
+          (p) => pathname === p || pathname.startsWith(p + "/"),
+        );
+        if (isAdminPage && role !== ADMIN_ROLE) {
+          return Response.redirect(new URL(withBasePath("/dashboard"), nextUrl));
         }
         return true;
       }

@@ -89,7 +89,34 @@ const baseConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV !== "development", // Remove console.log in production
+    // Strip console.log in production but keep error/warn: they are the
+    // server's only error and security log (failed logins, auth errors).
+    removeConsole:
+      process.env.NODE_ENV !== "development"
+        ? { exclude: ["error", "warn"] }
+        : false,
+  },
+  poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            // camera: barcode scanning from the phone browser
+            key: "Permissions-Policy",
+            value: "camera=(self), microphone=(), geolocation=()",
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains",
+          },
+        ],
+      },
+    ];
   },
 };
 

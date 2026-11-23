@@ -2,6 +2,7 @@
 import NextAuth from "next-auth";
 import { authConfig } from "@/lib/auth.config";
 import { NextRequest, NextResponse } from "next/server";
+import { verifyMobileToken } from "@/lib/mobile-auth";
 
 const { auth: nextAuthMiddleware } = NextAuth(authConfig);
 
@@ -9,13 +10,22 @@ const { auth: nextAuthMiddleware } = NextAuth(authConfig);
 export default async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Allow Bearer token authentication for mobile API routes
+  // Mobile API routes authenticate with a Bearer JWT instead of the NextAuth
+  // cookie. Only skip NextAuth when that token actually verifies; route
+  // handlers still re-check it (plus role / warehouse) via lib/authz.
   const authHeader = request.headers.get("authorization");
-  const hasBearerToken = authHeader?.startsWith("Bearer ");
+  const isMobileApi =
+    pathname.includes("/api/") && pathname.includes("/mobile/");
 
-  // If it's a mobile API route with Bearer token, skip NextAuth middleware
-  if (hasBearerToken && pathname.startsWith("/api/") && pathname.includes("/mobile/")) {
-    return NextResponse.next(); // Allow request to proceed to route handler
+  if (isMobileApi && authHeader?.startsWith("Bearer ")) {
+    const valid = await verifyMobileToken(authHeader.slice(7));
+    if (!valid) {
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired token" },
+        { status: 401 },
+      );
+    }
+    return NextResponse.next();
   }
 
   // Use standard NextAuth middleware for everything else

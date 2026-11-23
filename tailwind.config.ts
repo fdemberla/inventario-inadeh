@@ -127,10 +127,15 @@ const config: Config = {
           "0%": { transform: "scale(0.95)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        "gradient-shift": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.2s ease-in-out",
         "zoom-in-95": "zoom-in 0.3s ease-out",
+        "gradient-shift": "gradient-shift 15s ease infinite",
       },
     },
   },

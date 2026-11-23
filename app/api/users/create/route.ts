@@ -1,14 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { auth } from "@/auth";
+import { requireAdmin } from "@/lib/authz";
 
-export async function POST(req: Request) {
-  // Authentication check
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
-  }
+export async function POST(req: NextRequest) {
+  const guard = await requireAdmin(req);
+  if (guard.error) return guard.error;
 
   try {
     const body = await req.json();

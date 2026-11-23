@@ -73,7 +73,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
       <>
         {/* Overlay oscuro */}
         <div
-          className="bg-opacity-50 fixed inset-0 z-40 bg-black transition-opacity duration-300 ease-in-out"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300 ease-in-out dark:bg-black/60"
           onClick={handleOverlayClick}
           aria-hidden="true"
         />
@@ -84,7 +84,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
           <div
             ref={ref}
             className={cn(
-              "animate-in fade-in zoom-in-95 relative w-full rounded-xl bg-white shadow-xl duration-300 ease-out dark:bg-gray-800 dark:shadow-2xl",
+              "animate-in fade-in zoom-in-95 relative w-full rounded-2xl bg-white/70 dark:bg-gray-900/70 backdrop-blur-2xl border border-white/50 dark:border-white/10 shadow-2xl shadow-black/10 dark:shadow-black/40 duration-300 ease-out shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]",
               sizeClasses[size],
             )}
             role="dialog"
@@ -93,7 +93,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
           >
             {/* Header */}
             {(title || closeButton) && (
-              <div className="flex items-start justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+              <div className="flex items-start justify-between border-b border-white/20 px-6 py-4 dark:border-white/10">
                 <div>
                   {title && (
                     <h2
@@ -138,7 +138,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
 
             {/* Footer */}
             {footer && (
-              <div className="border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+              <div className="border-t border-white/20 px-6 py-4 dark:border-white/10">
                 {footer}
               </div>
             )}

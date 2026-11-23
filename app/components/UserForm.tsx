@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
-  Label,
-  TextInput,
-  Select,
-  Checkbox,
-  Spinner,
-} from "flowbite-react";
+  FormField,
+  Input,
+  Card,
+} from "@/app/components/ui";
 import { toast } from "react-hot-toast";
 import { withBasePath } from "@/lib/utils";
 
@@ -253,140 +251,141 @@ export default function UserForm({
 
   if (loading)
     return (
-      <div className="flex justify-center p-6">
-        <Spinner size="xl" />
+      <div className="flex justify-center p-12">
+        <div role="status" aria-label="Cargando...">
+          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+          <span className="sr-only">Cargando...</span>
+        </div>
       </div>
     );
 
   return (
-    <div
-      className={isEditMode ? "max-w-xl p-6" : "mx-auto max-w-2xl px-4 py-6"}
-    >
-      <h1
-        className={`mb-6 text-center font-bold ${isEditMode ? "text-2xl" : "text-3xl"} dark:text-white`}
-      >
-        {isEditMode ? "Editar Usuario" : "Crear Usuario"}
-      </h1>
+    <Card className="w-full">
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="FirstName">Nombre</Label>
-            <TextInput
-              id="FirstName"
-              name="FirstName"
-              value={formData.FirstName}
-              onChange={handleChange}
-              className="mt-1 text-gray-900 dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="LastName">Apellido</Label>
-            <TextInput
-              id="LastName"
-              name="LastName"
-              value={formData.LastName}
-              onChange={handleChange}
-              className="mt-1 text-gray-900 dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="Phone">Teléfono</Label>
-            <TextInput
-              id="Phone"
-              name="Phone"
-              value={formData.Phone}
-              onChange={handlePhoneChange}
-              maxLength={9}
-              placeholder="1234-5678"
-              className="mt-1 text-gray-900 dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="Email">Correo electrónico</Label>
-            <TextInput
-              id="Email"
-              type="email"
-              name="Email"
-              value={formData.Email}
-              placeholder="usuario@correo.com"
-              onChange={handleChange}
-              className="mt-1 text-gray-900 dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
+          <FormField
+            label="Nombre"
+            id="FirstName"
+            name="FirstName"
+            value={formData.FirstName}
+            onChange={handleChange}
+            required
+          />
+          <FormField
+            label="Apellido"
+            id="LastName"
+            name="LastName"
+            value={formData.LastName}
+            onChange={handleChange}
+            required
+          />
+          <FormField
+            label="Teléfono"
+            id="Phone"
+            name="Phone"
+            value={formData.Phone}
+            onChange={handlePhoneChange}
+            maxLength={9}
+            placeholder="1234-5678"
+            required
+          />
+          <FormField
+            label="Correo electrónico"
+            id="Email"
+            type="email"
+            name="Email"
+            value={formData.Email}
+            placeholder="usuario@correo.com"
+            onChange={handleChange}
+            required
+          />
         </div>
 
         {/* Credentials */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="Username">Nombre de usuario</Label>
-            <TextInput
-              id="Username"
-              name="Username"
-              readOnly
-              value={formData.Username}
-              disabled
-              className="mt-1 bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-white"
-            />
-          </div>
+          <FormField
+            label="Nombre de usuario"
+            id="Username"
+            name="Username"
+            readOnly
+            disabled
+            value={formData.Username}
+            className="disabled:cursor-not-allowed bg-white/20 dark:bg-gray-800/20"
+            helperText="Generado automáticamente"
+          />
 
-          <div>
-            <Label htmlFor="Password">Contraseña</Label>
-            <TextInput
-              id="Password"
-              type={showPassword ? "text" : "password"}
-              name="Password"
-              value={formData.Password || ""}
-              onChange={handleChange}
-              placeholder={
-                isEditMode ? "Deja en blanco para mantener la contraseña" : ""
-              }
-              className="mt-1 text-gray-900 dark:bg-gray-700 dark:text-white"
-              required={!isEditMode}
-            />
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <div className="w-full space-y-2">
+            <div className="flex items-center gap-1">
+              <label htmlFor="Password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Contraseña
+              </label>
+              {!isEditMode && (
+                <span className="text-red-600 dark:text-red-400" aria-label="Requerido">*</span>
+              )}
+            </div>
+            <div className="relative">
+              <Input
+                id="Password"
+                type={showPassword ? "text" : "password"}
+                name="Password"
+                value={formData.Password || ""}
+                onChange={handleChange}
+                placeholder={isEditMode ? "En blanco para mantener" : ""}
+                required={!isEditMode}
+                className="pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Al menos 8 caracteres, una letra y un número.
             </p>
-            <div className="mt-2 flex items-center">
-              <Checkbox
-                id="showPassword"
-                checked={showPassword}
-                onChange={() => setShowPassword(!showPassword)}
-              />
-              <Label htmlFor="showPassword" className="ml-2">
-                Mostrar contraseña
-              </Label>
-            </div>
           </div>
         </div>
 
         {/* Status and Role */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex items-center">
-            <Checkbox
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="checkbox"
               id="IsActive"
               checked={formData.IsActive}
               onChange={() => handleCheckboxChange("IsActive")}
+              className="h-4 w-4 rounded border-gray-300 text-brand-azul accent-brand-azul focus:ring-brand-azul cursor-pointer"
             />
-            <Label htmlFor="IsActive" className="ml-2">
+            <label htmlFor="IsActive" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
               Usuario activo
-            </Label>
+            </label>
           </div>
 
-          <div>
-            <Label htmlFor="RoleID">Rol</Label>
-            <Select
+          <div className="w-full space-y-1.5">
+            <label htmlFor="RoleID" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Rol <span className="text-red-600 dark:text-red-400" aria-label="Requerido">*</span>
+            </label>
+            <select
               id="RoleID"
               name="RoleID"
               value={formData.RoleID}
               onChange={handleChange}
               required
-              className="mt-1 text-gray-900 dark:bg-gray-700 dark:text-white"
+              className="w-full rounded-xl px-4 py-3 text-base font-normal transition-all duration-300 ease-out border border-white/50 bg-white/40 dark:border-white/10 dark:bg-gray-900/40 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] text-gray-900 dark:text-gray-100 focus-visible:outline-none focus-visible:bg-white/70 dark:focus-visible:bg-gray-800/70 focus-visible:ring-2 focus-visible:ring-brand-azul/50 focus-visible:border-brand-azul/30 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-white/60 dark:hover:border-white/20"
             >
               <option value="">Selecciona un rol</option>
               {roles.map((r: Role) => (
@@ -394,46 +393,61 @@ export default function UserForm({
                   {r.RoleName}
                 </option>
               ))}
-            </Select>
+            </select>
           </div>
         </div>
 
         {/* Warehouses */}
         <div>
-          <Label>Depósitos asignados</Label>
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {warehouses.map((w: Warehouse) => (
-              <label key={w.WarehouseID} className="flex items-center">
-                <Checkbox
-                  id={`warehouse-${w.WarehouseID}`}
-                  checked={formData.WarehouseIDs.includes(w.WarehouseID)}
-                  onChange={() => handleWarehouseChange(w.WarehouseID)}
-                />
-                <span className="ml-2 text-sm dark:text-white">
-                  {w.WarehouseCode} - {w.WarehouseName}
-                </span>
-              </label>
-            ))}
+          <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300 border-t border-white/20 dark:border-white/10 pt-4">Depósitos asignados</p>
+          <div className="mt-1 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {warehouses.map((w: Warehouse) => {
+              const isSelected = formData.WarehouseIDs.includes(w.WarehouseID);
+              return (
+                <label 
+                  key={w.WarehouseID} 
+                  className={`relative flex cursor-pointer items-start justify-between rounded-xl border p-4 shadow-sm transition-all duration-200 ease-in-out backdrop-blur-sm ${
+                    isSelected
+                      ? "border-brand-azul bg-brand-azul/10 ring-2 ring-brand-azul/50 dark:border-brand-azul dark:bg-brand-azul/20"
+                      : "border-white/40 bg-white/30 hover:bg-white/50 dark:border-white/10 dark:bg-gray-800/40 dark:hover:bg-gray-700/50"
+                  }`}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-bold text-gray-900 dark:text-white">
+                      {w.WarehouseCode}
+                    </span>
+                    <span className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                      {w.WarehouseName}
+                    </span>
+                  </div>
+                  <div className="flex h-5 items-center">
+                    <input
+                      type="checkbox"
+                      id={`warehouse-${w.WarehouseID}`}
+                      checked={isSelected}
+                      onChange={() => handleWarehouseChange(w.WarehouseID)}
+                      className="h-5 w-5 rounded border-gray-300 text-brand-azul focus:ring-brand-azul dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 cursor-pointer"
+                    />
+                  </div>
+                </label>
+              );
+            })}
           </div>
         </div>
 
         {/* Submit Button */}
-        <div className="text-center">
+        <div className="text-center pt-6 border-t border-white/20 dark:border-white/10">
           <Button
             type="submit"
+            variant="primary"
+            isLoading={submitting}
             disabled={submitting}
-            className="bg-brand-verde w-full sm:w-auto"
+            className="w-full"
           >
-            {submitting
-              ? isEditMode
-                ? "Actualizando..."
-                : "Creando..."
-              : isEditMode
-                ? "Actualizar Usuario"
-                : "Crear Usuario"}
+            {isEditMode ? "Actualizar Usuario" : "Crear Usuario"}
           </Button>
         </div>
       </form>
-    </div>
+    </Card>
   );
 }

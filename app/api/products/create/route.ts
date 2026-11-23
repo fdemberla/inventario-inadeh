@@ -4,6 +4,7 @@ import path from "path";
 import crypto from "crypto";
 import sharp from "sharp";
 import { rawSql } from "@/lib/db";
+import { getApiAuth, isAdmin } from "@/lib/api-auth";
 
 export const config = {
   api: {
@@ -13,6 +14,16 @@ export const config = {
 
 export async function POST(req: Request) {
   try {
+    // Auth & RBAC Check
+    // We cast req to any here because getApiAuth expects NextRequest, but this is a standard Request
+    const { user } = await getApiAuth(req as any);
+    if (!user) {
+      return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    }
+    if (!isAdmin(user)) {
+      return NextResponse.json({ message: "No tienes permisos de administrador" }, { status: 403 });
+    }
+
     const formData = await req.formData();
 
     // --- Extract and validate basic fields ---

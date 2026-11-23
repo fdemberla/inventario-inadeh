@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { HiRefresh } from "react-icons/hi";
-import { Button } from "@/app/components/ui";
+import { Button, Spinner } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import WarehouseCard from "../components/WarehouseCard";
 import { withBasePath } from "@/lib/utils";
@@ -141,7 +141,7 @@ export default function Dashboard() {
     loadAllData();
   }, [loadAllData]);
 
-  // Fetch inventory once warehouses are loaded
+  // Fetch inventory once warehouses are loadedb
   useEffect(() => {
     if (warehouses.length > 0 && warehouseInventory.size === 0) {
       fetchAllInventories();
@@ -183,7 +183,7 @@ export default function Dashboard() {
       <PageLayout title="Resumen de Almacenes">
         <div className="flex min-h-96 items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+            <Spinner size="lg" color="primary" />
             <p className="text-gray-600 dark:text-gray-400">
               Cargando dashboard...
             </p>

@@ -2,7 +2,8 @@
 // Mobile single barcode scan endpoint
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
-import { getMobileSession } from "@/lib/mobile-auth";
+import { getApiAuth } from "@/lib/api-auth";
+import { userCanAccessWarehouse } from "@/lib/authz";
 
 interface ScanRequest {
   barcode: string;
@@ -14,7 +15,7 @@ interface ScanRequest {
 export async function POST(req: NextRequest) {
   try {
     // Get user from Bearer token
-    const session = await getMobileSession(req);
+    const { user: session } = await getApiAuth(req);
     if (!session) {
       return NextResponse.json(
         { success: false, message: "Invalid or expired token" },
@@ -55,7 +56,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const scanQuantity = quantity && quantity > 0 ? quantity : 1;
+    if (
+      quantity !== undefined &&
+      (!Number.isInteger(quantity) || quantity <= 0 || quantity > 10000)
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Cantidad inválida" },
+        { status: 400 }
+      );
+    }
+    const scanQuantity = quantity ?? 1;
+    if (!(await userCanAccessWarehouse(session, warehouseId))) {
+      return NextResponse.json(
+        { success: false, message: "No tienes permiso para acceder a este almacén" },
+        { status: 403 }
+      );
+    }
+
     const createdBy = session.username || `user_${session.id}`;
 
     // Find product by barcode

@@ -7,6 +7,8 @@ import { Button } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "../../components/DataTable";
 import { withBasePath } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import { USER_ROLES } from "@/lib/constants";
 
 type Product = {
   ProductID: number;
@@ -17,6 +19,9 @@ type Product = {
 };
 
 export default function ViewAllProducts() {
+  const { data: session } = useSession();
+  // Edit / delete / create are admin-only (enforced by the API as well)
+  const isAdmin = session?.user?.role === USER_ROLES.ADMIN;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -91,7 +96,7 @@ export default function ViewAllProducts() {
     fetchProducts();
   }, []);
 
-  const columns = [
+  const allColumns = [
     {
       header: "Nombre",
       accessorKey: "ProductName",
@@ -136,12 +141,18 @@ export default function ViewAllProducts() {
       ),
     },
   ];
+  const columns = isAdmin
+    ? allColumns
+    : allColumns.filter((c) => c.id !== "actions");
 
   if (loading) {
     return (
       <PageLayout title="Productos">
         <div className="flex justify-center p-6 align-middle">
-          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+          <div role="status" aria-label="Cargando...">
+            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+            <span className="sr-only">Cargando...</span>
+          </div>
         </div>
       </PageLayout>
     );
@@ -156,12 +167,14 @@ export default function ViewAllProducts() {
         { label: "Productos" },
       ]}
       actions={
-        <Button
-          variant="primary"
-          onClick={() => router.push("/dashboard/products/create")}
-        >
-          Crear Producto
-        </Button>
+        isAdmin ? (
+          <Button
+            variant="primary"
+            onClick={() => router.push("/dashboard/products/create")}
+          >
+            Crear Producto
+          </Button>
+        ) : undefined
       }
     >
       <DataTable data={products} columns={columns} />

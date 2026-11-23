@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { BiBarcodeReader } from "react-icons/bi";
 import { PageLayout } from "@/app/components/PageLayout";
-import { Button } from "@/app/components/ui";
+import { Button, Spinner } from "@/app/components/ui";
 import { withBasePath } from "@/lib/utils";
 
 type Warehouse = {
@@ -47,11 +47,12 @@ export default function InventoryPage() {
     return (
       <PageLayout title="Gestión de Inventario">
         <div className="flex min-h-96 items-center justify-center">
-          <div className="text-center">
-            <div className="border-t-brand-azul dark:border-t-brand-verde mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
+          <div role="status" aria-label="Cargando almacenes..." className="text-center">
+            <Spinner size="xl" color="primary" className="mx-auto" />
+            <p className="mt-4 text-gray-600 dark:text-gray-400" aria-hidden="true">
               Cargando almacenes...
             </p>
+            <span className="sr-only">Cargando almacenes...</span>
           </div>
         </div>
       </PageLayout>
@@ -77,6 +78,7 @@ export default function InventoryPage() {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -97,28 +99,29 @@ export default function InventoryPage() {
               onClick={() =>
                 setSelectedWarehouseId(warehouse.WarehouseID.toString())
               }
-              className={`w-full rounded-lg border-2 p-4 text-left transition-all duration-200 ${
+              className={`w-full rounded-2xl border p-5 text-left transition-all duration-300 backdrop-blur-xl ${
                 selectedWarehouseId === warehouse.WarehouseID.toString()
-                  ? "border-brand-azul dark:border-brand-verde bg-blue-50 shadow-md dark:bg-gray-700"
-                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600"
-              } transform active:scale-95`}
+                  ? "border-brand-azul/50 dark:border-brand-verde/50 bg-brand-azul/5 dark:bg-brand-verde/5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.3)] ring-1 ring-brand-azul/20 dark:ring-brand-verde/20"
+                  : "border-white/50 bg-white/40 hover:bg-white/60 dark:border-gray-700/50 dark:bg-gray-800/40 dark:hover:bg-gray-800/60 shadow-sm"
+              } transform active:scale-[0.98]`}
             >
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-4">
                     {/* Warehouse Icon */}
                     <div
-                      className={`flex-shrink-0 rounded-lg p-2 ${
+                      className={`flex-shrink-0 rounded-xl p-3 ${
                         selectedWarehouseId === warehouse.WarehouseID.toString()
-                          ? "text-brand-azul dark:text-brand-verde bg-blue-100 dark:bg-gray-600"
-                          : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
-                      } `}
+                          ? "text-brand-azul dark:text-brand-verde bg-white/80 dark:bg-gray-800/80 shadow-sm"
+                          : "bg-white/50 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400"
+                      } backdrop-blur-md`}
                     >
                       <svg
                         className="h-6 w-6"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
+                        aria-hidden="true"
                       >
                         <path
                           strokeLinecap="round"
@@ -132,7 +135,7 @@ export default function InventoryPage() {
                     {/* Warehouse Info */}
                     <div className="min-w-0 flex-1">
                       <h3
-                        className={`truncate font-semibold ${
+                        className={`truncate font-semibold text-lg ${
                           selectedWarehouseId ===
                           warehouse.WarehouseID.toString()
                             ? "text-brand-azul dark:text-brand-verde"
@@ -142,7 +145,7 @@ export default function InventoryPage() {
                         {warehouse.WarehouseName}
                       </h3>
                       <p
-                        className={`truncate text-sm ${
+                        className={`truncate text-sm mt-0.5 font-medium ${
                           selectedWarehouseId ===
                           warehouse.WarehouseID.toString()
                             ? "text-brand-azul/70 dark:text-brand-verde/70"
@@ -156,9 +159,9 @@ export default function InventoryPage() {
                 </div>
 
                 {/* Selection Indicator */}
-                <div className="ml-3 flex-shrink-0">
+                <div className="ml-4 flex-shrink-0">
                   {selectedWarehouseId === warehouse.WarehouseID.toString() ? (
-                    <div className="bg-brand-azul dark:bg-brand-verde flex h-6 w-6 items-center justify-center rounded-full">
+                    <div className="bg-brand-azul dark:bg-brand-verde flex h-6 w-6 items-center justify-center rounded-full shadow-md">
                       <svg
                         className="h-4 w-4 text-white"
                         fill="currentColor"
@@ -172,7 +175,7 @@ export default function InventoryPage() {
                       </svg>
                     </div>
                   ) : (
-                    <div className="h-6 w-6 rounded-full border-2 border-gray-300 dark:border-gray-600"></div>
+                    <div className="h-6 w-6 rounded-full border-2 border-gray-300/50 dark:border-gray-600/50 bg-white/50 dark:bg-gray-800/50"></div>
                   )}
                 </div>
               </div>

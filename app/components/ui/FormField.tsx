@@ -8,6 +8,7 @@ export interface FormFieldProps extends Omit<InputProps, "label"> {
   error?: string;
   helperText?: string;
   description?: string;
+  children?: React.ReactNode;
 }
 
 /**
@@ -33,6 +34,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
       helperText,
       description,
       className,
+      children,
       ...inputProps
     },
     ref,
@@ -61,14 +63,18 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
           </p>
         )}
 
-        {/* Input */}
-        <Input
-          ref={ref}
-          error={error}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${label}-error` : undefined}
-          {...inputProps}
-        />
+        {/* Input o Custom Children */}
+        {children ? (
+          children
+        ) : (
+          <Input
+            ref={ref}
+            error={error}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${label}-error` : undefined}
+            {...inputProps}
+          />
+        )}
 
         {/* Mensaje de error */}
         {error && (

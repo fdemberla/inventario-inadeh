@@ -1,8 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
+import { getApiAuth } from "@/lib/api-auth";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { user } = await getApiAuth(req);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
     const result = await sql(
       "SELECT MainLocationID, Name, ShortName, Address FROM RegionalLocations",
       [],

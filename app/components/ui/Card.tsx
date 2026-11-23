@@ -36,16 +36,16 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           // Base
-          "rounded-lg bg-white transition-all duration-200 ease-in-out dark:bg-gray-800",
+          "rounded-2xl bg-white/40 transition-all duration-300 ease-out dark:bg-gray-900/40 backdrop-blur-lg backdrop-filter",
           // Padding
           !noPadding && "p-6",
           // Border
-          !noBorder && "border border-gray-200 dark:border-gray-700",
+          !noBorder && "border border-white/50 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]",
           // Shadow
-          !noShadow && "shadow-sm",
+          !noShadow && "shadow-xl shadow-black/5 dark:shadow-black/20",
           // Hoverable
           hoverable &&
-            "cursor-pointer hover:-translate-y-0.5 hover:shadow-md dark:hover:border-gray-600",
+            "cursor-pointer hover:-translate-y-1 hover:shadow-2xl hover:bg-white/50 dark:hover:bg-gray-800/50 hover:border-white/60 dark:hover:border-white/20",
           className,
         )}
         {...props}
@@ -68,7 +68,7 @@ const CardHeader = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "mb-4 border-b border-gray-200 pb-4 dark:border-gray-700",
+      "mb-4 border-b border-white/20 pb-4 dark:border-white/10",
       className,
     )}
     {...props}
@@ -99,7 +99,7 @@ const CardFooter = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "mt-4 border-t border-gray-200 pt-4 dark:border-gray-700",
+      "mt-4 border-t border-white/20 pt-4 dark:border-white/10",
       className,
     )}
     {...props}

@@ -59,7 +59,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-brand-gris dark:bg-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen text-gray-900 dark:text-gray-100 bg-gradient-to-br from-brand-azul/10 via-brand-gris/20 to-brand-verde/10 dark:from-gray-900 dark:via-brand-azul/20 dark:to-brand-verde/20 bg-[length:400%_400%] animate-gradient-shift`}
       >
         <Providers>
           <ThemeModeScript />

@@ -2,12 +2,13 @@
 // Get products for caching on mobile device
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql } from "@/lib/db";
-import { getMobileSession } from "@/lib/mobile-auth";
+import { getApiAuth } from "@/lib/api-auth";
+import { userCanAccessWarehouse } from "@/lib/authz";
 
 export async function GET(req: NextRequest) {
   try {
     // Get user from Bearer token
-    const session = await getMobileSession(req);
+    const { user: session } = await getApiAuth(req);
     if (!session) {
       return NextResponse.json(
         { success: false, message: "Invalid or expired token" },
@@ -25,11 +26,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Validate warehouseId is numeric
     if (!/^\d+$/.test(warehouseId)) {
       return NextResponse.json(
         { success: false, message: "warehouseId debe ser numérico" },
         { status: 400 }
+      );
+    }
+
+    if (!(await userCanAccessWarehouse(session, warehouseId))) {
+      return NextResponse.json(
+        { success: false, message: "No tienes permiso para acceder a este almacén" },
+        { status: 403 }
       );
     }
 

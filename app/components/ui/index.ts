@@ -10,6 +10,7 @@ export { Input } from "./Input";
 export type { InputProps } from "./Input";
 
 export { Card, CardHeader, CardBody, CardFooter } from "./Card";
+export * from "./Spinner";
 export type { CardProps } from "./Card";
 
 export { FormField } from "./FormField";

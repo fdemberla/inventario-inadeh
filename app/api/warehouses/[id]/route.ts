@@ -1,11 +1,14 @@
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
+import { requireWarehouse } from "@/lib/authz";
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params; // Await here
+  const guard = await requireWarehouse(request, id);
+  if (guard.error) return guard.error;
 
   const numericId = parseInt(id);
   if (isNaN(numericId)) {

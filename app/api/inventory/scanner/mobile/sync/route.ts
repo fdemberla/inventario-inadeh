@@ -2,7 +2,9 @@
 // Bulk sync endpoint for offline scans
 import { NextRequest, NextResponse } from "next/server";
 import { rawSql, withTransaction } from "@/lib/db";
-import { getMobileSession } from "@/lib/mobile-auth";
+import { getApiAuth } from "@/lib/api-auth";
+import { userCanAccessWarehouse } from "@/lib/authz";
+import type { ApiUser } from "@/lib/api-auth";
 
 interface MobileScanItem {
   id: number;
@@ -31,7 +33,7 @@ interface SyncResultItem {
 export async function POST(req: NextRequest) {
   try {
     // Get user from Bearer token
-    const session = await getMobileSession(req);
+    const { user: session } = await getApiAuth(req);
     if (!session) {
       return NextResponse.json(
         { success: false, message: "Invalid or expired token" },
@@ -90,6 +92,7 @@ export async function POST(req: NextRequest) {
       try {
         const result = await processMobileScan(
           scan,
+          session,
           createdBy,
           deviceId
         );
@@ -135,10 +138,23 @@ export async function POST(req: NextRequest) {
 
 async function processMobileScan(
   scan: MobileScanItem,
+  user: ApiUser,
   createdBy: string,
   deviceId: string
 ): Promise<SyncResultItem> {
   const { id, barcode, warehouseId, operation, quantity, timestamp } = scan;
+
+  if (!Number.isInteger(quantity) || quantity > 10000) {
+    return { id, success: false, error: "Cantidad inválida", conflictType: "invalid" };
+  }
+  if (!(await userCanAccessWarehouse(user, warehouseId))) {
+    return {
+      id,
+      success: false,
+      error: "No tienes permiso para acceder a este almacén",
+      conflictType: "forbidden",
+    };
+  }
 
   // Validate scan data
   if (!barcode || !warehouseId || !operation || !quantity) {

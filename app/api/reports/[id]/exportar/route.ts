@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { rawSql } from "@/lib/db";
+import { requireWarehouse } from "@/lib/authz";
 import * as XLSX from "xlsx";
 
 export async function GET(
@@ -7,7 +8,9 @@ export async function GET(
   { params }: { params: { id: string } },
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
+    const guard = await requireWarehouse(req, String(id));
+    if (guard.error) return guard.error;
 
     if (isNaN(id)) {
       return NextResponse.json(
