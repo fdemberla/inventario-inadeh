@@ -95,9 +95,9 @@ export default function SidebarComponent({ user }: SidebarComponentProps) {
         <Button
           onClick={handleLogout}
           variant="danger"
-          className="flex w-full items-center justify-center gap-2"
+          className="w-full"
+          leftIcon={<LogOut className="h-4 w-4" aria-hidden="true" />}
         >
-          <LogOut className="h-4 w-4" aria-hidden="true" />
           Cerrar Sesión
         </Button>
       </div>

@@ -87,7 +87,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {!isLoading && leftIcon && (
           <span className="inline-flex items-center">{leftIcon}</span>
         )}
-        {children && <span>{children}</span>}
+        {/* inline-flex: an icon passed as a child (Tailwind makes <svg>
+            display:block) stays on the same line as the text */}
+        {children && <span className="inline-flex items-center gap-2">{children}</span>}
         {!isLoading && rightIcon && (
           <span className="inline-flex items-center">{rightIcon}</span>
         )}
