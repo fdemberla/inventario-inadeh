@@ -73,7 +73,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
       <>
         {/* Overlay oscuro */}
         <div
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300 ease-in-out dark:bg-black/60"
+          className="animate-fade-in fixed inset-0 z-40 bg-black/50"
           onClick={handleOverlayClick}
           aria-hidden="true"
         />
@@ -84,7 +84,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
           <div
             ref={ref}
             className={cn(
-              "animate-in fade-in zoom-in-95 relative w-full rounded-2xl bg-white/70 dark:bg-gray-900/70 backdrop-blur-2xl border border-white/50 dark:border-white/10 shadow-2xl shadow-black/10 dark:shadow-black/40 duration-300 ease-out shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]",
+              "animate-zoom-in relative w-full rounded-2xl border border-line bg-surface text-fg shadow-2xl",
               sizeClasses[size],
             )}
             role="dialog"
@@ -93,18 +93,18 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
           >
             {/* Header */}
             {(title || closeButton) && (
-              <div className="flex items-start justify-between border-b border-white/20 px-6 py-4 dark:border-white/10">
+              <div className="flex items-start justify-between border-b border-line px-6 py-4">
                 <div>
                   {title && (
                     <h2
                       id="modal-title"
-                      className="text-lg font-bold text-gray-900 dark:text-white"
+                      className="text-lg font-bold text-fg"
                     >
                       {title}
                     </h2>
                   )}
                   {description && (
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mt-1 text-sm text-fg-muted">
                       {description}
                     </p>
                   )}
@@ -112,7 +112,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
                 {closeButton && (
                   <button
                     onClick={onClose}
-                    className="ml-4 inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                    className="ml-4 inline-flex h-11 w-11 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-muted hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
                     aria-label="Cerrar modal"
                   >
                     <svg
@@ -138,7 +138,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
 
             {/* Footer */}
             {footer && (
-              <div className="border-t border-white/20 px-6 py-4 dark:border-white/10">
+              <div className="border-t border-line px-6 py-4">
                 {footer}
               </div>
             )}

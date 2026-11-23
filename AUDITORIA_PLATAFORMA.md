@@ -214,6 +214,51 @@ Notas:
 
 **Encontrado de paso (para la fase 5):** en `/login`, el campo de contraseña no está asociado a su `<label>` y el botón de enviar no tiene nombre accesible.
 
+## 3c. ✅ Fase 4 aplicada: tokens de diseño (2026-11-23, sin commit)
+
+**Tokens en un solo lugar**
+- Los tokens viven solo en `app/globals.css`. Se eliminaron `tailwind.config.ts` y `lib/design-tokens.ts`: Tailwind v4 los ignoraba y nadie los importaba.
+- Prettier ahora apunta a `globals.css` (`tailwindStylesheet`).
+
+**Tokens semánticos**
+- Disponibles como `canvas`, `surface`, `fg`, `fg-muted`, `line`, `line-strong`, `primary`, `secondary`, `danger`, `on-primary`, `accent`, `success`, `warning`, `danger-fg` y `focus`.
+- Cambian solos en modo oscuro, que sigue la preferencia del sistema igual que `dark:`.
+- Todas las combinaciones se verificaron con la fórmula WCAG: texto ≥ 4.5:1 y foco ≥ 3:1, en claro y en oscuro.
+
+**Tonos de marca accesibles** (los colores del logo se mantienen para íconos y decoración)
+
+| Uso | Antes | Ahora |
+|---|---|---|
+| Verde | `#44A147` (3.26:1) | `#337935` (5.35:1) |
+| Naranja | `#ED7625` (2.91:1) | `#B2591C` (4.84:1) |
+| Peligro | red-500 (3.76:1) | red-600 (4.83:1) |
+| Azul en modo oscuro | `#004A98` (2.06:1) | `#80A5CC` (6.90:1) |
+
+**Componentes actualizados**
+- `Button`, `Card`, `Modal`, `Input`, `FormField`, `Spinner`, el encabezado de `DataTable` y `BottomMenu` usan los tokens.
+- Se quitaron los hex fijos, el *glassmorphism* (translúcido + blur) y las sombras de color.
+- Foco visible con `outline-focus`.
+- Los botones `sm` y `md` miden 44 px en pantallas táctiles.
+- Los bordes de los inputs pasaron de invisibles (`white/50`) a `line-strong` (4.83:1, WCAG 1.4.11).
+
+**Otros cambios**
+- La fuente **Geist** se cargaba pero no se usaba; ahora es `font-sans`.
+- Las animaciones `animate-in`/`zoom-in-95` no existían; ahora existen `animate-fade-in`, `animate-zoom-in` y `animate-slide-up`.
+- Se respeta `prefers-reduced-motion`.
+- El fondo de la app pasó de `brand-gris` (`#D1D3D4`) a `canvas` (`#F1F2F3`).
+
+**Verificación**
+- En el navegador (escritorio claro y oscuro, y celular oscuro), los colores calculados coinciden con los tokens.
+- ESLint pasa sin errores en todo el proyecto y los 161 tests pasan.
+
+**Pendiente para la fase 6**
+- Quedan 618 clases de paleta cruda (antes 709).
+- Hay 32 usos de `text-gray-500`, que no alcanza 4.5:1 sobre `canvas`.
+
+**Fuera de esta fase**
+- En desarrollo el *service worker* no se registra (*"unknown error when fetching the script"*), aunque `/sw.js` responde 200.
+- `public/sw.js` es un artefacto de build versionado: cada `next build` lo modifica.
+
 ## 3. Lenguaje visual e identidad
 
 - 🔴 **Los tokens de diseño no están conectados.** Tailwind v4 ignora `tailwind.config.ts` porque no hay `@config`. Por eso no existen `success/warning/error`, el espaciado, las fuentes ni las animaciones (`animate-gradient-shift`, `animate-in`). `lib/design-tokens.ts` se importa **0 veces**. `globals.css` solo define 4 colores `brand-*`.

@@ -11,7 +11,7 @@ const spinnerVariants = cva("animate-spin rounded-full", {
       xl: "h-16 w-16 border-4",
     },
     color: {
-      primary: "border-gray-200 border-t-brand-azul dark:border-gray-700 dark:border-t-blue-500",
+      primary: "border-line border-t-accent",
       white: "border-white/30 border-t-white",
       info: "border-blue-100 border-t-blue-600 dark:border-blue-900/30 dark:border-t-blue-400",
       success: "border-green-100 border-t-green-600 dark:border-green-900/30 dark:border-t-green-400",

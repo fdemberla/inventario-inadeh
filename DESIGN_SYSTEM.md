@@ -297,73 +297,53 @@ function ProductsPage() {
 
 ## 🎨 Tokens de Diseño
 
-Acceso a tokens de diseño centralizados:
+Los tokens viven **solo en CSS**, en `app/globals.css` (Tailwind v4 no usa `tailwind.config.ts`; ese archivo y `lib/design-tokens.ts` se eliminaron porque Tailwind v4 los ignoraba).
 
-```tsx
-import {
-  colors,
-  spacing,
-  typography,
-  shadows,
-  borders,
-} from "@/lib/design-tokens";
+### Tokens semánticos (úsalos por defecto)
 
-// Colores
-colors.brand.azul; // #004A98
-colors.brand.naranja; // #ED7625
-colors.brand.verde; // #44A147
-colors.brand.gris; // #D1D3D4
-colors.success; // #44A147
-colors.warning; // #FFB81C
-colors.error; // #DC2626
-colors.info; // #0EA5E9
+Indican *para qué* es un color y cambian solos en modo oscuro: no hace falta escribir variantes `dark:`.
 
-// Espaciado
-spacing.xs; // 0.5rem (8px)
-spacing.sm; // 0.75rem (12px)
-spacing.md; // 1rem (16px)
-spacing.lg; // 1.5rem (24px)
-spacing.xl; // 2rem (32px)
+| Clase | Uso |
+|---|---|
+| `bg-canvas` | Fondo de la página |
+| `bg-surface` / `bg-surface-muted` | Tarjetas, modales / rellenos suaves |
+| `text-fg` / `text-fg-muted` | Texto principal / secundario |
+| `border-line` | Divisores y bordes decorativos |
+| `border-line-strong` | Borde de campos de formulario (≥ 3:1, WCAG 1.4.11) |
+| `bg-primary` `hover:bg-primary-hover` | Acción principal (verde) |
+| `bg-secondary` `hover:bg-secondary-hover` | Acción alternativa (naranja) |
+| `bg-danger` `hover:bg-danger-hover` | Acción destructiva |
+| `text-on-primary` | Texto sobre cualquier color de relleno |
+| `text-accent` | Enlaces, navegación activa (azul) |
+| `text-success` / `text-warning` / `text-danger-fg` | Texto de estado |
+| `ring-focus` / `outline-focus` | Foco de teclado |
 
-// Tipografía
-typography.sizes.base.size; // 1rem
-typography.sizes.lg.lineHeight; // 1.75rem
-typography.weights.bold; // 700
+Todas las combinaciones texto/fondo cumplen **WCAG 2.1 AA (≥ 4.5:1)** en modo claro y oscuro, y el foco ≥ 3:1.
 
-// Sombras
-shadows.md; // "0 4px 6px -1px rgba(0, 0, 0, 0.1)..."
+### Paleta de marca
 
-// Bordes
-borders.radius.lg; // 0.5rem
-borders.width.sm; // 1px
-```
+| Token | Hex | Uso |
+|---|---|---|
+| `brand-azul` | `#004A98` | Marca, enlaces (texto blanco 8.6:1) |
+| `brand-azul-300` | `#80A5CC` | Azul sobre fondos oscuros |
+| `brand-verde` | `#44A147` | **Solo logo/íconos/bordes** (texto blanco 3.3:1 ✗) |
+| `brand-verde-700` / `-800` | `#337935` / `#2C692E` | Rellenos con texto blanco (5.4:1) |
+| `brand-naranja` | `#ED7625` | **Solo logo/íconos/bordes** (texto blanco 2.9:1 ✗) |
+| `brand-naranja-700` / `-800` | `#B2591C` / `#9A4D18` | Rellenos con texto blanco (4.8:1) |
+| `brand-gris` / `brand-gris-50` | `#D1D3D4` / `#F1F2F3` | Bordes / fondo de la app |
+
+**Regla:** nunca texto blanco sobre `brand-verde` o `brand-naranja`; usa `bg-primary` / `bg-secondary`.
+
+### Otros tokens
+
+- Tipografía: `font-sans` = Geist, `font-mono` = Geist Mono (cargadas con `next/font` en `app/layout.tsx`).
+- Animaciones: `animate-fade-in`, `animate-zoom-in`, `animate-slide-up`. Todas se desactivan con `prefers-reduced-motion`.
 
 ---
 
 ## 🌙 Dark Mode
 
-Todos los componentes soportan dark mode automáticamente. Para habilitarlo, agrega la clase `dark` al elemento `<html>`:
-
-```tsx
-// En un componente que controle el tema
-function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDark]);
-
-  return (
-    <Button onClick={() => setIsDark(!isDark)}>
-      {isDark ? "☀️ Claro" : "🌙 Oscuro"}
-    </Button>
-  );
-}
-```
+El modo oscuro sigue la **preferencia del sistema operativo** (`prefers-color-scheme`), igual que la variante `dark:` de Tailwind v4. Los tokens semánticos ya cambian solos; usa `dark:` solo para casos especiales. No hay selector manual de tema.
 
 ---
 
@@ -531,7 +511,7 @@ export default function ProductsPage() {
 
 ## ✅ Checklist de Implementación
 
-- [x] Design tokens creados (lib/design-tokens.ts)
+- [x] Design tokens en `app/globals.css` (semánticos + marca, AA verificado)
 - [x] Componentes UI implementados (Button, Input, Card, FormField, Modal)
 - [x] PageLayout para estructura de páginas
 - [x] Dark mode soportado en todos los componentes

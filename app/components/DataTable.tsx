@@ -112,7 +112,7 @@ export function DataTable<T extends object>({
                       <TableHeadCell
                         key={header.id}
                         onClick={header.column.getToggleSortingHandler()}
-                        className="bg-brand-azul/60 dark:bg-brand-azul/40 backdrop-blur-sm hover:bg-brand-azul/80 dark:hover:bg-brand-azul/60 cursor-pointer whitespace-nowrap text-white select-none"
+                        className="bg-brand-azul hover:bg-brand-azul/90 cursor-pointer whitespace-nowrap text-white select-none"
                         aria-label={typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : undefined}
                       >
                         <span className="inline-flex items-center gap-1">

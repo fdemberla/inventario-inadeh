@@ -1,5 +1,7 @@
 # 🎨 Sistema de Diseño Estandarizado - Resumen de Implementación
 
+> **Nota (2026-11-23):** registro histórico. `lib/design-tokens.ts` y `tailwind.config.ts` se eliminaron: Tailwind v4 los ignoraba. Los tokens vigentes están en `app/globals.css` y se documentan en `DESIGN_SYSTEM.md` → *Tokens de Diseño*.
+
 ## ✅ Lo que se completó
 
 ### 1. **Tokens de Diseño Centralizados**

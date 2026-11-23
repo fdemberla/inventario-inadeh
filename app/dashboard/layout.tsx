@@ -36,7 +36,7 @@ export default async function DashboardLayout({
       {/* Bottom padding clears the mobile bar + iOS home indicator */}
       <main
         id="main-content"
-        className="bg-brand-gris min-w-0 flex-1 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-6 dark:bg-gray-900"
+        className="bg-canvas min-w-0 flex-1 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-6"
       >
         {children}
       </main>

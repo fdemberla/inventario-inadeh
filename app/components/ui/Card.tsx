@@ -36,16 +36,16 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           // Base
-          "rounded-2xl bg-white/40 transition-all duration-300 ease-out dark:bg-gray-900/40 backdrop-blur-lg backdrop-filter",
+          "rounded-2xl bg-surface text-fg transition-[box-shadow,transform] duration-200 ease-out",
           // Padding
           !noPadding && "p-6",
           // Border
-          !noBorder && "border border-white/50 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]",
+          !noBorder && "border border-line",
           // Shadow
-          !noShadow && "shadow-xl shadow-black/5 dark:shadow-black/20",
+          !noShadow && "shadow-sm",
           // Hoverable
           hoverable &&
-            "cursor-pointer hover:-translate-y-1 hover:shadow-2xl hover:bg-white/50 dark:hover:bg-gray-800/50 hover:border-white/60 dark:hover:border-white/20",
+            "cursor-pointer hover:-translate-y-0.5 hover:shadow-md",
           className,
         )}
         {...props}

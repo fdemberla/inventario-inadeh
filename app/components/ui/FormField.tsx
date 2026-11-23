@@ -43,12 +43,12 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
       <div className={cn("w-full space-y-2", className)}>
         {/* Label con indicador de requerido */}
         <div className="flex items-center gap-1">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <label className="text-sm font-semibold text-fg">
             {label}
           </label>
           {required && (
             <span
-              className="text-red-600 dark:text-red-400"
+              className="text-danger-fg"
               aria-label="Requerido"
             >
               *
@@ -58,7 +58,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
 
         {/* Descripción adicional */}
         {description && (
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+          <p className="text-xs text-fg-muted">
             {description}
           </p>
         )}
@@ -80,7 +80,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
         {error && (
           <p
             id={`${label}-error`}
-            className="text-sm font-medium text-red-600 dark:text-red-400"
+            className="text-sm font-medium text-danger-fg"
           >
             {error}
           </p>
@@ -88,7 +88,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
 
         {/* Texto auxiliar */}
         {helperText && !error && (
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+          <p className="text-xs text-fg-muted">
             {helperText}
           </p>
         )}

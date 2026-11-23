@@ -44,7 +44,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="relative w-full">
         {icon && (
-          <div className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500 dark:text-gray-400">
+          <div className="absolute top-1/2 left-3 -translate-y-1/2 text-fg-muted">
             {icon}
           </div>
         )}
@@ -57,17 +57,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             // Base styles
             "w-full rounded-xl px-4 py-3 text-base font-normal transition-all duration-300 ease-out",
             // Border y fondo
-            "border border-white/50 bg-white/40 dark:border-white/10 dark:bg-gray-900/40 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]",
+            "border border-line-strong bg-surface",
             // Texto
-            "text-gray-900 placeholder-gray-500 dark:text-gray-100 dark:placeholder-gray-400",
+            "text-fg placeholder:text-fg-muted",
             // Focus
-            "focus-visible:outline-none focus-visible:bg-white/70 dark:focus-visible:bg-gray-800/70 focus-visible:ring-2 focus-visible:ring-brand-azul/50 focus-visible:border-brand-azul/30",
+            "focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-focus",
             // Hover
-            "hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-white/60 dark:hover:border-white/20",
+            "hover:border-fg-muted",
             // Disabled
-            "disabled:cursor-not-allowed disabled:bg-gray-100/50 disabled:text-gray-500 dark:disabled:bg-gray-800/30 dark:disabled:text-gray-500 dark:disabled:border-gray-800",
+            "disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-fg-muted disabled:opacity-70",
             // Error
-            error && "border-red-400 bg-red-50/50 dark:border-red-500/50 dark:bg-red-900/10 focus-visible:ring-red-400/50 focus-visible:border-red-400",
+            error && "border-danger-fg focus-visible:border-danger-fg focus-visible:outline-danger-fg",
             // Con icono
             icon && "pl-10",
             className,

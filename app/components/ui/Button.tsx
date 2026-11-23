@@ -7,31 +7,28 @@ import { Spinner } from "./Spinner";
  * Definición de variantes para el componente Button
  */
 const buttonVariants = cva(
-  // Estilos base
-  "inline-flex items-center justify-center font-semibold transition-all duration-300 ease-out cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-inherit disabled:hover:scale-100 disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-xl",
+  // Base. Colours come from the semantic tokens in app/globals.css; every
+  // filled variant is ≥ 4.5:1 with white text (WCAG 2.1 AA) in both themes.
+  "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl font-semibold transition-colors duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        // Primario: Verde (acción principal)
-        primary:
-          "bg-brand-verde text-white hover:bg-[#3ca340] active:scale-95 dark:bg-brand-verde/80 dark:hover:bg-brand-verde focus-visible:ring-brand-verde/50 backdrop-blur-md shadow-lg shadow-brand-verde/20 hover:shadow-xl hover:shadow-brand-verde/30",
-        // Secundario: Naranja (acciones alternativas)
-        secondary:
-          "bg-brand-naranja text-white hover:bg-[#de6615] active:scale-95 dark:bg-brand-naranja/80 dark:hover:bg-brand-naranja focus-visible:ring-brand-naranja/50 backdrop-blur-md shadow-lg shadow-brand-naranja/20 hover:shadow-xl hover:shadow-brand-naranja/30",
-        // Peligro: Rojo (acciones destructivas)
-        danger:
-          "bg-red-500 text-white hover:bg-red-600 active:scale-95 dark:bg-red-500/80 dark:hover:bg-red-500 focus-visible:ring-red-500/50 backdrop-blur-md shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30",
-        // Ghost: Transparente (acciones secundarias)
-        ghost:
-          "bg-transparent text-gray-700 hover:bg-white/40 active:scale-95 dark:text-gray-300 dark:hover:bg-gray-800/40 focus-visible:ring-brand-azul/50",
-        // Outline: Con borde
-        outline:
-          "border-2 border-brand-azul/50 bg-white/10 text-brand-azul hover:bg-brand-azul/10 active:scale-95 dark:border-brand-azul/40 dark:text-blue-400 dark:hover:bg-brand-azul/20 focus-visible:ring-brand-azul/50 backdrop-blur-md",
+        // Acción principal (verde de marca, tono AA)
+        primary: "bg-primary text-on-primary shadow-sm hover:bg-primary-hover",
+        // Acción alternativa (naranja de marca, tono AA)
+        secondary: "bg-secondary text-on-primary shadow-sm hover:bg-secondary-hover",
+        // Acción destructiva
+        danger: "bg-danger text-on-primary shadow-sm hover:bg-danger-hover",
+        // Acción terciaria sin fondo
+        ghost: "bg-transparent text-fg hover:bg-surface-muted",
+        // Con borde (azul de marca)
+        outline: "border-2 border-accent bg-transparent text-accent hover:bg-accent/10",
       },
+      // Touch screens get ≥ 44px targets (WCAG 2.5.5 / Apple HIG)
       size: {
-        sm: "px-3 py-1.5 text-sm h-8 gap-1",
-        md: "px-4 py-2 text-base h-10 gap-2",
-        lg: "px-6 py-3 text-base h-12 gap-2",
+        sm: "h-9 px-3 text-sm pointer-coarse:h-11",
+        md: "h-10 px-4 text-base pointer-coarse:h-11",
+        lg: "h-12 px-6 text-base",
       },
     },
     defaultVariants: {

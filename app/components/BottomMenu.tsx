@@ -23,11 +23,11 @@ type User = {
 };
 
 const itemBase =
-  "flex min-h-14 min-w-14 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-azul dark:focus-visible:outline-white";
+  "flex min-h-14 min-w-14 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 const itemIdle =
-  "text-gray-600 hover:bg-gray-100 hover:text-brand-azul dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white";
+  "text-fg-muted hover:bg-surface-muted hover:text-accent";
 const itemActive =
-  "bg-brand-azul/10 font-semibold text-brand-azul dark:bg-white/10 dark:text-white";
+  "bg-accent/10 font-semibold text-accent";
 
 export default function BottomMenu({ user }: { user: User }) {
   const pathname = stripBasePath(usePathname() ?? "");
@@ -98,7 +98,7 @@ export default function BottomMenu({ user }: { user: User }) {
     <>
       <nav
         aria-label="Navegación principal"
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden dark:border-gray-800 dark:bg-gray-900/95"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
       >
         <ul className="flex items-stretch gap-1 px-2 py-1.5">
           {primary.map((section) => {
@@ -141,7 +141,7 @@ export default function BottomMenu({ user }: { user: User }) {
             tabIndex={-1}
             aria-hidden="true"
             onClick={close}
-            className="absolute inset-0 h-full w-full cursor-default bg-black/50"
+            className="animate-fade-in absolute inset-0 h-full w-full cursor-default bg-black/50"
           />
           <div
             ref={panelRef}
@@ -149,14 +149,14 @@ export default function BottomMenu({ user }: { user: User }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl bg-white pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl dark:bg-gray-900"
+            className="animate-slide-up absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl bg-surface pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl"
           >
-            <div className="sticky top-0 flex items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
+            <div className="sticky top-0 flex items-center justify-between gap-3 border-b border-line bg-surface px-4 py-3">
               <div className="min-w-0">
-                <h2 id={titleId} className="text-base font-semibold text-gray-900 dark:text-white">
+                <h2 id={titleId} className="text-base font-semibold text-fg">
                   Menú
                 </h2>
-                <p className="truncate text-sm text-gray-600 dark:text-gray-400">
+                <p className="truncate text-sm text-fg-muted">
                   {displayName}
                 </p>
               </div>
@@ -164,7 +164,7 @@ export default function BottomMenu({ user }: { user: User }) {
                 type="button"
                 onClick={close}
                 aria-label="Cerrar menú"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-brand-azul dark:text-gray-300 dark:hover:bg-gray-800"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-fg-muted hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-focus"
               >
                 <X className="h-6 w-6" aria-hidden="true" />
               </button>
@@ -178,11 +178,11 @@ export default function BottomMenu({ user }: { user: User }) {
               </ul>
             )}
 
-            <div className="border-t border-gray-200 px-2 pt-2 dark:border-gray-800">
+            <div className="border-t border-line px-2 pt-2">
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-base font-medium text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-700 dark:text-red-400 dark:hover:bg-red-950/40"
+                className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-base font-medium text-danger-fg hover:bg-danger/10 focus-visible:outline-2 focus-visible:outline-danger-fg"
               >
                 <LogOut className="h-5 w-5" aria-hidden="true" />
                 Cerrar sesión
@@ -206,10 +206,10 @@ function MoreSection({ section, pathname }: { section: NavSection; pathname: str
       <Link
         href={section.path}
         aria-current={isPathActive(pathname, section.path) ? "page" : undefined}
-        className={`flex min-h-12 items-center gap-3 rounded-xl px-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-brand-azul ${
+        className={`flex min-h-12 items-center gap-3 rounded-xl px-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-focus ${
           active
-            ? "bg-brand-azul/10 text-brand-azul dark:bg-white/10 dark:text-white"
-            : "text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800"
+            ? "bg-accent/10 text-accent"
+            : "text-fg hover:bg-surface-muted"
         }`}
       >
         <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
@@ -222,7 +222,7 @@ function MoreSection({ section, pathname }: { section: NavSection; pathname: str
               <Link
                 href={link.path}
                 aria-current={pathname === link.path ? "page" : undefined}
-                className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-brand-azul aria-[current=page]:font-semibold aria-[current=page]:text-brand-azul dark:text-gray-300 dark:hover:bg-gray-800 dark:aria-[current=page]:text-white"
+                className="flex min-h-11 items-center rounded-lg px-3 text-sm text-fg-muted hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-focus aria-[current=page]:font-semibold aria-[current=page]:text-accent"
               >
                 {link.label}
               </Link>
