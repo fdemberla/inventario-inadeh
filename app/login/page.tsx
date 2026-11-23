@@ -178,7 +178,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="flex min-h-screen bg-surface-muted">
       {/* Lado Izquierdo: Branding y Fondo (oculto en móviles) */}
       <div className="relative hidden w-full flex-col justify-between overflow-hidden bg-gradient-to-br from-brand-azul to-[#003070] p-12 lg:flex lg:w-1/2 xl:w-3/5">
         {/* Mesh Gradient / Efectos de fondo */}
@@ -232,10 +232,10 @@ export default function LoginPage() {
                 height={60}
               />
             </div>
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h2 className="text-3xl font-bold tracking-tight text-fg">
               Iniciar Sesión
             </h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-sm text-fg-muted">
               Ingresa tus credenciales para acceder al panel.
             </p>
           </div>
@@ -243,7 +243,7 @@ export default function LoginPage() {
           <Card className="shadow-xl">
             {/* Error Message */}
             {errors.submit && (
-              <div role="alert" className="mb-6 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-800 dark:bg-red-900/20 dark:text-red-200 flex items-center gap-3">
+              <div role="alert" className="mb-6 rounded-xl bg-danger/10 p-4 text-sm font-medium text-danger-fg flex items-center gap-3">
                 <svg className="h-5 w-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>

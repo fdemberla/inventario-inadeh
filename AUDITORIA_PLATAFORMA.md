@@ -292,6 +292,82 @@ Notas:
 - ESLint pasa en todo el proyecto y los 161 tests pasan.
 - **Sin tests de componentes:** requieren agregar `jsdom` y `@testing-library/react`.
 
+## 3e. ✅ Fase 6 aplicada: migración de páginas (2026-11-23, sin commit)
+
+**Colores y componentes**
+- Codemod de clases de paleta → tokens semánticos: de 618 clases a 14, todas intencionales (spinner y el panel azul del login).
+- Nuevos componentes `Select`, `Textarea` y `Badge`. Los 10 formularios usan `FormField`, con etiquetas asociadas en todos los campos.
+- Escáner reescrito sin flowbite:
+  - tipo de operación con radios nativos de 56 px;
+  - campo con etiqueta;
+  - resultado anunciado con `aria-live`;
+  - `PageLayout`.
+- `WarehouseCard`: se corrigió un `<button>` dentro de un `<Link>` (HTML inválido) y el enlace "ver más" de 16 px.
+- `OfflineStatusBanner` usa tonos semánticos y `role="status"`.
+- La confirmación para eliminar un producto era un *toast* inalcanzable con teclado; ahora es un `Modal`.
+- Reportes:
+  - el filtro de categoría tiene nombre accesible;
+  - los esqueletos de carga ya no brillan en modo oscuro;
+  - las alertas indican la severidad en texto, no solo con color (WCAG 1.4.1);
+  - se corrigió un choque de clases en el botón de exportar.
+- **Sin emojis en la plataforma.** Una sola librería de íconos (lucide); se desinstaló `react-icons`.
+
+**Verificación**
+- Auditoría de contraste automática en el navegador: 19 páginas, en modo claro y oscuro, con **0 fallos**. Se encontraron y corrigieron:
+  - el naranja del logo usado como color de texto (2.91:1);
+  - el `surface-muted` oscuro (4.01:1).
+- 165 tests pasan, incluidas las 107 pruebas de integración contra el servidor real. Una prueba de `users` falla de forma intermitente cuando todas las suites corren en paralelo.
+
+**Base de datos (`lib/db.ts`)**
+- Había una condición de carrera: cada recarga en desarrollo abría un *pool* nuevo sin cerrar el anterior. Por eso el log "Connected to SQL Server" se repetía.
+- Ahora la promesa se cachea en `globalThis` y la conexión se abre al primer uso. 4 tests lo cubren.
+- Efecto secundario detectado y corregido: `sql.NVarChar` de otra instancia de `mssql` rompía el login con error 500.
+- `executeInTransaction` usaba imports inexistentes.
+- Se corrigió el tipado de `sql()`: de 185 errores de TypeScript a 134.
+
+**Incidente del codemod (corregido)**
+- La primera versión eliminaba *tokens* repetidos en cualquier cadena. Dañó 15 trazos SVG y un mensaje de texto ("not in browser" → "in browser").
+- Se detectó comparando cada cadena contra HEAD y se restauraron todas: quedan 0 dañadas.
+
+**Datos disponibles para KPIs**
+- Solo inventario por almacén y movimientos `RECEIPT` (4,248), `SHIPMENT` (283) y `ADJUSTMENT` (179).
+- No hay pedidos, rutas, cortes, muelles, tareas de *picking*, conteos, lotes ni ubicaciones.
+- `ReorderLevel` está definido en 2 de 538 registros.
+
+## 3f. ✅ Reportes: tablero de indicadores (2026-11-23, sin commit)
+
+**Qué se construyó**
+- `/dashboard/reports/[id]` reemplaza los 4 gráficos anteriores por un tablero con KPIs calculables con los datos actuales:
+  - valor del inventario;
+  - faltantes con demanda;
+  - productos en riesgo (cobertura < 14 días);
+  - stock inmovilizado (90 días);
+  - rotación anualizada;
+  - ajustes sobre movimientos, como aproximación de la exactitud del inventario.
+- Además incluye:
+  - recepciones y despachos por día o semana, con tabla accesible;
+  - listas de acción (faltantes, en riesgo, inmovilizado);
+  - actividad por usuario;
+  - calidad de datos;
+  - definiciones de cada fórmula.
+- Filtros por período (7, 30, 90 días o 12 meses) y por categoría.
+
+**API y código**
+- API `GET /api/reports/:id/kpis?days=&category=`, con acceso por almacén (`requireWarehouse`) y parámetros validados.
+- Lógica en `lib/reports/kpis.ts`.
+- El eje temporal incluye los días y semanas sin actividad; antes los omitía y deformaba la tendencia.
+
+**Verificación**
+- Valor, inmovilizado, faltantes y conteos de líneas cotejados con SQL independiente contra la base real.
+- Única diferencia explicada: los movimientos incluyen productos dados de baja después, y así se documenta en la página.
+- Paleta del gráfico validada con el validador de `dataviz` (banda de luminosidad, croma, ΔE para daltonismo ≥ 22 y contraste), con colores de marca y una paleta propia para modo oscuro.
+- Contraste: 307 textos, 0 fallos en modo claro y oscuro. A 375 px no hay desplazamiento horizontal.
+- Tests: `tests/kpis.test.ts` (11).
+
+**Pendiente**
+- Las APIs `niveles`, `movimiento`, `valor`, `alerta` y `tarjetas` ya no las usa la interfaz. `exportar` sí se usa.
+- Despacho a tiempo, pedidos en riesgo, *picking*, muelles y conteos requieren un módulo de pedidos y tareas.
+
 ## 3. Lenguaje visual e identidad
 
 - 🔴 **Los tokens de diseño no están conectados.** Tailwind v4 ignora `tailwind.config.ts` porque no hay `@config`. Por eso no existen `success/warning/error`, el espaciado, las fuentes ni las animaciones (`animate-gradient-shift`, `animate-in`). `lib/design-tokens.ts` se importa **0 veces**. `globals.css` solo define 4 colores `brand-*`.

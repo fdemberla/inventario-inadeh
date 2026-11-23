@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import ProductForm from "@/app/components/ProductForm";
+import { Button } from "@/app/components/ui";
 import { withBasePath } from "@/lib/utils";
 
 interface SupplierEntry {
@@ -50,29 +51,31 @@ export default function NewProductPage() {
       toast.success("Producto creado exitosamente.");
 
       toast.custom((t) => (
-        <div className="max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
-          <p className="mb-2 text-sm font-medium text-gray-800">
+        <div className="max-w-sm rounded-lg border border-line bg-surface p-4 shadow-lg">
+          <p className="mb-2 text-sm font-medium text-fg">
             ¿Desea agregar otro producto?
           </p>
           <div className="flex justify-end gap-2">
-            <button
+            <Button
+              size="sm"
+              variant="primary"
               onClick={() => {
                 toast.dismiss(t.id);
                 router.refresh();
               }}
-              className="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
             >
               Agregar otro
-            </button>
-            <button
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={() => {
                 toast.dismiss(t.id);
                 router.push("/dashboard/products");
               }}
-              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-100"
             >
-              Ir al inicio
-            </button>
+              Ver productos
+            </Button>
           </div>
         </div>
       ));

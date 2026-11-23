@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { Button } from "@/app/components/ui";
+import { Button, Modal, ModalFooter } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import { DataTable } from "../../components/DataTable";
 import { withBasePath } from "@/lib/utils";
@@ -26,58 +26,39 @@ export default function ViewAllProducts() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Confirmation is a real dialog (focusable, Escape, announced), not a toast
+  const [pendingDelete, setPendingDelete] = useState<{ id: number; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const handleDelete = (productId: number, productName: string) => {
-    toast.custom(
-      (t) => (
-        <div className="max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
-          <p className="mb-1 text-sm font-medium text-gray-800">
-            ¿Eliminar <span className="font-semibold">{productName}</span>?
-          </p>
-          <p className="mb-3 text-xs text-gray-500">
-            Esta acción no se puede deshacer.
-          </p>
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={async () => {
-                toast.dismiss(t.id);
-                const res = await fetch(
-                  withBasePath(`/api/products/${productId}`),
-                  {
-                    method: "DELETE",
-                  },
-                );
-                const result = await res.json();
-                if (res.ok) {
-                  setProducts((prev) =>
-                    prev.filter((p) => p.ProductID !== productId),
-                  );
-                  toast.success("Producto eliminado exitosamente.");
-                } else if (res.status === 409) {
-                  toast.error(
-                    "No se puede eliminar el producto porque tiene inventario registrado. El inventario debe ser 0 para poder eliminarlo.",
-                    { duration: 6000 },
-                  );
-                } else {
-                  toast.error(
-                    result.message || "Error al eliminar el producto.",
-                  );
-                }
-              }}
-              className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700"
-            >
-              Eliminar
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: Infinity },
-    );
+    setPendingDelete({ id: productId, name: productName });
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(withBasePath(`/api/products/${pendingDelete.id}`), {
+        method: "DELETE",
+      });
+      const result = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setProducts((prev) => prev.filter((p) => p.ProductID !== pendingDelete.id));
+        toast.success("Producto eliminado exitosamente.");
+      } else if (res.status === 409) {
+        toast.error(
+          "No se puede eliminar el producto porque tiene inventario registrado. El inventario debe ser 0 para poder eliminarlo.",
+          { duration: 6000 },
+        );
+      } else {
+        toast.error(result.message || "Error al eliminar el producto.");
+      }
+    } catch {
+      toast.error("Error de red al eliminar el producto.");
+    } finally {
+      setDeleting(false);
+      setPendingDelete(null);
+    }
   };
 
   useEffect(() => {
@@ -150,7 +131,7 @@ export default function ViewAllProducts() {
       <PageLayout title="Productos">
         <div className="flex justify-center p-6 align-middle">
           <div role="status" aria-label="Cargando...">
-            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-line"></div>
             <span className="sr-only">Cargando...</span>
           </div>
         </div>
@@ -178,6 +159,29 @@ export default function ViewAllProducts() {
       }
     >
       <DataTable caption="Productos" data={products} columns={columns} />
+
+      <Modal
+        isOpen={!!pendingDelete}
+        onClose={() => !deleting && setPendingDelete(null)}
+        isDismissable={!deleting}
+        title="Eliminar producto"
+        description="Esta acción no se puede deshacer."
+        size="sm"
+        footer={
+          <ModalFooter>
+            <Button variant="ghost" onClick={() => setPendingDelete(null)} disabled={deleting}>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={confirmDelete} isLoading={deleting}>
+              Eliminar
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <p className="text-fg">
+          ¿Eliminar <span className="font-semibold">{pendingDelete?.name}</span>?
+        </p>
+      </Modal>
     </PageLayout>
   );
 }

@@ -92,7 +92,7 @@ export default function UnitForm({
 
   return (
     <div className={className}>
-      {title && <h1 className="mb-4 text-xl font-bold dark:text-white">{title}</h1>}
+      {title && <h1 className="text-fg mb-4 text-xl font-bold">{title}</h1>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormField
           label="Nombre de la unidad"

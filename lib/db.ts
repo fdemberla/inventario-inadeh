@@ -1,4 +1,8 @@
-import { ConnectionPool } from "mssql";
+// Type-only import; the runtime module is loaded with import("mssql").
+// Callers must not pass mssql type objects (e.g. sql.NVarChar) to .input():
+// the shared pool can outlive a dev recompile and types are compared by
+// identity. Let mssql infer types from the JS values instead.
+import type { ConnectionPool } from "mssql";
 
 const config = {
   user: process.env.DB_USER,
@@ -16,7 +20,13 @@ const config = {
   },
 };
 
-let pool: ConnectionPool | null = null;
+// One pool per server process. The *promise* is cached (not the pool) so
+// concurrent first requests share a single connection attempt, and it lives
+// on globalThis so dev-mode recompiles/HMR reuse it instead of leaking a new
+// pool (and its SQL Server connections) on every reload.
+const globalForDb = globalThis as unknown as {
+  __mssqlPoolPromise?: Promise<ConnectionPool>;
+};
 
 /**
  * Attempts to connect to SQL Server with retries.
@@ -36,16 +46,16 @@ async function connectWithRetry(
       const newPool = new mssql.ConnectionPool(config);
       await newPool.connect();
       console.log(
-        `✅ Successfully connected to SQL Server! db: ${process.env.DB_DATABASE}`,
+        `[db] Connected to SQL Server (db: ${process.env.DB_DATABASE})`,
       );
       return newPool;
     } catch (err) {
-      lastError = err;
+      lastError = err as Error;
       attempt++;
       console.error(
-        `❌ Connection attempt ${attempt} failed. Retrying in ${retryDelayMs / 1000}s...`,
+        `[db] Connection attempt ${attempt} failed. Retrying in ${retryDelayMs / 1000}s...`,
       );
-      console.error("Error details:", err.message);
+      console.error("Error details:", (err as Error).message);
 
       if (attempt < maxRetries) {
         await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
@@ -54,19 +64,23 @@ async function connectWithRetry(
     }
   }
 
-  console.error("🔥 All connection attempts failed. Last error:", lastError);
+  console.error("[db] All connection attempts failed. Last error:", lastError);
   throw lastError; // Re-throw the last error
 }
 
-export async function getPool() {
-  if (!pool) {
-    pool = await connectWithRetry(); // Uses default: 5 retries, starting at 2s delay
+export function getPool(): Promise<ConnectionPool> {
+  if (!globalForDb.__mssqlPoolPromise) {
+    globalForDb.__mssqlPoolPromise = connectWithRetry().catch((err) => {
+      // Don't cache a failure: the next request tries to connect again
+      globalForDb.__mssqlPoolPromise = undefined;
+      throw err;
+    });
   }
-  return pool;
+  return globalForDb.__mssqlPoolPromise;
 }
 
 // SQL helper function
-export async function sql(query: string, params = []) {
+export async function sql(query: string, params: unknown[] = []) {
   const pool = await getPool();
   const request = pool.request();
 
@@ -126,15 +140,16 @@ export async function rawSql(query: string, params: unknown[]) {
     return result.recordset;
   } catch (err) {
     console.error("Error executing raw SQL:", err);
-    throw new Error(`Database query failed: ${err.message} - Query: ${query}`);
+    throw new Error(`Database query failed: ${(err as Error).message} - Query: ${query}`);
   }
 }
 
 export async function withTransaction(
-  callback: (transaction) => Promise<unknown>,
+  callback: (transaction: import("mssql").Transaction) => Promise<unknown>,
 ) {
-  const pool = await poolPromise;
-  const transaction = new (await import("mssql")).Transaction(pool);
+  const pool = await getPool();
+  const { Transaction } = await import("mssql");
+  const transaction = new Transaction(pool);
   try {
     await transaction.begin();
     const result = await callback(transaction);
@@ -147,9 +162,10 @@ export async function withTransaction(
 }
 
 export async function executeInTransaction(
-  queries: { query: string; params: [] }[],
+  queries: { query: string; params: unknown[] }[],
 ) {
   const pool = await getPool();
+  const { Transaction, Request: SqlRequest } = await import("mssql");
   const transaction = new Transaction(pool);
 
   try {
@@ -171,5 +187,13 @@ export async function executeInTransaction(
   }
 }
 
-// Adding poolPromise function to return a pool as a Promise
-export const poolPromise = getPool();
+/**
+ * @deprecated use `await getPool()`. Kept for existing imports; it is the
+ * same shared promise, created lazily instead of at import time.
+ */
+export const poolPromise = {
+  then: <T>(
+    onFulfilled?: (p: ConnectionPool) => T | PromiseLike<T>,
+    onRejected?: (e: unknown) => T | PromiseLike<T>,
+  ) => getPool().then(onFulfilled, onRejected),
+} as PromiseLike<ConnectionPool>;

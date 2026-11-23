@@ -53,17 +53,17 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           {breadcrumbs.map((crumb, index) => (
             <React.Fragment key={index}>
               {index > 0 && (
-                <span className="text-gray-400 dark:text-gray-600">/</span>
+                <span className="text-fg-muted">/</span>
               )}
               {crumb.href ? (
                 <Link
                   href={stripBasePath(crumb.href)}
-                  className="text-brand-azul hover:text-brand-azul/80 dark:text-blue-400 dark:hover:text-blue-300 transition-colors font-medium"
+                  className="text-accent focus-visible:outline-focus rounded font-medium underline-offset-4 hover:underline focus-visible:outline-2"
                 >
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="text-gray-700 dark:text-gray-300">
+                <span className="text-fg">
                   {crumb.label}
                 </span>
               )}
@@ -79,7 +79,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           {backButton && (
             <Link
               href={stripBasePath(backButton.href)}
-              className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-fg-muted hover:text-fg"
             >
               <svg
                 className="h-4 w-4"
@@ -99,13 +99,13 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           )}
 
           {/* Título */}
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+          <h1 className="text-3xl font-bold text-fg md:text-4xl">
             {title}
           </h1>
 
           {/* Subtítulo */}
           {subtitle && (
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-lg text-fg-muted">
               {subtitle}
             </p>
           )}

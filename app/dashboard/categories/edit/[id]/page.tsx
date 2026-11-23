@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { withBasePath } from "@/lib/utils";
 import { PageLayout } from "@/app/components/PageLayout";
-import { Card, Button, FormField } from "@/app/components/ui";
+import { Card, Button, FormField, Select, Spinner, Textarea } from "@/app/components/ui";
 
 type Category = {
   CategoryID: number;
@@ -79,14 +79,10 @@ export default function EditCategoryPage() {
   if (loading) {
     return (
       <div className="flex justify-center p-12">
-        <div role="status" aria-label="Cargando...">
-          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
-        </div>
+        <Spinner size="xl" />
       </div>
     );
   }
-
-  const inputClass = "w-full rounded-lg px-4 py-2.5 text-base font-normal transition-all duration-200 ease-in-out border border-white/40 bg-white/50 dark:border-white/10 dark:bg-gray-800/50 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus-visible:border-transparent focus-visible:bg-white dark:focus-visible:bg-gray-800 focus-visible:ring-2 focus-visible:ring-brand-azul focus-visible:outline-none";
 
   return (
     <PageLayout
@@ -112,18 +108,13 @@ export default function EditCategoryPage() {
               required
             />
 
-            <div className="w-full space-y-1.5">
-              <label htmlFor="parentCategory" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Categoría Principal (Opcional)
-              </label>
-              <select
-                id="parentCategory"
+            <FormField label="Categoría Principal (Opcional)" id="parentCategory">
+              <Select
                 value={parentCategoryID ?? ""}
                 onChange={(e) => {
                   const value = e.target.value;
                   setParentCategoryID(value ? parseInt(value) : null);
                 }}
-                className={inputClass}
               >
                 <option value="">Ninguna (Nivel Superior)</option>
                 {categories.map((cat) => (
@@ -131,25 +122,20 @@ export default function EditCategoryPage() {
                     {cat.CategoryName}
                   </option>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </FormField>
           </div>
 
-          <div className="w-full space-y-1.5">
-            <label htmlFor="description" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Descripción (Opcional)
-            </label>
-            <textarea
-              id="description"
+          <FormField label="Descripción (Opcional)" id="description">
+            <Textarea
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Escriba una descripción detallada"
-              className={inputClass}
             />
-          </div>
+          </FormField>
 
-          <div className="pt-4 border-t border-white/20 dark:border-white/10 text-center">
+          <div className="border-line border-t pt-4 text-center">
             <Button
               type="submit"
               variant="primary"

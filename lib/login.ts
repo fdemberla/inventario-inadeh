@@ -1,6 +1,5 @@
 // lib/login.ts
-import { poolPromise } from "@/lib/db";
-import * as sql from "mssql"; // Use mssql for SQL types
+import { getPool } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 // Hash of a random string: compared against when the user doesn't exist so
@@ -11,11 +10,15 @@ const DUMMY_HASH =
 // Login function specifically for user authentication
 export async function loginUser(username: string, password: string) {
   try {
-    const pool = await poolPromise;
+    const pool = await getPool();
 
     const result = await pool
       .request()
-      .input("Username", sql.NVarChar, username)
+      // No explicit type: mssql infers NVarChar for strings. Passing a type
+      // object (sql.NVarChar) breaks when the shared pool was created by an
+      // earlier instance of the mssql module (dev recompiles), since types
+      // are compared by identity.
+      .input("Username", username)
       .query(
         `SELECT UserID, Username, PasswordHash, RoleID, FirstName, LastName, Email, IsActive
          FROM Users WHERE Username = @Username`,

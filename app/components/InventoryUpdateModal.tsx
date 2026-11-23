@@ -102,17 +102,17 @@ export default function InventoryUpdateModal({
       <div className="space-y-5 pt-2 pb-2">
         {item && (
           <>
-            <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="space-y-2 text-sm text-fg bg-surface-muted p-4 rounded-lg border border-line">
               <p>
-                <span className="font-semibold text-gray-900 dark:text-white">Producto:</span> {item.ProductName}
+                <span className="font-semibold text-fg">Producto:</span> {item.ProductName}
               </p>
               {item.UnitName && (
                 <p>
-                  <span className="font-semibold text-gray-900 dark:text-white">Unidad:</span> {item.UnitName}
+                  <span className="font-semibold text-fg">Unidad:</span> {item.UnitName}
                 </p>
               )}
               <p>
-                <span className="font-semibold text-gray-900 dark:text-white">Cantidad actual:</span> {item.QuantityOnHand}
+                <span className="font-semibold text-fg">Cantidad actual:</span> {item.QuantityOnHand}
               </p>
             </div>
             <FormField

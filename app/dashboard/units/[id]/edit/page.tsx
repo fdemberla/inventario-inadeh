@@ -50,13 +50,13 @@ export default function EditUnitPage() {
     >
       <Card className="mx-auto w-full max-w-xl">
         {error ? (
-          <p role="alert" className="text-red-700 dark:text-red-400">
+          <p role="alert" className="text-danger-fg">
             {error}
           </p>
         ) : !unit ? (
           <p role="status">Cargando…</p>
         ) : !isEditable ? (
-          <p role="alert" className="text-gray-700 dark:text-gray-300">
+          <p role="alert" className="text-fg">
             Las unidades del sistema {unit.System} no se pueden editar. Solo
             las unidades personalizadas son editables.
           </p>

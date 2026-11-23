@@ -21,3 +21,12 @@ export type { ModalProps } from "./Modal";
 
 export { IconButton } from "./IconButton";
 export type { IconButtonProps } from "./IconButton";
+
+export { Select } from "./Select";
+export type { SelectProps } from "./Select";
+
+export { Textarea } from "./Textarea";
+export type { TextareaProps } from "./Textarea";
+
+export { Badge } from "./Badge";
+export type { BadgeProps, BadgeTone } from "./Badge";

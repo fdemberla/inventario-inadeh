@@ -39,7 +39,7 @@ export default function ViewAllUnits() {
     return (
       <PageLayout title="Unidades">
         <div className="flex justify-center p-6">
-          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-line"></div>
         </div>
       </PageLayout>
     );

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { withBasePath } from "@/lib/utils";
-import { Card, Button, FormField } from "@/app/components/ui";
+import { Card, Button, FormField, Select, Spinner } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 
 type MainLocation = {
   MainLocationID: number;
@@ -90,35 +91,31 @@ export default function EditWarehousePage() {
   if (loading) {
     return (
       <div className="flex justify-center p-12">
-        <div role="status" aria-label="Cargando...">
-          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
-          <span className="sr-only">Cargando...</span>
-        </div>
+        <Spinner size="xl" />
       </div>
     );
   }
 
   return (
-    <Card className="w-full p-6 shadow-lg border-none bg-white dark:bg-gray-900 mt-6">
-      <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white text-center">Editar Almacén</h2>
-      
+    <PageLayout
+      title="Editar Depósito"
+      subtitle={form.WarehouseName || undefined}
+      backButton={{ href: "/dashboard/warehouse", label: "Volver a depósitos" }}
+      breadcrumbs={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: "Depósitos", href: "/dashboard/warehouse" },
+        { label: "Editar" },
+      ]}
+    >
+    <Card className="w-full">
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          
-          <div className="w-full space-y-2">
-            <div className="flex items-center gap-1">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Centro Principal
-              </label>
-              <span className="text-red-600 dark:text-red-400" aria-label="Requerido">*</span>
-            </div>
-            <select
-              id="mainLocation"
-              required
+
+          <FormField label="Centro Principal" id="mainLocation" required>
+            <Select
               value={form.MainLocationID}
               onChange={(e) => setForm({ ...form, MainLocationID: parseInt(e.target.value) })}
               disabled={isSubmitting}
-              className="w-full rounded-lg px-4 py-2.5 text-base font-normal transition-all duration-200 ease-in-out border border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-brand-azul focus-visible:outline-none dark:focus-visible:ring-blue-400 hover:border-gray-400 dark:hover:border-gray-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-800/50 dark:disabled:text-gray-500 dark:disabled:border-gray-700"
             >
               <option value="" disabled>Seleccione un centro</option>
               {locations.map((loc) => (
@@ -126,9 +123,9 @@ export default function EditWarehousePage() {
                   {loc.Name}
                 </option>
               ))}
-            </select>
-          </div>
-          
+            </Select>
+          </FormField>
+
           <FormField
             label="Nombre"
             id="name"
@@ -138,7 +135,7 @@ export default function EditWarehousePage() {
             onChange={(e) => setForm({ ...form, WarehouseName: e.target.value })}
             disabled={isSubmitting}
           />
-          
+
           <FormField
             label="Ubicación"
             id="location"
@@ -148,27 +145,28 @@ export default function EditWarehousePage() {
             disabled={isSubmitting}
           />
         </div>
-        
-        <div className="flex items-center gap-2 pt-2">
+
+        <div className="flex min-h-11 items-center gap-2 pt-2">
           <input
             type="checkbox"
             id="isActive"
             checked={form.IsActive}
             onChange={(e) => setForm({ ...form, IsActive: e.target.checked })}
             disabled={isSubmitting}
-            className="h-5 w-5 cursor-pointer rounded border-gray-300 text-brand-azul focus:ring-brand-azul dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-brand-azul transition-all"
+            className="accent-brand-azul h-5 w-5 cursor-pointer"
           />
-          <label htmlFor="isActive" className="cursor-pointer text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <label htmlFor="isActive" className="text-fg cursor-pointer text-sm font-semibold">
             Activo
           </label>
         </div>
-        
-        <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-          <Button type="submit" variant="primary" className="w-full sm:w-auto px-8" isLoading={isSubmitting} disabled={isSubmitting}>
+
+        <div className="border-line border-t pt-4 text-center">
+          <Button type="submit" variant="primary" className="w-full sm:w-auto" isLoading={isSubmitting} disabled={isSubmitting}>
             Actualizar Almacén
           </Button>
         </div>
       </form>
     </Card>
+    </PageLayout>
   );
 }

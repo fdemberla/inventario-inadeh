@@ -4,7 +4,7 @@ import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { toast } from "react-hot-toast";
 import UnitForm from "@/app/components/UnitForm";
 import { withBasePath } from "@/lib/utils";
-import { Button, FormField, Modal, Card, Input } from "@/app/components/ui";
+import { Button, FormField, Modal, Card, Input, Select, Textarea } from "@/app/components/ui";
 
 interface Category {
   CategoryID: number;
@@ -219,24 +219,21 @@ export default function ProductForm({
 
   return (
     <>
-      <Card className="w-full border-none shadow-lg dark:bg-gray-900/40">
+      <Card className="w-full">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+          <h1 className="text-fg mb-2 text-2xl font-bold">
             {formTitle}
           </h1>
 
           {/* Imagen */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Imagen del producto
-            </label>
+          <FormField label="Imagen del producto" id="product-image">
             <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="w-full rounded-2xl p-3 text-sm text-gray-900 dark:text-gray-200 file:mr-4 file:rounded-md file:border-0 file:bg-brand-azul/10 file:px-4 file:py-2 file:text-brand-azul file:font-semibold hover:file:bg-brand-azul/20 dark:bg-gray-800 dark:file:bg-brand-azul/20 dark:file:text-blue-300 dark:hover:file:bg-brand-azul/30 cursor-pointer"
+              className="text-fg file:bg-accent/10 file:text-accent hover:file:bg-accent/20 w-full cursor-pointer text-sm file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:px-4 file:font-semibold"
             />
-          </div>
+          </FormField>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
@@ -252,13 +249,14 @@ export default function ProductForm({
           {/* Buscador ISTMO */}
           {showIstmoSearch && (
             <div className="relative">
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="istmosearch" className="text-fg mb-2 block text-sm font-semibold">
                 Buscar Producto Istmo
               </label>
-              <div className="mb-3 flex space-x-3 items-end">
+              <div className="mb-3 flex items-end gap-3">
                 <div className="flex-1">
                   <Input
                     type="text"
+                    id="istmosearch"
                     name="istmosearch"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -271,14 +269,20 @@ export default function ProductForm({
               </div>
 
               {showResults && results.length > 0 && (
-                <ul className="mb-4 max-h-60 w-full overflow-y-auto rounded-md border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
+                <ul
+                  aria-label="Resultados de búsqueda Istmo"
+                  className="border-line bg-surface mb-4 max-h-60 w-full overflow-y-auto rounded-xl border shadow-md"
+                >
                   {results.map((product) => (
-                    <li
-                      key={product.codigo}
-                      onClick={() => handleSelectResult(product.codigo)}
-                      className="cursor-pointer px-4 py-2 text-sm hover:bg-brand-azul/10 dark:text-white dark:hover:bg-gray-700"
-                    >
-                      {product.nombre} <span className="text-xs text-gray-500">({product.codigo})</span>
+                    <li key={product.codigo}>
+                      {/* Real button: reachable and selectable with the keyboard */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectResult(product.codigo)}
+                        className="text-fg hover:bg-accent/10 focus-visible:outline-focus min-h-11 w-full px-4 py-2 text-left text-sm focus-visible:outline-2 focus-visible:-outline-offset-2"
+                      >
+                        {product.nombre} <span className="text-fg-muted text-xs">({product.codigo})</span>
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -295,18 +299,14 @@ export default function ProductForm({
           )}
 
           {/* Descripción */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Descripción
-            </label>
-            <textarea
+          <FormField label="Descripción" id="description">
+            <Textarea
               name="description"
               value={form.description}
               onChange={handleChange}
-              className="w-full rounded-xl px-4 py-3 text-base font-normal transition-all duration-300 ease-out border border-white/50 bg-white/40 dark:border-white/10 dark:bg-gray-900/40 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] text-gray-900 dark:text-gray-100 focus-visible:outline-none focus-visible:bg-white/70 dark:focus-visible:bg-gray-800/70 focus-visible:ring-2 focus-visible:ring-brand-azul/50 focus-visible:border-brand-azul/30 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-white/60 dark:hover:border-white/20"
               rows={3}
             />
-          </div>
+          </FormField>
 
           {/* Código de barras */}
           <FormField
@@ -318,28 +318,16 @@ export default function ProductForm({
 
           {/* Categoría y Costo */}
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-            <div className="w-full space-y-2">
-              <div className="flex items-center gap-1">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Categoría
-                </label>
-                <span className="text-red-600 dark:text-red-400" aria-label="Requerido">*</span>
-              </div>
-              <select
-                name="categoryID"
-                value={form.categoryID}
-                onChange={handleChange}
-                required
-                className="w-full rounded-xl px-4 py-3 text-base font-normal transition-all duration-300 ease-out border border-white/50 bg-white/40 dark:border-white/10 dark:bg-gray-900/40 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] text-gray-900 dark:text-gray-100 focus-visible:outline-none focus-visible:bg-white/70 dark:focus-visible:bg-gray-800/70 focus-visible:ring-2 focus-visible:ring-brand-azul/50 focus-visible:border-brand-azul/30 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-white/60 dark:hover:border-white/20"
-              >
+            <FormField label="Categoría" id="categoryID" required>
+              <Select name="categoryID" value={form.categoryID} onChange={handleChange}>
                 <option value="">Seleccione...</option>
                 {categories.map((cat) => (
                   <option key={cat.CategoryID} value={cat.CategoryID}>
                     {cat.CategoryName}
                   </option>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </FormField>
             <FormField
               label="Costo"
               name="cost"
@@ -352,11 +340,8 @@ export default function ProductForm({
 
           {/* Sistema y Unidad */}
           <div className="grid grid-cols-2 gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Sistema de unidades
-              </label>
-              <select
+            <FormField label="Sistema de unidades" id="unitSystem" required>
+              <Select
                 name="unitSystem"
                 value={form.unitSystem}
                 onChange={(e) => {
@@ -366,8 +351,6 @@ export default function ProductForm({
                     unitID: "",
                   }));
                 }}
-                required
-                className="w-full rounded-xl px-4 py-3 text-base font-normal transition-all duration-300 ease-out border border-white/50 bg-white/40 dark:border-white/10 dark:bg-gray-900/40 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] text-gray-900 dark:text-gray-100 focus-visible:outline-none focus-visible:bg-white/70 dark:focus-visible:bg-gray-800/70 focus-visible:ring-2 focus-visible:ring-brand-azul/50 focus-visible:border-brand-azul/30 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-white/60 dark:hover:border-white/20"
               >
                 <option value="">Seleccione...</option>
                 {systemOptions.map((sys) => (
@@ -375,112 +358,105 @@ export default function ProductForm({
                     {sys}
                   </option>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </FormField>
 
             <div>
-              <div className="flex items-center justify-between">
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Unidad
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowUnitForm(true)}
-                  className="text-xs font-semibold text-brand-azul hover:underline dark:text-blue-400"
+              <FormField label="Unidad" id="unitID" required>
+                <Select
+                  name="unitID"
+                  value={form.unitID}
+                  onChange={handleChange}
+                  disabled={!form.unitSystem}
                 >
-                  + Nueva unidad
-                </button>
-              </div>
-              <select
-                name="unitID"
-                value={form.unitID}
-                onChange={handleChange}
-                disabled={!form.unitSystem}
-                required
-                className="w-full mt-1 rounded-xl px-4 py-3 text-base font-normal transition-all duration-300 ease-out border border-white/50 bg-white/40 dark:border-white/10 dark:bg-gray-900/40 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] text-gray-900 dark:text-gray-100 focus-visible:outline-none focus-visible:bg-white/70 dark:focus-visible:bg-gray-800/70 focus-visible:ring-2 focus-visible:ring-brand-azul/50 focus-visible:border-brand-azul/30 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-white/60 dark:hover:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100/50 dark:disabled:bg-gray-800/30"
+                  <option value="">Seleccione...</option>
+                  {filteredUnits.map((u) => (
+                    <option key={u.UnitID} value={u.UnitID}>
+                      {u.UnitName} ({u.Abbreviation})
+                    </option>
+                  ))}
+                </Select>
+              </FormField>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => setShowUnitForm(true)}
               >
-                <option value="">Seleccione...</option>
-                {filteredUnits.map((u) => (
-                  <option key={u.UnitID} value={u.UnitID}>
-                    {u.UnitName} ({u.Abbreviation})
-                  </option>
-                ))}
-              </select>
+                + Nueva unidad
+              </Button>
             </div>
           </div>
 
           {/* Proveedores */}
           <div>
-            <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100">
+            <h2 className="mb-4 text-lg font-semibold text-fg">
               Proveedores
             </h2>
             <div className="space-y-4">
               {supplierList.map((sup, i) => (
-                <Card
+                <div
                   key={i}
-                  className="p-4 bg-gray-50 dark:bg-gray-800/50 space-y-4 border border-gray-200 dark:border-gray-700"
-                  noShadow
+                  className="border-line bg-surface-muted space-y-4 rounded-2xl border p-4"
                 >
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Proveedor</label>
-                    <select
+                  <FormField label="Proveedor">
+                    <Select
                       value={sup.supplierID}
                       onChange={(e) => handleSupplierChange(i, "supplierID", e)}
-                      className="w-full rounded-xl px-4 py-3 text-base font-normal transition-all duration-300 ease-out border border-white/50 bg-white/40 dark:border-white/10 dark:bg-gray-900/40 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] text-gray-900 dark:text-gray-100 focus-visible:outline-none focus-visible:bg-white/70 dark:focus-visible:bg-gray-800/70 focus-visible:ring-2 focus-visible:ring-brand-azul/50 focus-visible:border-brand-azul/30 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-white/60 dark:hover:border-white/20"
                     >
                       {suppliers.map((s) => (
                         <option key={s.SupplierID} value={s.SupplierID}>
                           {s.SupplierName}
                         </option>
                       ))}
-                    </select>
-                  </div>
-                  <Input
+                    </Select>
+                  </FormField>
+                  <FormField
+                    label="SKU del proveedor"
                     type="text"
-                    placeholder="SKU del proveedor"
                     value={sup.supplierSKU}
                     onChange={(e) => handleSupplierChange(i, "supplierSKU", e)}
                   />
                   <div className="grid grid-cols-2 gap-3">
-                    <Input
+                    <FormField
+                      label="Días de entrega"
                       type="number"
-                      placeholder="Días de entrega"
                       value={sup.leadTimeDays.toString()}
                       onChange={(e) => handleSupplierChange(i, "leadTimeDays", e)}
                     />
-                    <Input
+                    <FormField
+                      label="Costo"
                       type="number"
                       step="0.01"
-                      placeholder="Costo"
                       value={sup.cost.toString()}
                       onChange={(e) => handleSupplierChange(i, "cost", e)}
                     />
                   </div>
-                  <div className="flex items-center justify-between pt-2">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                  <div className="flex items-center justify-between gap-3 pt-2">
+                    <label className="text-fg flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium">
                       <input
                         type="checkbox"
                         checked={sup.isPrimarySupplier}
                         onChange={(e) =>
                           handleSupplierChange(i, "isPrimarySupplier", e)
                         }
-                        className="h-5 w-5 rounded border-gray-300 text-brand-azul accent-brand-azul focus:ring-brand-azul cursor-pointer"
+                        className="accent-brand-azul h-5 w-5 cursor-pointer"
                       />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Proveedor principal
-                      </span>
+                      Proveedor principal
                     </label>
                     {supplierList.length > 1 && (
-                      <button
+                      <Button
                         type="button"
+                        variant="danger"
+                        size="sm"
                         onClick={() => handleRemoveSupplier(i)}
-                        className="text-xs font-semibold text-red-600 hover:underline"
                       >
                         Eliminar
-                      </button>
+                      </Button>
                     )}
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
 
@@ -494,7 +470,7 @@ export default function ProductForm({
             </Button>
           </div>
 
-          <div className="pt-6 mt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="border-line mt-4 border-t pt-6">
             <Button
               type="submit"
               variant="primary"

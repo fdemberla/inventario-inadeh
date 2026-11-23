@@ -7,8 +7,11 @@ import {
   FormField,
   Input,
   Card,
+  Select,
+  Spinner,
 } from "@/app/components/ui";
 import { toast } from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
 import { withBasePath } from "@/lib/utils";
 
 interface UserFormProps {
@@ -252,10 +255,7 @@ export default function UserForm({
   if (loading)
     return (
       <div className="flex justify-center p-12">
-        <div role="status" aria-label="Cargando...">
-          <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
-          <span className="sr-only">Cargando...</span>
-        </div>
+        <Spinner size="xl" />
       </div>
     );
 
@@ -312,19 +312,16 @@ export default function UserForm({
             readOnly
             disabled
             value={formData.Username}
-            className="disabled:cursor-not-allowed bg-white/20 dark:bg-gray-800/20"
             helperText="Generado automáticamente"
           />
 
           <div className="w-full space-y-2">
-            <div className="flex items-center gap-1">
-              <label htmlFor="Password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Contraseña
-              </label>
+            <label htmlFor="Password" className="text-fg block text-sm font-semibold">
+              Contraseña
               {!isEditMode && (
-                <span className="text-red-600 dark:text-red-400" aria-label="Requerido">*</span>
+                <span aria-hidden="true" className="text-danger-fg ml-1">*</span>
               )}
-            </div>
+            </label>
             <div className="relative">
               <Input
                 id="Password"
@@ -334,27 +331,25 @@ export default function UserForm({
                 onChange={handleChange}
                 placeholder={isEditMode ? "En blanco para mantener" : ""}
                 required={!isEditMode}
+                autoComplete="new-password"
+                aria-describedby="Password-helper"
                 className="pr-12"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+                aria-pressed={showPassword}
+                className="text-fg-muted hover:text-fg focus-visible:outline-focus absolute top-1/2 right-1 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg transition-colors focus-visible:outline-2"
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
                 {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                  </svg>
+                  <EyeOff className="h-5 w-5" aria-hidden="true" />
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+                  <Eye className="h-5 w-5" aria-hidden="true" />
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p id="Password-helper" className="text-fg-muted text-xs">
               Al menos 8 caracteres, una letra y un número.
             </p>
           </div>
@@ -362,61 +357,52 @@ export default function UserForm({
 
         {/* Status and Role */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex min-h-11 items-center gap-2 sm:self-end">
             <input
               type="checkbox"
               id="IsActive"
               checked={formData.IsActive}
               onChange={() => handleCheckboxChange("IsActive")}
-              className="h-4 w-4 rounded border-gray-300 text-brand-azul accent-brand-azul focus:ring-brand-azul cursor-pointer"
+              className="accent-brand-azul h-5 w-5 cursor-pointer"
             />
-            <label htmlFor="IsActive" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+            <label htmlFor="IsActive" className="text-fg cursor-pointer text-sm font-medium">
               Usuario activo
             </label>
           </div>
 
-          <div className="w-full space-y-1.5">
-            <label htmlFor="RoleID" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Rol <span className="text-red-600 dark:text-red-400" aria-label="Requerido">*</span>
-            </label>
-            <select
-              id="RoleID"
-              name="RoleID"
-              value={formData.RoleID}
-              onChange={handleChange}
-              required
-              className="w-full rounded-xl px-4 py-3 text-base font-normal transition-all duration-300 ease-out border border-white/50 bg-white/40 dark:border-white/10 dark:bg-gray-900/40 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] text-gray-900 dark:text-gray-100 focus-visible:outline-none focus-visible:bg-white/70 dark:focus-visible:bg-gray-800/70 focus-visible:ring-2 focus-visible:ring-brand-azul/50 focus-visible:border-brand-azul/30 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-white/60 dark:hover:border-white/20"
-            >
+          <FormField label="Rol" id="RoleID" required>
+            <Select name="RoleID" value={formData.RoleID} onChange={handleChange}>
               <option value="">Selecciona un rol</option>
               {roles.map((r: Role) => (
                 <option key={r.RoleID} value={r.RoleID}>
                   {r.RoleName}
                 </option>
               ))}
-            </select>
-          </div>
+            </Select>
+          </FormField>
         </div>
 
         {/* Warehouses */}
-        <div>
-          <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300 border-t border-white/20 dark:border-white/10 pt-4">Depósitos asignados</p>
+        <fieldset className="border-line border-t pt-4">
+          <legend className="text-fg mb-3 text-sm font-semibold">Depósitos asignados</legend>
           <div className="mt-1 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {warehouses.map((w: Warehouse) => {
               const isSelected = formData.WarehouseIDs.includes(w.WarehouseID);
               return (
-                <label 
-                  key={w.WarehouseID} 
-                  className={`relative flex cursor-pointer items-start justify-between rounded-xl border p-4 shadow-sm transition-all duration-200 ease-in-out backdrop-blur-sm ${
+                <label
+                  key={w.WarehouseID}
+                  htmlFor={`warehouse-${w.WarehouseID}`}
+                  className={`relative flex cursor-pointer items-start justify-between gap-3 rounded-xl border p-4 shadow-sm transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus ${
                     isSelected
-                      ? "border-brand-azul bg-brand-azul/10 ring-2 ring-brand-azul/50 dark:border-brand-azul dark:bg-brand-azul/20"
-                      : "border-white/40 bg-white/30 hover:bg-white/50 dark:border-white/10 dark:bg-gray-800/40 dark:hover:bg-gray-700/50"
+                      ? "border-accent bg-accent/10 ring-1 ring-accent"
+                      : "border-line bg-surface hover:bg-surface-muted"
                   }`}
                 >
                   <div className="flex flex-col">
-                    <span className="font-bold text-gray-900 dark:text-white">
+                    <span className="font-bold text-fg">
                       {w.WarehouseCode}
                     </span>
-                    <span className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                    <span className="mt-1 text-xs text-fg-muted">
                       {w.WarehouseName}
                     </span>
                   </div>
@@ -426,17 +412,17 @@ export default function UserForm({
                       id={`warehouse-${w.WarehouseID}`}
                       checked={isSelected}
                       onChange={() => handleWarehouseChange(w.WarehouseID)}
-                      className="h-5 w-5 rounded border-gray-300 text-brand-azul focus:ring-brand-azul dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 cursor-pointer"
+                      className="accent-brand-azul h-5 w-5 cursor-pointer"
                     />
                   </div>
                 </label>
               );
             })}
           </div>
-        </div>
+        </fieldset>
 
         {/* Submit Button */}
-        <div className="text-center pt-6 border-t border-white/20 dark:border-white/10">
+        <div className="border-line border-t pt-6 text-center">
           <Button
             type="submit"
             variant="primary"

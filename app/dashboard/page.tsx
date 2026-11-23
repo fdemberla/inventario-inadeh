@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { HiRefresh } from "react-icons/hi";
+import { RefreshCw } from "lucide-react";
 import { Button, Spinner } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import WarehouseCard from "../components/WarehouseCard";
@@ -184,7 +184,7 @@ export default function Dashboard() {
         <div className="flex min-h-96 items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <Spinner size="lg" color="primary" />
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-fg-muted">
               Cargando dashboard...
             </p>
           </div>
@@ -201,7 +201,7 @@ export default function Dashboard() {
         <Button
           onClick={handleRefresh}
           variant="primary"
-          leftIcon={<HiRefresh className="h-4 w-4" />}
+          leftIcon={<RefreshCw className="h-4 w-4" aria-hidden="true" />}
         >
           Actualizar Ahora
         </Button>
@@ -214,9 +214,9 @@ export default function Dashboard() {
             type="checkbox"
             checked={autoRefresh}
             onChange={(e) => setAutoRefresh(e.target.checked)}
-            className="text-brand-azul focus:ring-brand-azul h-4 w-4 rounded border-gray-300"
+            className="accent-brand-azul h-5 w-5 cursor-pointer"
           />
-          <span className="text-sm text-gray-700 dark:text-gray-300">
+          <span className="text-sm text-fg">
             Auto-actualizar cada 5 minutos
           </span>
         </label>
@@ -224,14 +224,14 @@ export default function Dashboard() {
 
       {/* Error Alert */}
       {error && (
-        <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-800 dark:bg-red-900/20 dark:text-red-200">
+        <div className="mb-6 rounded-lg bg-danger/10 p-4 text-danger-fg">
           <span className="font-medium">{error}</span>
         </div>
       )}
 
       {/* Empty State */}
       {warehouses.length === 0 && !error && (
-        <div className="mb-6 rounded-lg bg-blue-50 p-4 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200">
+        <div className="mb-6 rounded-lg bg-accent/10 p-4 text-accent">
           <span>No tienes almacenes asignados. Contacta al administrador.</span>
         </div>
       )}

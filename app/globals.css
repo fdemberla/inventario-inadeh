@@ -79,13 +79,17 @@
   --warning: #92400e;
   --danger-fg: #b91c1c;
   --focus: #004a98;
+  /* Chart series (validated with the dataviz validator: lightness band,
+     chroma, CVD ΔE ≥ 22, contrast ≥ 3:1 vs surface). Brand hues. */
+  --chart-receipts: #0a56a8;
+  --chart-shipments: #b2591c;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --canvas: #111827;
     --surface: #1f2937;
-    --surface-muted: #374151;
+    --surface-muted: #2a3443; /* every text token ≥ 4.5:1 on it (was #374151: accent 4.01) */
     --fg: #f3f4f6;
     --fg-muted: #9ca3af; /* 5.78:1 on surface */
     --line: #374151;
@@ -95,6 +99,8 @@
     --warning: #fbbf24;
     --danger-fg: #f87171;
     --focus: #80a5cc;
+    --chart-receipts: #4f86c6;
+    --chart-shipments: #d9691d;
   }
 }
 
@@ -123,6 +129,8 @@
   --color-warning: var(--warning);
   --color-danger-fg: var(--danger-fg);
   --color-focus: var(--focus);
+  --color-chart-receipts: var(--chart-receipts);
+  --color-chart-shipments: var(--chart-shipments);
 }
 
 /* Respect users who ask for less motion (WCAG 2.3.3) */

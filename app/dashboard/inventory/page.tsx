@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { BiBarcodeReader } from "react-icons/bi";
+import { ScanBarcode } from "lucide-react";
 import { PageLayout } from "@/app/components/PageLayout";
 import { Button, Spinner } from "@/app/components/ui";
 import { withBasePath } from "@/lib/utils";
@@ -49,7 +49,7 @@ export default function InventoryPage() {
         <div className="flex min-h-96 items-center justify-center">
           <div role="status" aria-label="Cargando almacenes..." className="text-center">
             <Spinner size="xl" color="primary" className="mx-auto" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400" aria-hidden="true">
+            <p className="mt-4 text-fg-muted" aria-hidden="true">
               Cargando almacenes...
             </p>
             <span className="sr-only">Cargando almacenes...</span>
@@ -71,8 +71,8 @@ export default function InventoryPage() {
       {/* Warehouse Selection Cards */}
       <div className="mb-6 space-y-3">
         {warehouses.length === 0 ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-800">
-            <div className="mb-2 text-gray-400">
+          <div className="rounded-lg border border-line bg-surface p-6 text-center">
+            <div className="mb-2 text-fg-muted">
               <svg
                 className="mx-auto h-12 w-12"
                 fill="none"
@@ -88,7 +88,7 @@ export default function InventoryPage() {
                 />
               </svg>
             </div>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-fg-muted">
               No hay depósitos disponibles
             </p>
           </div>
@@ -99,11 +99,12 @@ export default function InventoryPage() {
               onClick={() =>
                 setSelectedWarehouseId(warehouse.WarehouseID.toString())
               }
-              className={`w-full rounded-2xl border p-5 text-left transition-all duration-300 backdrop-blur-xl ${
+              aria-pressed={selectedWarehouseId === warehouse.WarehouseID.toString()}
+              className={`focus-visible:outline-focus w-full rounded-2xl border-2 p-5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.99] ${
                 selectedWarehouseId === warehouse.WarehouseID.toString()
-                  ? "border-brand-azul/50 dark:border-brand-verde/50 bg-brand-azul/5 dark:bg-brand-verde/5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.3)] ring-1 ring-brand-azul/20 dark:ring-brand-verde/20"
-                  : "border-white/50 bg-white/40 hover:bg-white/60 dark:border-gray-700/50 dark:bg-gray-800/40 dark:hover:bg-gray-800/60 shadow-sm"
-              } transform active:scale-[0.98]`}
+                  ? "border-accent bg-accent/5"
+                  : "border-line bg-surface hover:bg-surface-muted shadow-sm"
+              }`}
             >
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
@@ -112,9 +113,9 @@ export default function InventoryPage() {
                     <div
                       className={`flex-shrink-0 rounded-xl p-3 ${
                         selectedWarehouseId === warehouse.WarehouseID.toString()
-                          ? "text-brand-azul dark:text-brand-verde bg-white/80 dark:bg-gray-800/80 shadow-sm"
-                          : "bg-white/50 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400"
-                      } backdrop-blur-md`}
+                          ? "bg-surface text-accent shadow-sm"
+                          : "bg-surface-muted text-fg-muted"
+                      }`}
                     >
                       <svg
                         className="h-6 w-6"
@@ -138,8 +139,8 @@ export default function InventoryPage() {
                         className={`truncate font-semibold text-lg ${
                           selectedWarehouseId ===
                           warehouse.WarehouseID.toString()
-                            ? "text-brand-azul dark:text-brand-verde"
-                            : "text-gray-900 dark:text-white"
+                            ? "text-accent"
+                            : "text-fg"
                         } `}
                       >
                         {warehouse.WarehouseName}
@@ -148,8 +149,8 @@ export default function InventoryPage() {
                         className={`truncate text-sm mt-0.5 font-medium ${
                           selectedWarehouseId ===
                           warehouse.WarehouseID.toString()
-                            ? "text-brand-azul/70 dark:text-brand-verde/70"
-                            : "text-gray-500 dark:text-gray-400"
+                            ? "text-accent"
+                            : "text-fg-muted"
                         } `}
                       >
                         Código: {warehouse.WarehouseCode}
@@ -161,9 +162,10 @@ export default function InventoryPage() {
                 {/* Selection Indicator */}
                 <div className="ml-4 flex-shrink-0">
                   {selectedWarehouseId === warehouse.WarehouseID.toString() ? (
-                    <div className="bg-brand-azul dark:bg-brand-verde flex h-6 w-6 items-center justify-center rounded-full shadow-md">
+                    <div className="bg-accent flex h-6 w-6 items-center justify-center rounded-full">
                       <svg
-                        className="h-4 w-4 text-white"
+                        aria-hidden="true"
+                        className="text-surface h-4 w-4"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -175,7 +177,7 @@ export default function InventoryPage() {
                       </svg>
                     </div>
                   ) : (
-                    <div className="h-6 w-6 rounded-full border-2 border-gray-300/50 dark:border-gray-600/50 bg-white/50 dark:bg-gray-800/50"></div>
+                    <div aria-hidden="true" className="border-line-strong bg-surface h-6 w-6 rounded-full border-2"></div>
                   )}
                 </div>
               </div>
@@ -281,7 +283,7 @@ export default function InventoryPage() {
                 `/dashboard/inventory/update/scanner/${selectedWarehouseId}`,
               )
             }
-            leftIcon={<BiBarcodeReader className="h-5 w-5" />}
+            leftIcon={<ScanBarcode className="h-5 w-5" aria-hidden="true" />}
           >
             Usar Scanner
           </Button>

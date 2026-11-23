@@ -86,7 +86,7 @@ export default function SuppliersPage() {
       <PageLayout title="Proveedores">
         <div className="flex justify-center p-6">
           <div role="status" aria-label="Cargando...">
-            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+            <div className="border-t-brand-azul dark:border-t-brand-verde h-12 w-12 animate-spin rounded-full border-4 border-line"></div>
             <span className="sr-only">Cargando...</span>
           </div>
         </div>
@@ -112,12 +112,12 @@ export default function SuppliersPage() {
       }
     >
       {suppliers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white py-14 text-center dark:border-gray-700 dark:bg-gray-800">
-          <svg className="mb-3 h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-line bg-surface py-14 text-center">
+          <svg className="mb-3 h-12 w-12 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 18L4 14m0 0l4-4M4 14h13a4 4 0 000-8H5" />
           </svg>
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">No hay proveedores registrados</p>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Crea un proveedor para comenzar</p>
+          <p className="text-sm font-medium text-fg-muted">No hay proveedores registrados</p>
+          <p className="mt-1 text-xs text-fg-muted">Crea un proveedor para comenzar</p>
         </div>
       ) : (
         <DataTable caption="Proveedores" data={suppliers} columns={columns} />

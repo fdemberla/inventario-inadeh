@@ -4,7 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { withBasePath } from "@/lib/utils";
 import { PageLayout } from "@/app/components/PageLayout";
-import { Button, Input, Card, FormField } from "@/app/components/ui";
+import { Check, Search, X } from "lucide-react";
+import { Button, Input, Card, FormField, IconButton, Modal } from "@/app/components/ui";
 
 interface ProductOption {
   ProductID: number;
@@ -20,15 +21,22 @@ interface ProductSearchSelectProps {
   onChange: (e: FieldChange) => void;
   placeholder?: string;
   name?: string;
+  // Passed by <FormField> so its label and messages point at the trigger
+  id?: string;
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
+  required?: boolean;
 }
 
-// Componente de búsqueda de productos con Glassmorphism
+/** Product picker: a trigger button that opens an accessible search dialog. */
 const ProductSearchSelect = ({
   products,
   value,
   onChange,
   placeholder = "Buscar producto...",
   name = "productId",
+  id,
+  "aria-describedby": describedBy,
 }: ProductSearchSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -83,130 +91,88 @@ const ProductSearchSelect = ({
     setSearchTerm("");
   };
 
-  if (isOpen) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4 bg-gray-900/40 backdrop-blur-md transition-opacity">
-        <div className="w-full max-w-lg bg-white/70 dark:bg-gray-900/70 backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden border border-white/50 dark:border-gray-700/50 flex flex-col h-[80vh] sm:h-[60vh] transform transition-all">
-          {/* Header del modal */}
-          <div className="sticky top-0 z-10 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/40 dark:bg-gray-800/40 px-6 py-4 backdrop-blur-md">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Seleccionar Producto
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="rounded-full p-2 text-gray-500 hover:bg-black/5 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-200 transition-colors"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Campo de búsqueda */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={placeholder}
-                className="w-full rounded-2xl border border-white/60 dark:border-gray-600/60 bg-white/50 dark:bg-gray-800/50 py-3 pr-4 pl-12 text-base focus:border-brand-azul focus:ring-2 focus:ring-brand-azul/30 dark:focus:ring-brand-verde/30 focus:outline-none shadow-[inset_0_1px_3px_rgba(0,0,0,0.05)] dark:text-white transition-all"
-                autoFocus
-              />
-            </div>
-          </div>
-
-          {/* Lista de productos */}
-          <div className="flex-1 overflow-y-auto p-2">
-            {searchTerm && filteredProducts.length === 0 ? (
-              <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                No se encontraron productos
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {filteredProducts.map((product: ProductOption) => (
-                  <button
-                    key={product.ProductID}
-                    type="button"
-                    onClick={() => handleSelect(product)}
-                    className="w-full rounded-xl px-4 py-3 text-left transition-all duration-200 hover:bg-black/5 active:bg-black/10 dark:hover:bg-white/10 dark:active:bg-white/15"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
-                        {product.ProductName} <span className="text-gray-400 font-normal text-sm ml-2">({product.Barcode})</span>
-                      </span>
-                      {selectedProduct?.ProductID === product.ProductID && (
-                        <div className="rounded-full bg-brand-azul/20 dark:bg-brand-verde/20 p-1">
-                          <svg className="h-5 w-5 text-brand-azul dark:text-brand-verde" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          {selectedProduct && (
-            <div className="border-t border-gray-200/50 dark:border-gray-700/50 bg-white/40 dark:bg-gray-800/40 p-4 backdrop-blur-md">
-              <Button
-                variant="primary"
-                size="md"
-                className="w-full"
-                onClick={() => setIsOpen(false)}
-              >
-                Confirmar: {selectedProduct.ProductName}
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      onClick={() => setIsOpen(true)}
-      className="flex min-h-[52px] w-full cursor-pointer items-center justify-between rounded-xl border border-gray-200 bg-white/60 px-4 py-3 shadow-[inset_0_1px_2px_rgba(255,255,255,0.8)] backdrop-blur-sm transition-all hover:border-brand-azul/50 hover:bg-white/80 active:scale-[0.99] dark:border-gray-700/60 dark:bg-gray-800/60 dark:shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)] dark:hover:border-brand-verde/50"
-    >
-      <div className="flex min-w-0 flex-1 items-center">
-        {selectedProduct ? (
-          <div className="flex w-full items-center justify-between">
-            <span className="truncate pr-2 font-medium text-gray-900 dark:text-white">
-              {selectedProduct.ProductName}
-            </span>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClear();
-              }}
-              className="flex-shrink-0 rounded-full p-1.5 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-            >
-              <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        ) : (
-          <span className="text-gray-500 dark:text-gray-400">Seleccione un Producto...</span>
+    <>
+      <div className="flex items-center gap-2">
+        <button
+          id={id}
+          type="button"
+          aria-haspopup="dialog"
+          aria-describedby={describedBy}
+          onClick={() => setIsOpen(true)}
+          className="border-line-strong bg-surface hover:border-fg-muted focus-visible:outline-focus flex min-h-[52px] min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 rounded-xl border px-4 py-3 text-left transition-colors focus-visible:outline-2"
+        >
+          <span
+            className={
+              selectedProduct ? "text-fg truncate font-medium" : "text-fg-muted"
+            }
+          >
+            {selectedProduct ? selectedProduct.ProductName : "Seleccione un Producto..."}
+          </span>
+          <Search className="text-fg-muted h-5 w-5 shrink-0" aria-hidden="true" />
+        </button>
+        {selectedProduct && (
+          <IconButton aria-label="Quitar producto seleccionado" onClick={handleClear}>
+            <X aria-hidden="true" />
+          </IconButton>
         )}
       </div>
-      {!selectedProduct && (
-        <svg className="h-5 w-5 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      )}
-    </div>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Seleccionar Producto"
+        size="lg"
+        footer={
+          selectedProduct && (
+            <Button variant="primary" className="w-full" onClick={() => setIsOpen(false)}>
+              Confirmar: {selectedProduct.ProductName}
+            </Button>
+          )
+        }
+      >
+        <Input
+          type="search"
+          aria-label="Buscar producto"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={placeholder}
+          icon={<Search className="h-5 w-5" />}
+        />
+
+        {searchTerm && filteredProducts.length === 0 ? (
+          <p className="text-fg-muted px-4 py-8 text-center" role="status">
+            No se encontraron productos
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-1" aria-label="Productos">
+            {filteredProducts.map((product: ProductOption) => {
+              const isSelected = selectedProduct?.ProductID === product.ProductID;
+              return (
+                <li key={product.ProductID}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(product)}
+                    aria-pressed={isSelected}
+                    className="hover:bg-surface-muted focus-visible:outline-focus flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-4 py-3 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2"
+                  >
+                    <span className="text-fg font-medium">
+                      {product.ProductName}{" "}
+                      <span className="text-fg-muted ml-2 text-sm font-normal">
+                        ({product.Barcode})
+                      </span>
+                    </span>
+                    {isSelected && (
+                      <Check className="text-accent h-5 w-5 shrink-0" aria-hidden="true" />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Modal>
+    </>
   );
 };
 

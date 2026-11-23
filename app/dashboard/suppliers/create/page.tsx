@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { withBasePath } from "@/lib/utils";
-import { Card, Button, FormField } from "@/app/components/ui";
+import { Card, Button, FormField, Textarea } from "@/app/components/ui";
+import { PageLayout } from "@/app/components/PageLayout";
 
 export default function CreateSupplier() {
   const [supplierName, setSupplierName] = useState("");
@@ -73,8 +74,17 @@ export default function CreateSupplier() {
   };
 
   return (
-    <Card className="w-full p-6 shadow-lg border-none bg-white dark:bg-gray-900 mt-6">
-      <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white text-center">Crear Nuevo Proveedor</h2>
+    <PageLayout
+      title="Crear Proveedor"
+      subtitle="Complete los datos para registrar un nuevo proveedor."
+      backButton={{ href: "/dashboard/suppliers", label: "Volver a proveedores" }}
+      breadcrumbs={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: "Proveedores", href: "/dashboard/suppliers" },
+        { label: "Crear" },
+      ]}
+    >
+    <Card className="w-full">
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <FormField
@@ -123,31 +133,23 @@ export default function CreateSupplier() {
             disabled={isSubmitting}
           />
         </div>
-        
-        <div className="w-full space-y-2">
-          <div className="flex items-center gap-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Dirección
-            </label>
-            <span className="text-red-600 dark:text-red-400" aria-label="Requerido">*</span>
-          </div>
-          <textarea
-            id="address"
+
+        <FormField label="Dirección" id="address" required>
+          <Textarea
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            required
             disabled={isSubmitting}
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-base font-normal transition-all duration-200 ease-in-out focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-brand-azul focus-visible:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400 hover:border-gray-400 dark:hover:border-gray-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-800/50 dark:disabled:text-gray-500 dark:disabled:border-gray-700"
             rows={3}
           />
-        </div>
+        </FormField>
 
-        <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-          <Button type="submit" variant="primary" className="w-full sm:w-auto px-8" isLoading={isSubmitting} disabled={isSubmitting}>
+        <div className="border-line border-t pt-4 text-center">
+          <Button type="submit" variant="primary" className="w-full sm:w-auto" isLoading={isSubmitting} disabled={isSubmitting}>
             Crear Proveedor
           </Button>
         </div>
       </form>
     </Card>
+    </PageLayout>
   );
 }
