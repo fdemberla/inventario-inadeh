@@ -1,11 +1,16 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { HiOutlineCube, HiOutlineHome } from "react-icons/hi";
-import { MdLogout, MdOutlineInventory } from "react-icons/md";
-import { CiBoxList } from "react-icons/ci";
-import { USER_ROLES } from "@/lib/constants";
+import { LayoutGrid, LogOut, X } from "lucide-react";
+import {
+  getNavSections,
+  isPathActive,
+  isSectionActive,
+  type NavSection,
+} from "@/lib/navigation";
 import { stripBasePath, withBasePath } from "@/lib/utils";
 
 type User = {
@@ -17,88 +22,214 @@ type User = {
   email?: string;
 };
 
-const BottomMenu = ({ user }: { user: User }) => {
-  const pathname = usePathname();
-  const router = useRouter();
+const itemBase =
+  "flex min-h-14 min-w-14 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-azul dark:focus-visible:outline-white";
+const itemIdle =
+  "text-gray-600 hover:bg-gray-100 hover:text-brand-azul dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white";
+const itemActive =
+  "bg-brand-azul/10 font-semibold text-brand-azul dark:bg-white/10 dark:text-white";
 
-  const menuItems =
-    user.role === USER_ROLES.ADMIN
-      ? [
-          {
-            label: "Inicio",
-            icon: HiOutlineHome,
-            path: "/dashboard",
-          },
-          {
-            label: "Productos",
-            icon: HiOutlineCube,
-            path: "/dashboard/products",
-          },
-          {
-            label: "Inventario",
-            icon: MdOutlineInventory,
-            path: "/dashboard/inventory",
-          },
-          {
-            label: "Unidades",
-            icon: CiBoxList,
-            path: "/dashboard/units",
-          },
-        ]
-      : [
-          {
-            label: "Inicio",
-            icon: HiOutlineHome,
-            path: "/dashboard",
-          },
-          {
-            label: "Productos",
-            icon: HiOutlineCube,
-            path: "/dashboard/products",
-          },
-          {
-            label: "Inventario",
-            icon: MdOutlineInventory,
-            path: "/dashboard/inventory",
-          },
-        ];
+export default function BottomMenu({ user }: { user: User }) {
+  const pathname = stripBasePath(usePathname() ?? "");
+  const sections = useMemo(() => getNavSections(user.role), [user.role]);
+  const primary = sections.filter((s) => s.primary).slice(0, 4);
+  const more = sections.filter((s) => !primary.includes(s));
+
+  const [open, setOpen] = useState(false);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const panelId = useId();
+
+  const close = useCallback(() => {
+    setOpen(false);
+    moreButtonRef.current?.focus();
+  }, []);
+
+  // Close the sheet whenever the route changes
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // While open: lock page scroll, focus the panel, Escape closes, Tab stays inside
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const panel = panelRef.current;
+    panel?.querySelector<HTMLElement>("a, button")?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+        return;
+      }
+      if (e.key !== "Tab" || !panel) return;
+      const focusable = panel.querySelectorAll<HTMLElement>("a[href], button:not([disabled])");
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, close]);
 
   const handleLogout = async () => {
+    // signOut sets window.location directly, so the callbackUrl needs the basePath
     await signOut({ callbackUrl: withBasePath("/login") });
   };
 
-  return (
-    <nav role="navigation" aria-label="Menú de navegación" className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t border-gray-200/50 bg-white/80 backdrop-blur-lg pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] md:hidden dark:border-gray-800/50 dark:bg-gray-900/80">
-      {menuItems.map((item) => {
-        const normalizedPathname = stripBasePath(pathname);
-        const isActive = normalizedPathname === item.path || (item.path !== '/dashboard' && normalizedPathname.startsWith(item.path));
-        return (
-          <button
-            key={item.path}
-            onClick={() => router.push(item.path)}
-            aria-label={`Ir a ${item.label}`}
-            aria-current={isActive ? "page" : undefined}
-            className={`flex flex-col items-center justify-center px-2 py-1 text-[10px] font-medium transition-all duration-200 ${
-              isActive
-                ? "text-brand-azul scale-110 dark:text-brand-azul"
-                : "text-gray-500 hover:text-brand-azul hover:bg-gray-100/50 rounded-lg dark:text-gray-400 dark:hover:bg-gray-800/50"
-            }`}
-          >
-            <item.icon className={`mb-1 h-6 w-6 ${isActive ? 'stroke-2' : ''}`} />
-            {item.label}
-          </button>
-        );
-      })}
-      <button
-        onClick={handleLogout}
-        aria-label="Cerrar sesión"
-        className={`flex flex-col items-center justify-center px-2 py-1 text-[10px] font-medium text-gray-500 transition-all duration-200 hover:bg-red-50/50 hover:text-red-600 rounded-lg dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400`}
-      >
-        <MdLogout className="mb-1 h-6 w-6" />
-        Salir
-      </button>
-    </nav>
-  );
-};
+  const moreIsActive = more.some((s) => isSectionActive(pathname, s));
+  const displayName =
+    [user.firstName, user.lastName].filter(Boolean).join(" ") || user.username;
 
-export default BottomMenu;
+  return (
+    <>
+      <nav
+        aria-label="Navegación principal"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden dark:border-gray-800 dark:bg-gray-900/95"
+      >
+        <ul className="flex items-stretch gap-1 px-2 py-1.5">
+          {primary.map((section) => {
+            const active = isSectionActive(pathname, section);
+            const Icon = section.icon;
+            return (
+              <li key={section.key} className="flex flex-1">
+                <Link
+                  href={section.path}
+                  aria-current={active ? "page" : undefined}
+                  className={`${itemBase} ${active ? itemActive : itemIdle}`}
+                >
+                  <Icon className="h-6 w-6" aria-hidden="true" strokeWidth={active ? 2.25 : 1.75} />
+                  <span>{section.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+          <li className="flex flex-1">
+            <button
+              ref={moreButtonRef}
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-controls={panelId}
+              aria-haspopup="dialog"
+              className={`${itemBase} ${open || moreIsActive ? itemActive : itemIdle}`}
+            >
+              <LayoutGrid className="h-6 w-6" aria-hidden="true" />
+              <span>Más</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      {open && (
+        <div className="fixed inset-0 z-[60] md:hidden">
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-hidden="true"
+            onClick={close}
+            className="absolute inset-0 h-full w-full cursor-default bg-black/50"
+          />
+          <div
+            ref={panelRef}
+            id={panelId}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl bg-white pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl dark:bg-gray-900"
+          >
+            <div className="sticky top-0 flex items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
+              <div className="min-w-0">
+                <h2 id={titleId} className="text-base font-semibold text-gray-900 dark:text-white">
+                  Menú
+                </h2>
+                <p className="truncate text-sm text-gray-600 dark:text-gray-400">
+                  {displayName}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={close}
+                aria-label="Cerrar menú"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-brand-azul dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                <X className="h-6 w-6" aria-hidden="true" />
+              </button>
+            </div>
+
+            {more.length > 0 && (
+              <ul className="px-2 py-2">
+                {more.map((section) => (
+                  <MoreSection key={section.key} section={section} pathname={pathname} />
+                ))}
+              </ul>
+            )}
+
+            <div className="border-t border-gray-200 px-2 pt-2 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-base font-medium text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-700 dark:text-red-400 dark:hover:bg-red-950/40"
+              >
+                <LogOut className="h-5 w-5" aria-hidden="true" />
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function MoreSection({ section, pathname }: { section: NavSection; pathname: string }) {
+  const Icon = section.icon;
+  const active = isSectionActive(pathname, section);
+  // Extra links besides the section's main page (e.g. "Crear …")
+  const extra = section.links.filter((l) => l.path !== section.path);
+
+  return (
+    <li className="py-0.5">
+      <Link
+        href={section.path}
+        aria-current={isPathActive(pathname, section.path) ? "page" : undefined}
+        className={`flex min-h-12 items-center gap-3 rounded-xl px-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-brand-azul ${
+          active
+            ? "bg-brand-azul/10 text-brand-azul dark:bg-white/10 dark:text-white"
+            : "text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800"
+        }`}
+      >
+        <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+        {section.label}
+      </Link>
+      {extra.length > 0 && (
+        <ul className="ml-11">
+          {extra.map((link) => (
+            <li key={link.path}>
+              <Link
+                href={link.path}
+                aria-current={pathname === link.path ? "page" : undefined}
+                className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-brand-azul aria-[current=page]:font-semibold aria-[current=page]:text-brand-azul dark:text-gray-300 dark:hover:bg-gray-800 dark:aria-[current=page]:text-white"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}

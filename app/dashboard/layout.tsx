@@ -21,20 +21,28 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      {/* Sidebar for Desktop */}
-      <aside className="bg-brand-azul hidden w-72 md:block">
+      <a
+        href="#main-content"
+        className="sr-only z-[70] rounded-lg bg-white px-4 py-2 font-medium text-brand-azul focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+      >
+        Saltar al contenido
+      </a>
+
+      {/* Desktop navigation (md+) */}
+      <aside className="bg-brand-azul hidden w-72 shrink-0 md:block">
         <SidebarComponent user={user} />
       </aside>
 
-      {/* Main Content */}
-      <main className="bg-brand-gris flex-1 p-4 pb-20 md:pb-0 dark:bg-gray-900">
+      {/* Bottom padding clears the mobile bar + iOS home indicator */}
+      <main
+        id="main-content"
+        className="bg-brand-gris min-w-0 flex-1 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-6 dark:bg-gray-900"
+      >
         {children}
       </main>
 
-      {/* Bottom Menu for Mobile */}
-      <div className="md:hidden">
-        <BottomMenu user={user} />
-      </div>
+      {/* Mobile navigation (< md) */}
+      <BottomMenu user={user} />
     </div>
   );
 }

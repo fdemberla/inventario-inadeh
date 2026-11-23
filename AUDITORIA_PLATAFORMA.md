@@ -183,6 +183,37 @@ Notas:
 
 ---
 
+## 3b. ✅ Fase 3 aplicada: navegación móvil (2026-11-23, sin commit)
+
+**Menú compartido**
+- `lib/navigation.ts` es la única fuente del menú y lo filtra por rol.
+- Se agregó **Reportes**, que es seguro para el rol GENERAL porque la API filtra por almacén.
+
+**Celular** (`BottomMenu`)
+- La barra muestra Inicio, Inventario, Productos, Reportes y **Más**.
+- "Más" abre un panel desde abajo con el resto de secciones, sus accesos "Crear …", el usuario y "Cerrar sesión".
+- El panel se cierra con Escape o al navegar, retiene el foco del teclado y bloquea el desplazamiento de la página de fondo.
+- Usa `<Link>` y áreas táctiles de 56 px o más.
+
+**Escritorio** (`Sidebar`)
+- Usa el mismo menú y no depende de flowbite.
+- Los encabezados de sección son `<button>` reales.
+- Los enlaces de secciones cerradas ya no son alcanzables con Tab.
+- La sección de la página actual se abre sola.
+- Se eliminó el código móvil que nunca se mostraba.
+
+**Layout**
+- Enlace "Saltar al contenido".
+- Espacio inferior que contempla el área segura del iPhone.
+
+**Verificación**
+- En el navegador a 375 px con el usuario admin: se llega a Usuarios desde "Más", el panel cierra al navegar, el foco vuelve a "Más" y no hay desplazamiento horizontal.
+- A 1280 px: el Sidebar muestra las 9 secciones.
+- `tests/navigation.test.ts` (7 tests).
+- No se probó con un usuario GENERAL real: el filtro está cubierto por los tests.
+
+**Encontrado de paso (para la fase 5):** en `/login`, el campo de contraseña no está asociado a su `<label>` y el botón de enviar no tiene nombre accesible.
+
 ## 3. Lenguaje visual e identidad
 
 - 🔴 **Los tokens de diseño no están conectados.** Tailwind v4 ignora `tailwind.config.ts` porque no hay `@config`. Por eso no existen `success/warning/error`, el espaciado, las fuentes ni las animaciones (`animate-gradient-shift`, `animate-in`). `lib/design-tokens.ts` se importa **0 veces**. `globals.css` solo define 4 colores `brand-*`.
