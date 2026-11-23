@@ -4,7 +4,6 @@ import SidebarComponent from "../components/Sidebar";
 import { redirect } from "next/navigation";
 import BottomMenu from "../components/BottomMenu";
 import { auth } from "@/auth";
-import { withBasePath } from "@/lib/utils";
 
 export default async function DashboardLayout({
   children,
@@ -14,7 +13,8 @@ export default async function DashboardLayout({
   const session = await auth();
 
   if (!session?.user) {
-    redirect(withBasePath("/login"));
+    // redirect() adds the basePath itself; wrapping it would double it
+    redirect("/login");
   }
 
   const user = session.user;

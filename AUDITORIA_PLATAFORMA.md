@@ -122,6 +122,27 @@ Ya existían en `.agents/skills/`, pero Claude Code no las leía desde ahí.
 | 🟠 | `/user-dashboard` está huérfano. El login siempre envía a `/dashboard` y nada enruta al rol GENERAL. Además tiene textos en inglés ("Hello,", "Inventory"). |
 | 🟡 | La navegación está definida dos veces (`Sidebar.tsx` y `BottomMenu.tsx`) y no coincide: Reportes no aparece en el Sidebar. `BottomMenu` usa `<button onClick=router.push>` en lugar de `<Link>`. |
 
+### ✅ Fase 2 aplicada (2026-11-23, sin commit)
+
+**Rutas que no funcionaban**
+- **Editar unidad** daba 404, y la página `units/[id]/update/page.tsx` también estaba vacía, así que la edición de unidades no existía.
+  - Se creó `/dashboard/units/[id]/edit` con su API (`GET /api/units/:id` y `PUT /api/units/:id/update`, solo admin).
+  - Solo se pueden editar unidades personalizadas. Las estándar están protegidas en la API y no muestran el botón "Editar".
+- Se eliminó `products/edit/page.tsx` (vacío). La edición real está en `products/edit/[id]`.
+
+**basePath duplicado** (verificado en el código de Next 15.3.1: `redirect()` y `router.push()` ya añaden el basePath)
+- Se corrigió en `dashboard/layout.tsx` y en el respaldo del logout en `Sidebar.tsx`.
+- `signOut({ callbackUrl })` sí necesita `withBasePath`; se corrigió su comentario, que decía lo contrario.
+
+**Un solo dashboard**
+- Se eliminaron `app/user-dashboard` y la página huérfana `/dashboard/inventory/update`. El escáner, en `update/scanner/[id]`, se mantiene.
+- `/user-dashboard/*` ahora redirige a `/dashboard` (o a `/login` si no hay sesión).
+
+**Build**
+- Se corrigieron 14 errores de ESLint que bloqueaban `next build`.
+- Con `NEXT_PUBLIC_BASE_PATH=/inventario` el build genera las 48 páginas sin errores (verificado en un worktree aislado).
+- Un escaneo de todos los enlaces y navegaciones contra las páginas existentes no encuentra rutas rotas.
+
 **Decisión (2026-11-23):** se usa **solo `/dashboard`**, con navegación y acceso filtrados por rol. Se elimina `app/user-dashboard`.
 
 ---

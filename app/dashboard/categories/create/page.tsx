@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { withBasePath } from "@/lib/utils";
 import { PageLayout } from "@/app/components/PageLayout";
-import { Card, Button, FormField, Input } from "@/app/components/ui";
+import { Card, Button, FormField } from "@/app/components/ui";
 
 type Category = {
   CategoryID: number;

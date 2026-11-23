@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
@@ -12,11 +12,10 @@ export const config = {
   },
 };
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     // Auth & RBAC Check
-    // We cast req to any here because getApiAuth expects NextRequest, but this is a standard Request
-    const { user } = await getApiAuth(req as any);
+    const { user } = await getApiAuth(req);
     if (!user) {
       return NextResponse.json({ message: "No autorizado" }, { status: 401 });
     }

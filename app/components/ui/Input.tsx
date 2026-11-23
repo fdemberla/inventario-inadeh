@@ -29,7 +29,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       type = "text",
       placeholder,
       error,
+      // TODO(fase 5, WCAG): render label/helperText with useId(); for now they
+      // are only pulled out so they are not forwarded to the DOM <input>.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       label,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       helperText,
       disabled,
       icon,

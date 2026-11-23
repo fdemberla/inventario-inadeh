@@ -174,7 +174,7 @@
 2. ✅ ~~Configurar Tailwind~~ COMPLETADO
 3. ✅ ~~Crear documentation~~ COMPLETADO
 4. ⏳ **Aplicar a /app/dashboard/** - Reemplazar Flowbite directo
-5. ⏳ **Aplicar a /app/user-dashboard/** - Usar PageLayout
+5. ✖️ ~~Aplicar a /app/user-dashboard/~~ (eliminado: se usa solo /dashboard)
 6. ⏳ **Aplicar a /app/login/** - Usar FormField
 
 ### **Mediano Plazo**
@@ -273,7 +273,7 @@ export default function ExamplePage() {
 - [x] Exportaciones centralizadas
 - [x] Validación de build (sin errores de componentes)
 - [ ] Aplicar a páginas del dashboard
-- [ ] Aplicar a user-dashboard
+- [x] ~~Aplicar a user-dashboard~~ (eliminado)
 - [ ] Aplicar a login
 - [ ] Pruebas en dispositivos reales
 - [ ] Optimizaciones de rendimiento

@@ -539,7 +539,7 @@ export default function ProductsPage() {
 - [x] Tailwind config personalizado
 - [x] Utilidades centralizadas (utils.ts)
 - [ ] Aplicar componentes a páginas de dashboard
-- [ ] Aplicar componentes a user-dashboard
+- [x] ~~Aplicar componentes a user-dashboard~~ (eliminado: se usa solo /dashboard)
 - [ ] Aplicar componentes a login
 
 ---

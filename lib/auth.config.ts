@@ -61,6 +61,7 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       const pathname = stripBasePath(nextUrl.pathname);
       const isOnDashboard = pathname.startsWith("/dashboard");
+      // Legacy route: the app now has a single role-filtered /dashboard
       const isOnUserDashboard = pathname.startsWith("/user-dashboard");
       const isOnLogin = pathname.startsWith("/login");
       const isOnApi = pathname.startsWith("/api");
@@ -94,7 +95,13 @@ export const authConfig: NextAuthConfig = {
       }
 
       // Protect dashboard routes
-      if (isOnDashboard || isOnUserDashboard) {
+      if (isOnUserDashboard) {
+        return Response.redirect(
+          new URL(withBasePath(isLoggedIn ? "/dashboard" : "/login"), nextUrl),
+        );
+      }
+
+      if (isOnDashboard) {
         if (!isLoggedIn) {
           return Response.redirect(new URL(withBasePath("/login"), nextUrl));
         }

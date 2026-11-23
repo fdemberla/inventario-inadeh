@@ -6,6 +6,22 @@ import { withBasePath } from "@/lib/utils";
 import { PageLayout } from "@/app/components/PageLayout";
 import { Button, Input, Card, FormField } from "@/app/components/ui";
 
+interface ProductOption {
+  ProductID: number;
+  ProductName: string;
+  Barcode?: string | null;
+}
+
+type FieldChange = { target: { name: string; value: string } };
+
+interface ProductSearchSelectProps {
+  products: ProductOption[];
+  value: string;
+  onChange: (e: FieldChange) => void;
+  placeholder?: string;
+  name?: string;
+}
+
 // Componente de búsqueda de productos con Glassmorphism
 const ProductSearchSelect = ({
   products,
@@ -13,18 +29,19 @@ const ProductSearchSelect = ({
   onChange,
   placeholder = "Buscar producto...",
   name = "productId",
-}) => {
+}: ProductSearchSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(products);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductOption | null>(null);
 
   useEffect(() => {
     if (!searchTerm.trim()) {
       setFilteredProducts(products.slice(0, 50));
     } else {
       const filtered = products
-        .filter((product: any) =>
+        .filter((product: ProductOption) =>
           product.ProductName.toLowerCase().includes(searchTerm.toLowerCase()),
         )
         .slice(0, 20);
@@ -35,15 +52,15 @@ const ProductSearchSelect = ({
   useEffect(() => {
     if (value) {
       const product = products.find(
-        (p: any) => p.ProductID.toString() === value.toString(),
+        (p: ProductOption) => p.ProductID.toString() === value.toString(),
       );
-      setSelectedProduct(product);
+      setSelectedProduct(product ?? null);
     } else {
       setSelectedProduct(null);
     }
   }, [value, products]);
 
-  const handleSelect = (product: any) => {
+  const handleSelect = (product: ProductOption) => {
     setSelectedProduct(product);
     onChange({
       target: {
@@ -113,7 +130,7 @@ const ProductSearchSelect = ({
               </div>
             ) : (
               <div className="space-y-1">
-                {filteredProducts.map((product: any) => (
+                {filteredProducts.map((product: ProductOption) => (
                   <button
                     key={product.ProductID}
                     type="button"
@@ -198,8 +215,8 @@ export default function AddProductToWarehouse() {
   const router = useRouter();
   const warehouseId = params?.id as string;
 
-  const [warehouse, setWarehouse] = useState<any>(null);
-  const [products, setProducts] = useState([]);
+  const [warehouse, setWarehouse] = useState<{ WarehouseName: string } | null>(null);
+  const [products, setProducts] = useState<ProductOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -244,7 +261,7 @@ export default function AddProductToWarehouse() {
     fetchWarehouse();
   }, [params?.id]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: FieldChange) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -303,7 +320,7 @@ export default function AddProductToWarehouse() {
               <ProductSearchSelect
                 products={products}
                 value={formData.productId}
-                onChange={handleChange as any}
+                onChange={handleChange}
                 name="productId"
                 placeholder="Buscar producto..."
               />
@@ -347,7 +364,7 @@ export default function AddProductToWarehouse() {
                 variant="primary"
                 type="submit"
                 isLoading={submitting}
-                disabled={submitting || !formData.productId}
+                disabled={submitting || loading || !formData.productId}
                 className="flex-1"
               >
                 Agregar a Inventario

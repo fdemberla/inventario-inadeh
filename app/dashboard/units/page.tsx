@@ -61,17 +61,19 @@ export default function ViewAllUnits() {
     {
       header: "Acciones",
       id: "actions",
-      cell: ({ row }) => (
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() =>
-            router.push(`/dashboard/units/${row.original.UnitID}/edit`)
-          }
-        >
-          Editar
-        </Button>
-      ),
+      // Only custom units are editable (the API enforces it too)
+      cell: ({ row }) =>
+        row.original.System === "Personalizado" ? (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() =>
+              router.push(`/dashboard/units/${row.original.UnitID}/edit`)
+            }
+          >
+            Editar
+          </Button>
+        ) : null,
     },
   ];
 

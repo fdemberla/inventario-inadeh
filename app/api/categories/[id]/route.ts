@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { rawSql } from "@/lib/db";
-import { getApiAuth, isAdmin } from "@/lib/api-auth";
+import { getApiAuth } from "@/lib/api-auth";
 
 export async function GET(
   req: NextRequest,

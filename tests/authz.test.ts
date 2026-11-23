@@ -33,6 +33,7 @@ import { POST as webScan } from "@/app/api/inventory/scanner/route";
 import { POST as webSync } from "@/app/api/inventory/scanner/sync/route";
 import { POST as mobileScan } from "@/app/api/inventory/scanner/mobile/scan/route";
 import { GET as nivelesReport } from "@/app/api/reports/[id]/niveles/route";
+import { PUT as updateUnit } from "@/app/api/units/[id]/update/route";
 
 const ADMIN = { id: 1, role: 1, username: "admin" };
 const GENERAL = { id: 2, role: 2, username: "operador" };
@@ -73,6 +74,8 @@ describe("Admin-only routes reject GENERAL users (403) and anonymous (401)", () 
       updateCategory(req("/api/categories/1/update", "PUT", { categoryName: "x" }), params("1"))],
     ["DELETE products/:id", () =>
       deleteProduct(req("/api/products/1", "DELETE"), params("1"))],
+    ["PUT units/:id/update", () =>
+      updateUnit(req("/api/units/1/update", "PUT", { UnitName: "x" }), params("1"))],
   ];
 
   it.each(cases)("%s → 403 for GENERAL", async (_, call) => {
@@ -94,6 +97,32 @@ describe("Admin-only routes reject GENERAL users (403) and anonymous (401)", () 
       req("/api/users/5/update", "PUT", { Username: "x", RoleID: 2 }),
     );
     expect(res.status).toBe(200);
+  });
+});
+
+describe("Unit editing", () => {
+  const put = (body: object) =>
+    updateUnit(req("/api/units/3/update", "PUT", body), params("3"));
+
+  beforeEach(() => asUser(ADMIN));
+
+  it("refuses to edit standard (non-custom) units", async () => {
+    (rawSql as jest.Mock).mockResolvedValueOnce([{ System: "Métrico" }]);
+    const res = await put({ UnitName: "Kilo" });
+    expect(res.status).toBe(409);
+    expect(rawSql).toHaveBeenCalledTimes(1); // no UPDATE issued
+  });
+
+  it("updates a custom unit", async () => {
+    (rawSql as jest.Mock).mockResolvedValueOnce([{ System: "Personalizado" }]);
+    const res = await put({ UnitName: " Caja ", Abbreviation: "cj" });
+    expect(res.status).toBe(200);
+    expect((rawSql as jest.Mock).mock.calls[1][1]).toEqual(["Caja", "cj", 3]);
+  });
+
+  it("rejects an empty name", async () => {
+    const res = await put({ UnitName: "  " });
+    expect(res.status).toBe(400);
   });
 });
 
@@ -138,7 +167,7 @@ describe("Warehouse-scoped routes reject foreign warehouses (403)", () => {
   });
 
   it("GET reports/:id/niveles", async () => {
-    const res = await nivelesReport(req("/api/reports/99/niveles"), params("99"));
+    const res = await nivelesReport(req("/api/reports/99/niveles"), params("99") as never);
     expect(res.status).toBe(403);
   });
 
