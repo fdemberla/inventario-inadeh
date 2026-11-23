@@ -259,6 +259,39 @@ Notas:
 - En desarrollo el *service worker* no se registra (*"unknown error when fetching the script"*), aunque `/sw.js` responde 200.
 - `public/sw.js` es un artefacto de build versionado: cada `next build` lo modifica.
 
+## 3d. ✅ Fase 5 aplicada: componentes accesibles (2026-11-23, sin commit)
+
+**Formularios**
+- `Input` y `FormField`: etiqueta asociada (`useId` + `htmlFor`); error y ayuda vinculados con `aria-describedby`; `required` nativo con el asterisco oculto para lectores de pantalla.
+- El campo **Usuario** del login no tenía etiqueta asociada; ahora sí.
+- Corrección a la auditoría: la contraseña y el botón "Iniciar Sesión" sí tenían nombre accesible. La herramienta de inspección mostraba el *placeholder* y no se verificó en el DOM.
+- Login: el botón para mostrar la contraseña ahora mide 44 px y tiene foco visible; se agregó `autocomplete`.
+
+**Diálogos**
+- Nuevo `hooks/useDialog.ts`: retiene el foco, cierra con Escape, devuelve el foco y bloquea el scroll. Lo comparten `Modal` y el menú "Más".
+- `Modal` se renderiza en un *portal* sobre `<body>`, tiene ids únicos y es un panel inferior en celular. Enfoca el primer campo al abrirse.
+- **Corregido:** en celular la barra inferior tapaba el botón "Cancelar" de los modales. El contenedor `relative z-10` de `PageLayout` atrapaba el `z-index`.
+
+**Tabla (`DataTable`)**
+- Es un panel único con búsqueda y paginación internas: *padding* de 16/20 px en la barra y 20 px en los bordes de la tabla. Antes la búsqueda tocaba el borde.
+- Encabezados y celdas con la misma alineación.
+- Usa `<table>` nativa en lugar de flowbite, sin sobrescrituras `!important`.
+- Encabezados ordenables como botones con `aria-sort`; `caption` para lectores de pantalla.
+- Contador de resultados con `aria-live`. Paginación con `IconButton` y el texto "Mostrando X–Y de Z".
+- Orden alfabético en español (`Intl.Collator`).
+
+**Otros**
+- Nuevo `IconButton`, con `aria-label` obligatorio.
+- `inventory/[id]/view`: se quitó la tarjeta doble y el *checkbox* "Ver productos sin stock" pasó a la barra de la tabla.
+- **Corregido:** el botón "Agregar Producto" nunca aparecía, porque usaba una *prop* inexistente (`actionButton`).
+- **Corregido:** en Usuarios no se podía ordenar ni buscar por nombre, porque la columna usaba un campo `FullName` que la API no devuelve.
+- `caption` agregado a las 7 tablas.
+
+**Verificación**
+- En el navegador (escritorio y celular, sin guardar datos): etiquetas, `required`, `aria-sort`, orden real de las filas, búsqueda por nombre completo, foco atrapado y devuelto, Escape, y que ningún elemento tape los botones del modal.
+- ESLint pasa en todo el proyecto y los 161 tests pasan.
+- **Sin tests de componentes:** requieren agregar `jsdom` y `@testing-library/react`.
+
 ## 3. Lenguaje visual e identidad
 
 - 🔴 **Los tokens de diseño no están conectados.** Tailwind v4 ignora `tailwind.config.ts` porque no hay `@config`. Por eso no existen `success/warning/error`, el espaciado, las fuentes ni las animaciones (`animate-gradient-shift`, `animate-in`). `lib/design-tokens.ts` se importa **0 veces**. `globals.css` solo define 4 colores `brand-*`.

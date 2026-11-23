@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Button, Card } from "@/app/components/ui";
+import { Button } from "@/app/components/ui";
 import { PageLayout } from "@/app/components/PageLayout";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/app/components/DataTable";
@@ -126,30 +126,21 @@ export default function InventoryPage() {
         { label: "Inventario", href: withBasePath("/dashboard/inventory") },
         { label: "Vista" },
       ]}
-      actionButton={{
-        label: "Agregar Producto",
-        onClick: () => router.push(`/dashboard/inventory/${selectedWarehouseId}/add`),
-      }}
+      actions={
+        <Button
+          variant="primary"
+          onClick={() => router.push(`/dashboard/inventory/${selectedWarehouseId}/add`)}
+        >
+          Agregar Producto
+        </Button>
+      }
     >
       <div className="space-y-6">
-        <div className="flex items-center justify-between px-2">
-          {lastUpdated ? (
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Última actualización: {lastUpdated.toLocaleTimeString()}
-            </p>
-          ) : (
-            <div />
-          )}
-          <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-            <input
-              type="checkbox"
-              checked={showZero}
-              onChange={(e) => setShowZero(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300/50 bg-white/50 text-brand-azul focus:ring-brand-azul dark:border-gray-600/50 dark:bg-gray-800/50"
-            />
-            Ver productos sin stock
-          </label>
-        </div>
+        {lastUpdated && (
+          <p className="text-fg-muted text-sm">
+            Última actualización: {lastUpdated.toLocaleTimeString()}
+          </p>
+        )}
 
         <InventoryUpdateModal
           item={modalItem}
@@ -158,12 +149,25 @@ export default function InventoryPage() {
           onSuccess={() => fetchInventory(selectedWarehouseId)}
         />
 
-        <Card noPadding className="overflow-hidden">
-          <DataTable
-            data={showZero ? inventory : inventory.filter((item) => item.QuantityOnHand > 0)}
-            columns={columns}
-          />
-        </Card>
+        <DataTable
+          caption="Inventario de la bodega"
+          data={showZero ? inventory : inventory.filter((item) => item.QuantityOnHand > 0)}
+          columns={columns}
+          emptyMessage={
+            showZero ? "No hay productos en esta bodega." : "No hay productos con stock."
+          }
+          toolbar={
+            <label className="text-fg flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={showZero}
+                onChange={(e) => setShowZero(e.target.checked)}
+                className="accent-brand-azul h-5 w-5 cursor-pointer"
+              />
+              Ver productos sin stock
+            </label>
+          }
+        />
       </div>
     </PageLayout>
   );

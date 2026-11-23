@@ -18,3 +18,6 @@ export type { FormFieldProps } from "./FormField";
 
 export { Modal, ModalFooter } from "./Modal";
 export type { ModalProps } from "./Modal";
+
+export { IconButton } from "./IconButton";
+export type { IconButtonProps } from "./IconButton";

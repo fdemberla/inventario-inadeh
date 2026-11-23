@@ -91,7 +91,7 @@ export default function ViewAllCategories() {
         </Button>
       }
     >
-      <DataTable data={categories} columns={columns} />
+      <DataTable caption="Categorías" data={categories} columns={columns} />
     </PageLayout>
   );
 }

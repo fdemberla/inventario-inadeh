@@ -7,32 +7,67 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   flexRender,
-  ColumnDef,
+  type ColumnDef,
+  type Header,
+  type Row,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHeadCell,
-} from "flowbite-react";
-import { SearchIcon, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  ClipboardList,
+  Search,
+} from "lucide-react";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { Input, Card, Button } from "@/app/components/ui";
+import { Input, IconButton } from "@/app/components/ui";
 
 type DataTableProps<T> = {
   data: T[];
   columns: ColumnDef<T>[];
   className?: string;
+  /** Accessible name of the table (read by screen readers, not shown). */
+  caption?: string;
+  /** Extra controls shown next to the search box (filters, toggles…). */
+  toolbar?: ReactNode;
+  emptyMessage?: string;
 };
 
+// Spanish collation: ignores case and accents ("álvaro" sorts with "Alberto"),
+// and compares digits numerically ("9" < "10").
+const collator = new Intl.Collator("es", { sensitivity: "base", numeric: true });
+
+function spanishSort<T>(a: Row<T>, b: Row<T>, columnId: string): number {
+  const x = a.getValue(columnId);
+  const y = b.getValue(columnId);
+  if (x == null || x === "") return y == null || y === "" ? 0 : 1;
+  if (y == null || y === "") return -1;
+  if (typeof x === "number" && typeof y === "number") return x - y;
+  return collator.compare(String(x), String(y));
+}
+
+/** Column title as plain text (for mobile labels and sort announcements). */
+function headerText<T>(header: ColumnDef<T>["header"], fallback: string): string {
+  return typeof header === "string" ? header : fallback;
+}
+
+/**
+ * Tabla de datos con búsqueda, orden y paginación.
+ * Es un panel completo (borde, fondo, padding): no la envuelvas en <Card>.
+ * En celular se muestra como lista de tarjetas.
+ */
 export function DataTable<T extends object>({
   data,
   columns,
   className,
+  caption,
+  toolbar,
+  emptyMessage = "No hay resultados.",
 }: DataTableProps<T>) {
   const [globalFilter, setGlobalFilter] = useState("");
   const isMobile = useIsMobile();
@@ -40,9 +75,8 @@ export function DataTable<T extends object>({
   const table = useReactTable({
     data,
     columns,
-    state: {
-      globalFilter,
-    },
+    defaultColumn: { sortingFn: spanishSort },
+    state: { globalFilter },
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -50,188 +84,237 @@ export function DataTable<T extends object>({
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  const rows = table.getRowModel().rows;
+  const total = table.getFilteredRowModel().rows.length;
+  const { pageIndex, pageSize } = table.getState().pagination;
+  const from = total === 0 ? 0 : pageIndex * pageSize + 1;
+  const to = Math.min(total, (pageIndex + 1) * pageSize);
+
+  const search = (
+    <div className="w-full sm:max-w-sm">
+      <Input
+        type="search"
+        placeholder="Buscar..."
+        value={globalFilter}
+        onChange={(e) => setGlobalFilter(e.target.value)}
+        aria-label={caption ? `Buscar en ${caption}` : "Buscar"}
+        icon={<Search className="h-[18px] w-[18px]" />}
+      />
+    </div>
+  );
+
+  // Announced politely when the search changes the number of results
+  const resultCount = (
+    <p className="text-fg-muted text-sm" aria-live="polite">
+      {total === 1 ? "1 resultado" : `${total} resultados`}
+    </p>
+  );
+
+  const empty = (
+    <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+      <ClipboardList className="text-fg-muted mb-3 h-10 w-10" aria-hidden="true" />
+      <p className="text-fg-muted text-sm">{emptyMessage}</p>
+    </div>
+  );
+
+  const pagination = table.getPageCount() > 1 && (
+    <nav
+      aria-label="Paginación"
+      className="flex flex-col items-center justify-between gap-3 sm:flex-row"
+    >
+      <p className="text-fg-muted text-sm">
+        Mostrando <span className="text-fg font-semibold">{from}</span>–
+        <span className="text-fg font-semibold">{to}</span> de{" "}
+        <span className="text-fg font-semibold">{total}</span>
+      </p>
+      <div className="flex items-center gap-1">
+        <IconButton
+          variant="outline"
+          aria-label="Primera página"
+          onClick={() => table.setPageIndex(0)}
+          disabled={!table.getCanPreviousPage()}
+        >
+          <ChevronsLeft aria-hidden="true" />
+        </IconButton>
+        <IconButton
+          variant="outline"
+          aria-label="Página anterior"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          <ChevronLeft aria-hidden="true" />
+        </IconButton>
+        <span className="text-fg px-2 text-sm whitespace-nowrap">
+          Página {pageIndex + 1} de {table.getPageCount()}
+        </span>
+        <IconButton
+          variant="outline"
+          aria-label="Página siguiente"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          <ChevronRight aria-hidden="true" />
+        </IconButton>
+        <IconButton
+          variant="outline"
+          aria-label="Última página"
+          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+          disabled={!table.getCanNextPage()}
+        >
+          <ChevronsRight aria-hidden="true" />
+        </IconButton>
+      </div>
+    </nav>
+  );
+
+  // ---------- Phone: search + card list ----------
+  if (isMobile) {
+    return (
+      <div className={`flex flex-col gap-4 ${className ?? ""}`}>
+        <div className="flex flex-col gap-2">
+          {search}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {resultCount}
+            {toolbar}
+          </div>
+        </div>
+
+        {rows.length === 0 ? (
+          <div className="border-line bg-surface rounded-2xl border">{empty}</div>
+        ) : (
+          <ul className="flex flex-col gap-3" aria-label={caption}>
+            {rows.map((row) => (
+              <li
+                key={row.id}
+                className="border-line bg-surface rounded-2xl border p-4 shadow-sm"
+              >
+                <dl className="grid gap-3">
+                  {row.getVisibleCells().map((cell) => {
+                    const label = headerText(cell.column.columnDef.header, "");
+                    return (
+                      <div key={cell.id} className="min-w-0">
+                        {label && (
+                          <dt className="text-fg-muted text-xs font-semibold tracking-wide uppercase">
+                            {label}
+                          </dt>
+                        )}
+                        <dd className="text-fg mt-0.5 break-words">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </dd>
+                      </div>
+                    );
+                  })}
+                </dl>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {pagination}
+      </div>
+    );
+  }
+
+  // ---------- Desktop: one framed panel (toolbar · table · pagination) ----------
   return (
-    <div className={`flex flex-col space-y-4 ${className ?? ""}`}>
-      <div className="max-w-sm">
-        <Input
-          type="text"
-          placeholder="Buscar..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          aria-label="Buscar"
-          icon={<SearchIcon size={18} className="text-gray-400" />}
-        />
+    <section
+      aria-label={caption}
+      className={`border-line bg-surface overflow-hidden rounded-2xl border shadow-sm ${className ?? ""}`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:px-5">
+        {search}
+        <div className="flex flex-wrap items-center gap-4">
+          {toolbar}
+          {resultCount}
+        </div>
       </div>
 
-      {isMobile ? (
-        <div className="space-y-4">
-          {table.getRowModel().rows.length === 0 ? (
-            <Card className="flex flex-col items-center justify-center py-12 text-center">
-              <svg className="mb-3 h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <p className="text-sm text-gray-500 dark:text-gray-400">No hay resultados.</p>
-            </Card>
-          ) : (
-            table.getRowModel().rows.map((row) => (
-              <Card
-                key={row.id}
-                hoverable
-                className="p-4"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <div key={cell.id} className="mb-2 last:mb-0">
-                    <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                      {flexRender(
-                        cell.column.columnDef.header,
-                        cell.getContext(),
-                      )}
-                    </div>
-                    <div className="text-gray-800 dark:text-white">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </div>
-                  </div>
+      <div className="border-line overflow-x-auto border-t">
+        <table className="w-full min-w-[600px] border-collapse text-left text-sm">
+          {caption && <caption className="sr-only">{caption}</caption>}
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <HeaderCell key={header.id} header={header} />
                 ))}
-              </Card>
-            ))
-          )}
-        </div>
-      ) : (
-        <Card noPadding className="w-full overflow-hidden">
-          <div className="w-full overflow-x-auto">
-            <Table
-              className="min-w-[600px] w-full !bg-transparent dark:!bg-transparent"
-            >
-              <TableHead className="!bg-transparent dark:!bg-transparent">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="[&>th]:border-b-0">
-                    {headerGroup.headers.map((header) => (
-                      <TableHeadCell
-                        key={header.id}
-                        onClick={header.column.getToggleSortingHandler()}
-                        className="bg-brand-azul hover:bg-brand-azul/90 cursor-pointer whitespace-nowrap text-white select-none"
-                        aria-label={typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : undefined}
-                      >
-                        <span className="inline-flex items-center gap-1">
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                          {header.column.getCanSort() && (
-                            <span aria-hidden="true" className="inline-flex">
-                              {header.column.getIsSorted() === "asc" ? (
-                                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832l-3.71 3.938a.75.75 0 01-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clipRule="evenodd" /></svg>
-                              ) : header.column.getIsSorted() === "desc" ? (
-                                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" /></svg>
-                              ) : (
-                                <svg className="h-3.5 w-3.5 opacity-40" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clipRule="evenodd" /></svg>
-                              )}
-                            </span>
-                          )}
-                        </span>
-                      </TableHeadCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHead>
-  
-              <TableBody className="!bg-transparent dark:!bg-transparent">
-                {table.getRowModel().rows.length === 0 ? (
-                  <TableRow className="bg-transparent">
-                    <TableCell
-                      colSpan={columns.length}
-                      className="py-12 text-center !bg-transparent"
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={table.getVisibleLeafColumns().length}>{empty}</td>
+              </tr>
+            ) : (
+              rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-line even:bg-surface-muted hover:bg-accent/5 border-t transition-colors"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      className="text-fg px-4 py-3 align-middle whitespace-nowrap first:pl-5 last:pr-5"
                     >
-                      <div className="flex flex-col items-center justify-center">
-                        <svg className="mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        <p className="text-sm text-gray-400 dark:text-gray-500">No hay resultados.</p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      className="!bg-transparent border-b border-white/20 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10 even:bg-black/5 even:dark:bg-white/10 transition-colors"
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                          className="px-4 py-3 whitespace-nowrap text-gray-900 dark:text-gray-200 !bg-transparent"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </Card>
-      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Pagination Controls */}
-      {table.getPageCount() > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
-          <div className="flex items-center gap-2">
-            <span>
-              Página <span className="font-semibold">{table.getState().pagination.pageIndex + 1}</span> de{" "}
-              <span className="font-semibold">{table.getPageCount()}</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-              className="px-2 py-1"
-              aria-label="Ir a la primera página"
-            >
-              <ChevronsLeft size={16} />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              className="px-2 py-1"
-              aria-label="Ir a la página anterior"
-            >
-              <ChevronLeft size={16} />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              className="px-2 py-1"
-              aria-label="Ir a la página siguiente"
-            >
-              <ChevronRight size={16} />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-              className="px-2 py-1"
-              aria-label="Ir a la última página"
-            >
-              <ChevronsRight size={16} />
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
+      {pagination && <div className="border-line border-t px-4 py-3 sm:px-5">{pagination}</div>}
+    </section>
+  );
+}
+
+// Header style; padding lives on the <th> (plain) or on its <button> (sortable)
+const thBase =
+  "group bg-brand-azul text-xs font-semibold tracking-wide whitespace-nowrap text-white uppercase";
+const cellPadding = "px-4 py-3";
+
+/** Sortable headers are real buttons with aria-sort on the <th> (WCAG 2.1.1, 4.1.2). */
+function HeaderCell<T>({ header }: { header: Header<T, unknown> }) {
+  const content = header.isPlaceholder
+    ? null
+    : flexRender(header.column.columnDef.header, header.getContext());
+
+  if (!header.column.getCanSort()) {
+    return (
+      <th scope="col" className={`${thBase} ${cellPadding} first:pl-5 last:pr-5`}>
+        {content}
+      </th>
+    );
+  }
+
+  const sorted = header.column.getIsSorted();
+  const Icon = sorted === "asc" ? ArrowUp : sorted === "desc" ? ArrowDown : ArrowUpDown;
+  const name = headerText(header.column.columnDef.header, header.column.id);
+  const next =
+    sorted === "asc" ? "descendente" : sorted === "desc" ? "sin orden" : "ascendente";
+
+  return (
+    <th
+      scope="col"
+      aria-sort={sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : "none"}
+      className={thBase}
+    >
+      <button
+        type="button"
+        onClick={header.column.getToggleSortingHandler()}
+        title={`Ordenar ${name}: ${next}`}
+        className="flex w-full cursor-pointer items-center gap-1.5 px-4 py-3 text-left uppercase group-first:pl-5 group-last:pr-5 hover:bg-white/10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
+      >
+        {content}
+        <Icon
+          className={`h-3.5 w-3.5 shrink-0 ${sorted ? "" : "opacity-60"}`}
+          aria-hidden="true"
+        />
+      </button>
+    </th>
   );
 }

@@ -12,6 +12,7 @@ import {
   type NavSection,
 } from "@/lib/navigation";
 import { stripBasePath, withBasePath } from "@/lib/utils";
+import { useDialog } from "@/hooks/useDialog";
 
 type User = {
   id: number;
@@ -41,49 +42,15 @@ export default function BottomMenu({ user }: { user: User }) {
   const titleId = useId();
   const panelId = useId();
 
-  const close = useCallback(() => {
-    setOpen(false);
-    moreButtonRef.current?.focus();
-  }, []);
+  const close = useCallback(() => setOpen(false), []);
 
   // Close the sheet whenever the route changes
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // While open: lock page scroll, focus the panel, Escape closes, Tab stays inside
-  useEffect(() => {
-    if (!open) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const panel = panelRef.current;
-    panel?.querySelector<HTMLElement>("a, button")?.focus();
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        close();
-        return;
-      }
-      if (e.key !== "Tab" || !panel) return;
-      const focusable = panel.querySelectorAll<HTMLElement>("a[href], button:not([disabled])");
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, close]);
+  // Focus trap, Escape, scroll lock and focus return to "Más"
+  useDialog(open, panelRef, { onEscape: close });
 
   const handleLogout = async () => {
     // signOut sets window.location directly, so the callbackUrl needs the basePath

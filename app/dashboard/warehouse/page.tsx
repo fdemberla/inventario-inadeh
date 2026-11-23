@@ -84,7 +84,7 @@ export default function WarehouseListPage() {
         </Button>
       }
     >
-      <DataTable data={warehouses} columns={columns} />
+      <DataTable caption="Depósitos" data={warehouses} columns={columns} />
     </PageLayout>
   );
 }

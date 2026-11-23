@@ -31,9 +31,11 @@ export default function UserListPage() {
 
   const columns = [
     {
-      accessorKey: "FullName",
+      // The API has no FullName field: build it so sorting and search work
+      id: "FullName",
+      accessorFn: (u: { FirstName?: string; LastName?: string }) =>
+        `${u.FirstName ?? ""} ${u.LastName ?? ""}`.trim(),
       header: "Nombre",
-      cell: ({ row }) => `${row.original.FirstName} ${row.original.LastName}`,
     },
     { accessorKey: "RoleName", header: "Rol" },
     { accessorKey: "Email", header: "Correo" },
@@ -87,7 +89,7 @@ export default function UserListPage() {
         </Button>
       }
     >
-      <DataTable data={users} columns={columns} />
+      <DataTable caption="Usuarios" data={users} columns={columns} />
     </PageLayout>
   );
 }

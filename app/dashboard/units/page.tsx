@@ -94,7 +94,7 @@ export default function ViewAllUnits() {
         </Button>
       }
     >
-      <DataTable data={units} columns={columns} />
+      <DataTable caption="Unidades de medida" data={units} columns={columns} />
     </PageLayout>
   );
 }

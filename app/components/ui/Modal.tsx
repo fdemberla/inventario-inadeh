@@ -1,7 +1,10 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useCallback, useId, useRef } from "react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDialog } from "@/hooks/useDialog";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -12,19 +15,26 @@ export interface ModalProps {
   footer?: React.ReactNode;
   closeButton?: boolean;
   size?: "sm" | "md" | "lg" | "xl";
+  /** Allow closing with Escape and by clicking the backdrop. */
   isDismissable?: boolean;
 }
 
+const sizeClasses = {
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-xl",
+};
+
 /**
- * Componente Modal personalizado
+ * Accessible modal dialog (ARIA dialog pattern): focus moves inside and is
+ * trapped, Escape closes it, focus returns to the opener, page scroll is
+ * locked. Bottom sheet on phones, centred card from `sm` up.
  *
  * @example
- * <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Confirmación">
+ * <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Confirmación"
+ *   footer={<ModalFooter>…</ModalFooter>}>
  *   <p>¿Está seguro de que desea continuar?</p>
- *   <Modal.Footer>
- *     <Button variant="ghost" onClick={() => setIsOpen(false)}>Cancelar</Button>
- *     <Button variant="primary" onClick={handleConfirm}>Confirmar</Button>
- *   </Modal.Footer>
  * </Modal>
  */
 const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
@@ -40,111 +50,98 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
       size = "md",
       isDismissable = true,
     },
-    ref,
+    forwardedRef,
   ) => {
-    // Prevenir scroll del body cuando el modal está abierto
-    useEffect(() => {
-      if (isOpen) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "unset";
-      }
-      return () => {
-        document.body.style.overflow = "unset";
-      };
-    }, [isOpen]);
+    const panelRef = useRef<HTMLDivElement | null>(null);
+    const bodyRef = useRef<HTMLDivElement | null>(null);
+    const titleId = useId();
+    const descriptionId = useId();
 
-    if (!isOpen) return null;
+    // Focus the first control in the body (e.g. a form field); falls back to "Cerrar"
+    useDialog(isOpen, panelRef, {
+      onEscape: isDismissable ? onClose : undefined,
+      initialFocus: bodyRef,
+    });
 
-    const sizeClasses = {
-      sm: "max-w-sm",
-      md: "max-w-md",
-      lg: "max-w-lg",
-      xl: "max-w-xl",
-    };
+    const setRefs = useCallback(
+      (node: HTMLDivElement | null) => {
+        panelRef.current = node;
+        if (typeof forwardedRef === "function") forwardedRef(node);
+        else if (forwardedRef) forwardedRef.current = node;
+      },
+      [forwardedRef],
+    );
 
-    const handleOverlayClick = (e: React.MouseEvent) => {
-      if (isDismissable && e.target === e.currentTarget) {
-        onClose();
-      }
-    };
+    if (!isOpen || typeof document === "undefined") return null;
 
-    return (
-      <>
-        {/* Overlay oscuro */}
+    // Rendered in a portal on <body>: an ancestor with its own stacking context
+    // (e.g. PageLayout's `relative z-10`) would otherwise trap the modal below
+    // the mobile BottomMenu. z-[60] = above BottomMenu (z-50), like its "Más" sheet.
+    return createPortal(
+      <div className="fixed inset-0 z-[60]">
+        {/* Backdrop */}
         <div
-          className="animate-fade-in fixed inset-0 z-40 bg-black/50"
-          onClick={handleOverlayClick}
           aria-hidden="true"
+          onClick={isDismissable ? onClose : undefined}
+          className="animate-fade-in absolute inset-0 bg-black/50"
         />
 
-        {/* Contenedor del modal */}
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
-          {/* Modal card */}
+        <div className="pointer-events-none absolute inset-0 flex items-end justify-center sm:items-center sm:p-4">
           <div
-            ref={ref}
-            className={cn(
-              "animate-zoom-in relative w-full rounded-2xl border border-line bg-surface text-fg shadow-2xl",
-              sizeClasses[size],
-            )}
+            ref={setRefs}
             role="dialog"
             aria-modal="true"
-            aria-labelledby={title ? "modal-title" : undefined}
+            aria-labelledby={title ? titleId : undefined}
+            aria-describedby={description ? descriptionId : undefined}
+            tabIndex={-1}
+            className={cn(
+              "pointer-events-auto relative flex w-full flex-col",
+              "border-line bg-surface text-fg border shadow-2xl",
+              // Phone: bottom sheet. sm+: centred card.
+              "max-h-[90dvh] rounded-t-2xl pb-[env(safe-area-inset-bottom)] max-sm:animate-slide-up",
+              "sm:max-h-[85vh] sm:animate-zoom-in sm:rounded-2xl sm:pb-0",
+              "focus:outline-none",
+              sizeClasses[size],
+            )}
           >
-            {/* Header */}
             {(title || closeButton) && (
-              <div className="flex items-start justify-between border-b border-line px-6 py-4">
-                <div>
+              <div className="border-line flex shrink-0 items-start justify-between gap-4 border-b px-6 py-4">
+                <div className="min-w-0">
                   {title && (
-                    <h2
-                      id="modal-title"
-                      className="text-lg font-bold text-fg"
-                    >
+                    <h2 id={titleId} className="text-fg text-lg font-bold">
                       {title}
                     </h2>
                   )}
                   {description && (
-                    <p className="mt-1 text-sm text-fg-muted">
+                    <p id={descriptionId} className="text-fg-muted mt-1 text-sm">
                       {description}
                     </p>
                   )}
                 </div>
                 {closeButton && (
                   <button
+                    type="button"
                     onClick={onClose}
-                    className="ml-4 inline-flex h-11 w-11 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-muted hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
-                    aria-label="Cerrar modal"
+                    aria-label="Cerrar"
+                    className="text-fg-muted hover:bg-surface-muted hover:text-fg focus-visible:outline-focus -mr-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2"
                   >
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+                    <X className="h-5 w-5" aria-hidden="true" />
                   </button>
                 )}
               </div>
             )}
 
-            {/* Body */}
-            <div className="px-6 py-4">{children}</div>
+            <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+              {children}
+            </div>
 
-            {/* Footer */}
             {footer && (
-              <div className="border-t border-line px-6 py-4">
-                {footer}
-              </div>
+              <div className="border-line shrink-0 border-t px-6 py-4">{footer}</div>
             )}
           </div>
         </div>
-      </>
+      </div>,
+      document.body,
     );
   },
 );
@@ -152,7 +149,8 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
 Modal.displayName = "Modal";
 
 /**
- * ModalFooter - Footer del modal con acciones
+ * ModalFooter - acciones del modal. En celular los botones ocupan el ancho
+ * completo y se apilan (acción principal arriba).
  */
 const ModalFooter = React.forwardRef<
   HTMLDivElement,
@@ -160,7 +158,10 @@ const ModalFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex justify-end gap-3", className)}
+    className={cn(
+      "flex flex-col-reverse gap-3 sm:flex-row sm:justify-end [&>*]:w-full sm:[&>*]:w-auto",
+      className,
+    )}
     {...props}
   />
 ));

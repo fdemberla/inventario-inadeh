@@ -120,7 +120,7 @@ export default function SuppliersPage() {
           <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Crea un proveedor para comenzar</p>
         </div>
       ) : (
-        <DataTable data={suppliers} columns={columns} />
+        <DataTable caption="Proveedores" data={suppliers} columns={columns} />
       )}
     </PageLayout>
   );

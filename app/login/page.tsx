@@ -240,7 +240,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <Card className="shadow-xl ring-1 ring-gray-900/5 dark:ring-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl">
+          <Card className="shadow-xl">
             {/* Error Message */}
             {errors.submit && (
               <div role="alert" className="mb-6 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-800 dark:bg-red-900/20 dark:text-red-200 flex items-center gap-3">
@@ -255,6 +255,7 @@ export default function LoginPage() {
               <FormField
                 label="Usuario"
                 type="text"
+                autoComplete="username"
                 placeholder="Tu nombre de usuario"
                 required
                 value={username}
@@ -269,10 +270,10 @@ export default function LoginPage() {
 
               <div className="w-full space-y-2">
                 <div className="flex items-center gap-1">
-                  <label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <label htmlFor="password" className="text-fg text-sm font-semibold">
                     Contraseña
+                    <span aria-hidden="true" className="text-danger-fg ml-1">*</span>
                   </label>
-                  <span className="text-red-600 dark:text-red-400" aria-label="Requerido">*</span>
                 </div>
                 <div className="relative">
                   <Input
@@ -280,6 +281,8 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     required
+                    autoComplete="current-password"
+                    aria-describedby={errors.passwordField ? "password-error" : undefined}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     error={errors.passwordField}
@@ -293,7 +296,8 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none transition-colors"
+                    aria-pressed={showPassword}
+                    className="text-fg-muted hover:text-fg focus-visible:outline-focus absolute top-1/2 right-1 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg transition-colors focus-visible:outline-2"
                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
                     {showPassword ? (
@@ -309,7 +313,7 @@ export default function LoginPage() {
                   </button>
                 </div>
                 {errors.passwordField && (
-                  <p className="text-sm font-medium text-red-600 dark:text-red-400 mt-1">{errors.passwordField}</p>
+                  <p id="password-error" role="alert" className="text-danger-fg mt-1 text-sm font-medium">{errors.passwordField}</p>
                 )}
               </div>
 

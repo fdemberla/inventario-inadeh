@@ -295,6 +295,15 @@ function ProductsPage() {
 
 ---
 
+## ♿ Accesibilidad de los componentes (WCAG 2.1 AA)
+
+- **`FormField` / `Input`**: cada campo tiene `id` (generado con `useId`) y su `<label htmlFor>`. Error, ayuda y descripción quedan vinculados con `aria-describedby`; `required` es nativo (el asterisco es solo visual, `aria-hidden`). Con un hijo personalizado, `FormField` le pasa `id`, `aria-describedby`, `aria-invalid` y `required`. Un `Input` sin etiqueta visible necesita `aria-label`.
+- **`Modal`**: se renderiza en un *portal* sobre `<body>` (ningún contenedor puede taparlo), retiene el foco, se cierra con Escape (si `isDismissable`), enfoca el primer campo del contenido y devuelve el foco a quien lo abrió. En celular es un panel inferior. La lógica está en `hooks/useDialog.ts` y la comparte el menú "Más".
+- **`IconButton`**: para botones solo con ícono. `aria-label` es obligatorio por tipo; 40 px (44 px táctil).
+- **`DataTable`**: es un panel completo (borde, fondo y *padding* propios): **no lo envuelvas en `<Card>`**. Usa `caption` para su nombre accesible y `toolbar` para filtros junto a la búsqueda. Los encabezados ordenables son botones con `aria-sort`; el orden es alfabético en español (sin distinguir mayúsculas ni acentos). En celular se muestra como tarjetas.
+
+---
+
 ## 🎨 Tokens de Diseño
 
 Los tokens viven **solo en CSS**, en `app/globals.css` (Tailwind v4 no usa `tailwind.config.ts`; ese archivo y `lib/design-tokens.ts` se eliminaron porque Tailwind v4 los ignoraba).

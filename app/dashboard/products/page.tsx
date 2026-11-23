@@ -177,7 +177,7 @@ export default function ViewAllProducts() {
         ) : undefined
       }
     >
-      <DataTable data={products} columns={columns} />
+      <DataTable caption="Productos" data={products} columns={columns} />
     </PageLayout>
   );
 }
